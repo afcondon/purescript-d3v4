@@ -1,7 +1,7 @@
 module Main where
 
 import Control.Monad.Eff (Eff)
-import Prelude (show, id, bind, (<>))
+import Prelude (show, id, bind, (<>), (*))
 import Graphics.D3.Base (D3)
 import Graphics.D3.Util (maxFn, (..))
 import Graphics.D3.Selection (Selection, text', style', append, enter, bindData, selectAll, rootSelect)
@@ -40,5 +40,5 @@ main = do
     .. selectAll "div"
       .. bindData array
     .. enter .. append "div"
-      .. style' "width" (\d -> show (d) <> "px") -- (\d -> show (x d) <> "px")
+      .. style' "width" (\d -> show (d * 10.0) <> "px") -- (\d -> show (x d) <> "px")
       .. text' show
