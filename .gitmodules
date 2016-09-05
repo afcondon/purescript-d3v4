@@ -1,0 +1,3 @@
+[submodule "submodules"]
+	path = submodules
+	url = https://afcondon@github.com/afcondon/purescript-d3.git
