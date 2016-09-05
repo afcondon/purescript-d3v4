@@ -31,14 +31,14 @@ array = [4.0, 8.0, 15.0, 16.0, 23.0, 42.0]
 -- main :: forall e. Eff (d3 :: D3, dom :: DOM, console :: CONSOLE | e) Unit
 main :: forall e. Eff ( d3 :: D3 | e ) (Selection Number)
 main = do
-  x <- linearScale
-    .. domain [0.0, maxFn id array]
-    .. range [0.0, 420.0]
-    .. toFunction
-
+  -- x <- linearScale
+  --   .. domain [0.0, maxFn id array]
+  --   .. range [0.0, 420.0]
+  --   .. toFunction
+  --
   rootSelect ".chart"
     .. selectAll "div"
       .. bindData array
     .. enter .. append "div"
-      .. style' "width" (\d -> show (x d) <> "px")
+      .. style' "width" (\d -> show (d) <> "px") -- (\d -> show (x d) <> "px")
       .. text' show
