@@ -13,9 +13,6 @@ array = [4.0, 8.0, 15.0, 16.0, 23.0, 42.0]
 
 arrayMax = foldr max 0.0 array
 
--- x d = d * 10.0
-
--- main :: forall e. Eff (d3 :: D3, dom :: DOM, console :: CONSOLE | e) Unit
 main :: forall e. Eff ( d3 :: D3 | e ) (Selection Number)
 main = do
   x <- linearScale
@@ -27,5 +24,5 @@ main = do
     .. selectAll "div"
       .. bindData array
     .. enter .. append "div"
-      .. style' "width" (\d -> show (x d) <> "px") -- (\d -> show (x d) <> "px")
+      .. style' "width" (\d -> show (x d) <> "px")
       .. text' show
