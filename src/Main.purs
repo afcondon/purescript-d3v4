@@ -5,7 +5,7 @@ import Control.Monad.Eff.Console (CONSOLE, log)
 import DOM.Event.Types (EventType)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Foldable (foldr)
-import Data.Function.Eff (EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn1, runEffFn2)
+import Data.Function.Eff (EffFn5, EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn5, runEffFn1, runEffFn2)
 import Prelude (Unit, show, unit, pure, bind, max, (*), (<>))
 
 -- || FFI for D3
@@ -83,33 +83,53 @@ type CallbackParam d =
   }
 type CallbackParamP d p =
     { datum     :: d
-    , prop      :: p
     , elem      :: D3Element
     , timestamp :: Number
+    , prop      :: p
     , meta      :: Boolean
     , shift     :: Boolean
     , ctrl      :: Boolean
     , alt       :: Boolean
   }
 
-foreign import data D3EffCallback :: # ! -> * -> * -> *
+foreign import data D3EffCallback  :: # ! -> * -> * -> *
+foreign import data D3EffCallbackP :: # ! -> * -> * -> * -> *
+foreign import mkCallback         :: forall eff d r.   (CallbackParam d -> Eff eff r)
+  -> D3EffCallback eff (CallbackParam d) r
+foreign import mkCallbackWithProp :: forall eff d p r. (CallbackParamP d p -> Eff eff r) -> PropertyName
+  -> D3EffCallbackP eff (CallbackParamP d p) PropertyName r
+
 foreign import onImpl :: forall eff a d.
     EffFn3 (d3::D3|eff)
       (Selection a)               -- 1st argument for EffFn3, the selection itself
       EventType                   -- 2nd argument for EffFn3, the type of the event being bound
       (D3EffCallback (d3::D3|eff) -- 3rd argument for EffFn3, the callback function
-        (CallbackParam d)           -- arg for callback EffFn1, callback data
+        (CallbackParam d)         -- arg for callback EffFn1, callback data
         Unit)                       --  Unit, result of EffFn1
       (Selection a)               -- result of EffFn3, returns selection for "fluid interface" / monadic chain
 
-foreign import mkCallbackWithT    :: forall eff d r. (CallbackParam d -> Eff eff r) -> D3EffCallback eff (CallbackParam d) r
+foreign import onImplWithProperty :: forall eff a d p.
+  EffFn5 (d3::D3|eff)
+        (Selection a)               -- 1st argument for EffFn3, the selection itself
+        EventType                   -- 2nd argument for EffFn3, the type of the event being bound
+        (D3EffCallbackP (d3::D3|eff)   -- 3rd argument for EffFn3, the callback function
+            (CallbackParamP d p)       -- arg for callback EffFn1, Tuple of D3Element and a datum
+            PropertyName
+            Unit)                     --  Unit, result of EffFn1
+        PropertyName
+        p
+        (Selection a)               -- result of EffFn3, returns selection for "fluid interface" / monadic chain
 
--- generic "on" function replaces single and double click functions and works for any DOM event
+-- generic "on" function works for any DOM event
 on :: forall a d eff. EventType
                 -> (CallbackParam d -> Eff (d3::D3|eff) Unit)
-                -> (Selection a)
-                -> Eff (d3::D3|eff) (Selection a)
-on event callback selection  = runEffFn3 onImpl selection event (mkCallbackWithT callback)
+                -> (Selection a) -> Eff (d3::D3|eff) (Selection a)
+on event callback selection  = runEffFn3 onImpl selection event (mkCallback callback)
+
+on' :: forall a d p eff. EventType -> PropertyName -> p
+                -> (CallbackParamP d p -> Eff (d3::D3|eff) Unit)
+                -> (Selection a) -> Eff (d3::D3|eff) (Selection a)
+on' evType propName prop callback sel = runEffFn5 onImplWithProperty sel evType (mkCallbackWithProp callback propName) propName prop
 
 
 -- | mainline: simplest possible D3 demo
@@ -119,10 +139,16 @@ array = [4.0, 8.0, 15.0, 16.0, 23.0, 42.0]
 arrayMax :: Number
 arrayMax = foldr max 0.0 array
 
-foo :: forall eff. CallbackParam Number -> Eff (d3::D3, console::CONSOLE|eff) Unit
-foo { datum: d, meta: m } = do
+awn :: forall eff. CallbackParam Number -> Eff (d3::D3, console::CONSOLE|eff) Unit
+awn { datum: d, meta: m } = do
   log (show d)
   log (show m)
+  pure unit
+
+bel :: forall eff. CallbackParamP Number String -> Eff (d3::D3, console::CONSOLE|eff) Unit
+bel { datum: d, prop: p } = do
+  log (show d)
+  log (show p)
   pure unit
 
 main :: forall e. Eff (d3::D3, console::CONSOLE | e ) (Selection Number)
@@ -133,6 +159,6 @@ main = do
     .. enter .. append "div"
       .. style "width" (FnD (\d -> show (d * 10.0) <> "px"))
       .. text          (FnD (\d -> show d))
-      .. on mouseenter         foo
-      .. on mouseleave         foo
-      .. on click              foo
+      .. on mouseenter         awn
+      .. on mouseleave         awn
+      .. on' click "magic" "snape" bel
