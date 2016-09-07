@@ -13,14 +13,14 @@ infixl 4 bind as ..
 foreign import data D3Element :: *
 foreign import data Selection :: * -> *
 
-foreign import rootSelectImpl     :: forall d eff. EffFn1 (d3::D3|eff) String                                         (Selection d)
+foreign import rootSelectImpl     :: forall d eff.      EffFn1 (d3::D3|eff) String                                    (Selection d)
 
-foreign import selectAllImpl      :: forall d eff. EffFn2 (d3::D3|eff) String                           (Selection d) (Selection d)
-foreign import bindDataImpl       :: forall d eff. EffFn2 (d3::D3|eff) (Array d)                        (Selection d) (Selection d)
-foreign import enterImpl          :: forall d eff. EffFn1 (d3::D3|eff)                                  (Selection d) (Selection d)
+foreign import selectAllImpl      :: forall d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
+foreign import bindDataImpl       :: forall d eff.      EffFn2 (d3::D3|eff) (Array d)                   (Selection d) (Selection d)
+foreign import enterImpl          :: forall d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 
-foreign import unsafeAppendImpl   :: forall d eff. EffFn2 (d3::D3|eff) String                           (Selection d) (Selection d)
-foreign import unsafeInsertImpl   :: forall d eff. EffFn2 (d3::D3|eff) String                           (Selection d) (Selection d)
+foreign import unsafeAppendImpl   :: forall d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
+foreign import unsafeInsertImpl   :: forall d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 
 foreign import unsafeStyleImpl    :: forall d v eff.    EffFn3 (d3::D3|eff) String v                    (Selection d) (Selection d)
 foreign import unsafeStyleImplP   :: forall d v v2 eff. EffFn3 (d3::D3|eff) String (v -> v2)            (Selection d) (Selection d)
