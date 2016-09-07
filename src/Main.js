@@ -22,29 +22,17 @@ exports.onImpl             =
     selection.on(eventType, callback);
     return selection;
   }
-exports.onImplWithProperty =
-  // another variation useful if you need to pass something arbitrary thru to the callback fn
-  // achieved by caching the thing you want sent in a Property in the D3 selection
+exports.onImplWithProperty = // variation which enables cached `prop` to be sent with callback data
   function (selection, eventType, callback, propname, prop) {
     selection.on(eventType, callback);
     selection.property(propname, prop);
     return selection;
   }
 
-// custom version of mkEffFn1 which passes a Tuple of both datum _and_ 'this'
-// enables callbacks in the D3 style which rely on 'this' for access to the
-// D3Element associated with the datum
-exports.mkCallbackWithT = function (fn) {
-  return function(d) {
-      var cbParams = { datum: d
-                     , elem: this
-                     , timestamp: d3.event.timeStamp
-                     , meta: d3.event.metaKey
-                     , shift: d3.event.shiftKey
-                     , ctrl: d3.event.ctrlKey
-                     , alt: d3.event.altKey };
-    return fn(cbParams)();
-  };
+// enables callbacks in the D3 style which rely on 'this' for access to the D3Element associated with the datum
+// NB we default 'prop' to duplicate of datum
+exports.mkCallback = function (fn) {
+  return function(d) { return fn(getCallBackParams(d, this, d))(); };
 };
 
 // another callback-making function, this time taking a property name and bundling that with
@@ -63,3 +51,16 @@ exports.mkCallbackWithProp = function mkCallbackWithProp(fn) {
     }
   };
 };
+
+// custom version of mkEffFn1 which passes a row containing data including element and 'this'
+function getCallBackParams(d, elem, prop) {
+  var cbParams = { datum: d
+                 , elem: elem
+                 , prop: prop
+                 , timestamp: d3.event.timeStamp
+                 , meta:      d3.event.metaKey
+                 , shift:     d3.event.shiftKey
+                 , ctrl:      d3.event.ctrlKey
+                 , alt:       d3.event.altKey };
+  return cbParams;
+}
