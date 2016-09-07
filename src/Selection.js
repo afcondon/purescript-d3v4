@@ -16,47 +16,38 @@ exports.unsafeTextImplPP  = function (text, selection)      { return selection.t
 exports.unsafeInsertImpl  = function (selector, selection)  { return selection.insert(selector); }
 exports.unsafeAppendImpl  = function (tag, selection)       { return selection.append(tag); }
 
-// this bit is the call back stuff - to be revised for changes in D3v4
-exports.onImpl             =
-  function (selection, eventType, callback) {
-    selection.on(eventType, callback);
-    return selection;
-  }
-exports.onImplWithProperty = // variation which enables cached `prop` to be sent with callback data
-  function (selection, eventType, callback, propname, prop) {
-    selection.on(eventType, callback);
-    selection.property(propname, prop);
-    return selection;
-  }
-
+// custom version of mkEffFn1 which passes a row containing data including element and 'this'
 // enables callbacks in the D3 style which rely on 'this' for access to the D3Element associated with the datum
+exports.onImpl =  function (selection, eventType, callback) {
+                    selection.on(eventType, callback);
+                    return selection;
+                  }
 // NB we default 'prop' to duplicate of datum
 exports.mkCallback = function (fn) {
-  return function(d) { return fn(getCallBackParams(d, this, d))(); };
-};
+                        return function(d) {
+                          return fn(getCallBackParams(d, this, d))();
+                        };
+                      };
 
 // another callback-making function, this time taking a property name and bundling that with
-// callback params too
+exports.onImplWithProperty = function (selection, eventType, callback, propname, prop) {
+                                selection.on(eventType, callback);
+                                selection.property(propname, prop);
+                                return selection;
+                             }
 exports.mkCallbackWithProp = function mkCallbackWithProp(fn) {
-  return function(propName) {
-    return function(d) {
-      var cbParams = { datum: d, elem: this
-                     , prop: this[propName]
-                     , timestamp: d3.event.timeStamp
-                     , meta: d3.event.metaKey
-                     , shift: d3.event.shiftKey
-                     , ctrl: d3.event.ctrlKey
-                     , alt: d3.event.altKey };
-      return fn(cbParams)();
-    }
-  };
-};
+                                return function(propName) {
+                                  return function(d) {
+                                    return fn(getCallBackParams(d, this, this[propName]))();
+                                  }
+                                };
+                              };
 
-// custom version of mkEffFn1 which passes a row containing data including element and 'this'
+// utility function to package up the parameter block for a callback
 function getCallBackParams(d, elem, prop) {
   var cbParams = { datum: d
                  , elem: elem
-                 , prop: prop
+                 , prop: prop    // NB - untyped assignment - only use in mkCallback fns
                  , timestamp: d3.event.timeStamp
                  , meta:      d3.event.metaKey
                  , shift:     d3.event.shiftKey
