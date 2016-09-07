@@ -136,6 +136,9 @@ on' evType propName prop callback sel = runEffFn5 onImplWithProperty sel evType 
 array :: Array Number
 array = [4.0, 8.0, 15.0, 16.0, 23.0, 42.0]
 
+array2 :: Array String
+array2 = ["this", "is", "a", "sentence", "in", "pieces"]
+
 arrayMax :: Number
 arrayMax = foldr max 0.0 array
 
@@ -151,7 +154,7 @@ bel { datum: d, prop: p } = do
   log (show p)
   pure unit
 
-main :: forall e. Eff (d3::D3, console::CONSOLE | e ) (Selection Number)
+main :: forall e. Eff ( d3 :: D3 , console :: CONSOLE | e ) Unit
 main = do
   rootSelect ".chart"
     .. selectAll "div"
@@ -162,3 +165,11 @@ main = do
       .. on mouseenter         awn
       .. on mouseleave         awn
       .. on' click "magic" "snape" bel
+  rootSelect ".chart2"
+    .. selectAll "div"
+      .. bindData array2
+    .. enter .. append "div" .. append "span"
+      .. style "fill"  (Value "red")
+      .. text          (FnD (\d -> show d))
+      .. on' click "cep" "stringy" bel
+  pure unit
