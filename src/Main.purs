@@ -79,7 +79,7 @@ main = do
         .. on       mouseleave      awn
         .. on' click "magic" "snape" bel
 
-  d3Select ".chart2"
+  chart2 <- d3Select ".chart2"
     .. selectAll "div"
       .. dataBind (Keyed array2 (\d -> revString d))
     .. enter .. append "div"
@@ -89,6 +89,8 @@ main = do
       .. attr "name"               (AttrFn dof)
       .. text                      (FnD (\d -> show d))
       .. on' click "cep" "stringy" bel
-      .. makeTransition
+      -- .. makeTransition
+
+  chart2 ... makeTransition
 
   pure unit
