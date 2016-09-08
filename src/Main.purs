@@ -61,7 +61,7 @@ hoy = d3Transition "ist"
 
 main :: forall e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
-  d3Transition "erg"
+  erg <- d3Transition "erg"
     .. duration 750.0
 
   chart1 <- d3Select ".chart"
@@ -88,8 +88,10 @@ main = do
       .. text                      (FnD (\d -> show d))
       .. on' click "cep" "stringy" bel
       -- .. makeTransition
+      -- .. duration 750.0
 
-  chart1 ... namedTransition "erg"
-  chart2 ... namedTransition "erg"
+  chart1 ... savedTransition erg  -- works because the transition gets type (Transition Number) from chart1
+
+  chart2 ... savedTransition erg  -- doesn't work because this needs to be (Transition String)
 
   pure unit
