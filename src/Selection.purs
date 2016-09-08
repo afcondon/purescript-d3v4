@@ -2,12 +2,20 @@ module D3.Selection where
 
 import Control.Monad.Eff (Eff)
 import DOM.Event.Types (EventType)
+import Data.Foreign.Null (writeNull)
 import Data.Function.Eff (EffFn5, EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn5, runEffFn1, runEffFn2)
 import Prelude (class Ord, Unit, bind)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- || FFI for D3
 foreign import data D3 :: !
 type D3Eff a = forall e. Eff (d3 :: D3 | e) a
+type Index = Number
+type Nodes = Array D3Element
+
+theHorror :: forall t0. t0
+theHorror = unsafeCoerce writeNull
+
 infixl 4 bind as ..
 
 foreign import data D3Element :: *
@@ -16,14 +24,17 @@ foreign import data Selection :: * -> *
 foreign import appendFn     :: forall d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import bindDataFn   :: forall d eff.      EffFn2 (d3::D3|eff) (Array d)                   (Selection d) (Selection d)
 foreign import bindDataFnK  :: forall d k eff.    EffFn3 (d3::D3|eff) (Array d) (d -> k)          (Selection d) (Selection d)
+foreign import classedFn    :: forall d eff.      EffFn3 (d3::D3|eff) String Boolean              (Selection d) (Selection d)
+foreign import classedFnP   :: forall d eff.      EffFn3 (d3::D3|eff) String (PredicateB d)      (Selection d) (Selection d)
+foreign import d3SelectAllFn :: forall d eff.     EffFn1 (d3::D3|eff) String                                    (Selection d)
+foreign import d3SelectFn   :: forall d eff.      EffFn1 (d3::D3|eff) String                                    (Selection d)
 foreign import enterFn      :: forall d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import exitFn       :: forall d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
-foreign import filterFnP    :: forall d eff.      EffFn2 (d3::D3|eff) (d -> Boolean)              (Selection d) (Selection d)
 foreign import filterFn     :: forall d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
-foreign import removeFn     :: forall d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
+foreign import filterFnP    :: forall d eff.      EffFn2 (d3::D3|eff) (d -> Boolean)              (Selection d) (Selection d)
 foreign import insertFn     :: forall d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
-foreign import d3SelectFn   :: forall d eff.      EffFn1 (d3::D3|eff) String                                    (Selection d)
-foreign import d3SelectAllFn :: forall d eff.     EffFn1 (d3::D3|eff) String                                    (Selection d)
+foreign import orderFn      :: forall d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
+foreign import removeFn     :: forall d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import selectAllFn  :: forall d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import selectElFn   :: forall d eff.      EffFn1 (d3::D3|eff) D3Element                                 (Selection d)
 foreign import selectFn     :: forall d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
@@ -33,6 +44,8 @@ foreign import styleFnPP    :: forall d v v2 eff. EffFn3 (d3::D3|eff) String (v 
 foreign import textFn       :: forall d v eff.    EffFn2 (d3::D3|eff) v                           (Selection d) (Selection d)
 foreign import textFnP      :: forall d v v2 eff. EffFn2 (d3::D3|eff) (v -> v2)                   (Selection d) (Selection d)
 foreign import textFnPP     :: forall d v v2 eff. EffFn2 (d3::D3|eff) (v -> Number -> v2)         (Selection d) (Selection d)
+foreign import attrFn       :: forall d v eff.    EffFn3 (d3::D3|eff) String v                    (Selection d) (Selection d)
+foreign import attrFnP      :: forall d v eff.    EffFn3 (d3::D3|eff) String (PredicateFn v d)    (Selection d) (Selection d)
 
 -- | ADT used to wrap those polymorphic calls in D3 which take either
 --      a value, or...
@@ -45,12 +58,29 @@ data PolyValue d v  = Value v
 data Filter d       = Selector  String
                     | Predicate (d -> Boolean)
 
-style  :: forall d v eff.  String -> PolyValue d v -> (Selection d) -> Eff (d3::D3|eff) (Selection d)
+type PredicateFn r d  = (d -> Number -> (Array D3Element) -> D3Element -> r)
+type PredicateB d     = PredicateFn Boolean d
+
+data ClassSetter  d = ClassB Boolean
+                    | ClassFn (PredicateB d)
+
+data AttrSetter v d = AttrV v
+                    | AttrFn (PredicateFn v d)
+
+classed :: forall d eff. String -> ClassSetter d    -> Selection d -> Eff (d3::D3|eff) (Selection d)
+classed s (ClassB b)  = runEffFn3 classedFn  s b
+classed s (ClassFn p) = runEffFn3 classedFnP s p
+
+attr :: forall v d eff. String -> AttrSetter v d    -> Selection d -> Eff (d3::D3|eff) (Selection d)
+attr s (AttrV b)  = runEffFn3 attrFn  s b
+attr s (AttrFn p) = runEffFn3 attrFnP s p
+
+style  :: forall d v eff.  String -> PolyValue d v  -> Selection d -> Eff (d3::D3|eff) (Selection d)
 style name (Value value)  = runEffFn3 styleFn name value
 style name (FnD  f)       = runEffFn3 styleFnP name f
 style name (FnDI f)       = runEffFn3 styleFnPP name f
 
-text  :: forall d v eff.  PolyValue d v            -> (Selection d) -> Eff (d3::D3|eff) (Selection d)
+text  :: forall d v eff.  PolyValue d v             -> Selection d -> Eff (d3::D3|eff) (Selection d)
 text       (Value value)  = runEffFn2 textFn value
 text       (FnD  f)       = runEffFn2 textFnP f
 text       (FnDI f)       = runEffFn2 textFnPP f
@@ -73,13 +103,16 @@ select selector           = runEffFn2 selectFn selector
 dataBind :: forall d eff. Array d                    -> Selection d -> Eff (d3::D3|eff) (Selection d)
 dataBind dataArray        = runEffFn2 bindDataFn dataArray
 
-filter  :: forall d eff.  Filter d                     -> Selection d -> Eff (d3::D3|eff) (Selection d)
-filter (Selector s)       = runEffFn2 filterFn s
-filter (Predicate p)      = runEffFn2 filterFnP p
-
 -- alternative bind takes a function which will yield a sort key from each datum, Ord constraint here is symbolic only
 dataBindKeyFn     :: forall d k eff. Ord k => Array d -> (d -> k)   -> Selection d -> Eff (d3::D3|eff) (Selection d)
 dataBindKeyFn             = runEffFn3 bindDataFnK
+
+filter  :: forall d eff.  Filter d                   -> Selection d -> Eff (d3::D3|eff) (Selection d)
+filter (Selector s)       = runEffFn2 filterFn s
+filter (Predicate p)      = runEffFn2 filterFnP p
+
+order :: forall d eff.                                  Selection d -> Eff (d3::D3|eff) (Selection d)
+order                     = runEffFn1 orderFn
 
 enter :: forall d eff.                                  Selection d -> Eff (d3::D3|eff) (Selection d)
 enter                     = runEffFn1 enterFn
