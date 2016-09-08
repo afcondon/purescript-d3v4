@@ -56,17 +56,15 @@ cep datum _ _ _ = if (datum == 16.0) then true else false
 dof :: String -> Index -> Nodes -> D3Element -> String
 dof datum _ _ _ = if (datum == "sentence") then "marriage" else theHorror
 
-fub :: forall d eff. Eff (d3::D3|eff) (Transition d)
-fub = d3Transition "erg"
-        .. duration 750.0
-
 hoy :: forall eff. Eff (d3::D3|eff) (Transition String)
 hoy = d3Transition "ist"
 
 main :: forall e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
+  d3Transition "erg"
+    .. duration 750.0
 
-  d3Select ".chart"
+  chart1 <- d3Select ".chart"
       .. selectAll "div"
         .. dataBind (Data array)
       .. enter .. append "div"
@@ -91,6 +89,7 @@ main = do
       .. on' click "cep" "stringy" bel
       -- .. makeTransition
 
-  chart2 ... makeTransition
+  chart1 ... namedTransition "erg"
+  chart2 ... namedTransition "erg"
 
   pure unit
