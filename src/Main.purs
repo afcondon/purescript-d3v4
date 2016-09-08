@@ -76,6 +76,8 @@ main = do
         .. on       mouseenter      awn
         .. on       mouseleave      awn
         .. on' click "magic" "snape" bel
+        -- .. makeTransition
+        -- .. duration 500.0
 
   chart2 <- d3Select ".chart2"
     .. selectAll "div"
