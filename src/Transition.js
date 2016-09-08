@@ -9,3 +9,5 @@ exports.savedTransitionFn = function (t, selection)    { return selection.transi
 exports.durationFn        = function (ms, transition)  { return transition.duration(ms); }
 exports.attrFn            = function (name, value, transition)  { return transition.attr(name, value); }
 exports.attrIFn           = function (name, interp, transition) { return transition.attr(name, interp); }
+exports.styleFn           = function (name, value, transition)  { return transition.style(name, value); }
+exports.styleIFn          = function (name, interp, transition) { return transition.style(name, interp); }

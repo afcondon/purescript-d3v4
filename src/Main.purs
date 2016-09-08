@@ -3,7 +3,7 @@ module Main where
 import D3.Selection
 import Control.Monad.Eff.Console (CONSOLE, log)
 import D3.Base (D3, Eff, D3Element, Nodes, Index, theHorror, (..), (...))
-import D3.Transitions (Transition, duration, makeTransition, namedTransition, savedTransition, d3Transition)
+import D3.Transitions (Transition, AttrInterpolator(..), duration, makeTransition, namedTransition, savedTransition, d3Transition, tStyle, tAttr)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Array (reverse)
 import Data.Foldable (foldr)
@@ -93,6 +93,7 @@ main = do
       -- .. duration 750.0
 
   chart1 ... savedTransition erg  -- works because the transition gets type (Transition Number) from chart1
+          .. tStyle "color" (Start "red")
 
   chart2 ... savedTransition erg  -- doesn't work because this needs to be (Transition String)
 
