@@ -1,6 +1,6 @@
 /* global exports */
 "use strict";
-// var Data_Tuple = require("../Data.Tuple");
+
 exports.d3SelectFn    = function (selector)              { return d3.select(selector); }
 exports.d3SelectAllFn = function (selector)              { return d3.selectAll(selector); }
 
@@ -11,6 +11,7 @@ exports.classedFn   = function (names, b, selection)     { return selection.clas
 exports.attrFn      = function (attr, b, selection)      { return selection.attr(attr, b); }
 exports.enterFn     = function (selection)               { return selection.enter(); }
 exports.exitFn      = function (selection)               { return selection.exit(); }
+exports.sizeFn      = function (selection)               { return selection.size(); }
 exports.filterFn    = function (selector, selection)     { return selection.filter(selector); }
 exports.filterFnP   = function (predicate, selection)    { return selection.filter(predicate); }
 exports.insertFn    = function (selector, selection)     { return selection.insert(selector); }

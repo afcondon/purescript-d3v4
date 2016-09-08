@@ -1,31 +1,50 @@
-module D3.Selection where
+module D3.Selection
+  ( Selection         -- Types
+  , AttrSetter(..)
+  , ClassSetter(..)
+  , DataBind(..)
+  , PolyValue(..)
+  , CallbackParam
+  , CallbackParamP
+  , d3Select         -- functions that yield a selection
+  , d3SelectAll
+  , append           -- functions belonging to selections
+  , attr
+  -- , call
+  , classed
+  , dataBind
+  -- , each
+  -- , empty
+  , enter
+  , exit
+  , insert
+  -- , merge
+  -- , node
+  -- , nodes
+  , on
+  , on'             -- revisit this and see if can be wrapped in ADT like the other polymorphic functions TODO
+  , remove
+  , select
+  , selectAll
+  , selectElem
+  , size
+  , style
+  , text
+  ) where
 
-import Control.Monad.Eff (Eff)
 import DOM.Event.Types (EventType)
-import Data.Foreign.Null (writeNull)
 import Data.Function.Eff (EffFn5, EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn5, runEffFn1, runEffFn2)
-import Prelude (class Ord, Unit, bind)
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (Unit)
 
--- || FFI for D3
-foreign import data D3 :: !
-type D3Eff a = forall e. Eff (d3 :: D3 | e) a
-type Index = Number
-type Nodes = Array D3Element
+import D3.Base
 
-theHorror :: forall t0. t0
-theHorror = unsafeCoerce writeNull
-
-infixl 4 bind as ..
-
-foreign import data D3Element :: *
 foreign import data Selection :: * -> *
 
 foreign import appendFn     :: forall d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import bindDataFn   :: forall d eff.      EffFn2 (d3::D3|eff) (Array d)                   (Selection d) (Selection d)
 foreign import bindDataFnK  :: forall d k eff.    EffFn3 (d3::D3|eff) (Array d) (d -> k)          (Selection d) (Selection d)
 foreign import classedFn    :: forall d eff.      EffFn3 (d3::D3|eff) String Boolean              (Selection d) (Selection d)
-foreign import classedFnP   :: forall d eff.      EffFn3 (d3::D3|eff) String (PredicateB d)      (Selection d) (Selection d)
+foreign import classedFnP   :: forall d eff.      EffFn3 (d3::D3|eff) String (PredicateB d)       (Selection d) (Selection d)
 foreign import d3SelectAllFn :: forall d eff.     EffFn1 (d3::D3|eff) String                                    (Selection d)
 foreign import d3SelectFn   :: forall d eff.      EffFn1 (d3::D3|eff) String                                    (Selection d)
 foreign import enterFn      :: forall d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
@@ -46,20 +65,21 @@ foreign import textFnP      :: forall d v v2 eff. EffFn2 (d3::D3|eff) (v -> v2) 
 foreign import textFnPP     :: forall d v v2 eff. EffFn2 (d3::D3|eff) (v -> Number -> v2)         (Selection d) (Selection d)
 foreign import attrFn       :: forall d v eff.    EffFn3 (d3::D3|eff) String v                    (Selection d) (Selection d)
 foreign import attrFnP      :: forall d v eff.    EffFn3 (d3::D3|eff) String (PredicateFn v d)    (Selection d) (Selection d)
+foreign import sizeFn       :: forall d eff.      EffFn1 (d3::D3|eff)                             (Selection d) Int
 
 -- | ADT used to wrap those polymorphic calls in D3 which take either
 --      a value, or...
 --      a function to get a value from the datum, or...
 --      a function to get a value from the datum and its index
+data DataBind d k = Data (Array d)
+                  | Keyed (Array d) (d -> k)
+
 data PolyValue d v  = Value v
                     | FnD  (d -> v)
                     | FnDI (d -> Number -> v)
 
 data Filter d       = Selector  String
                     | Predicate (d -> Boolean)
-
-type PredicateFn r d  = (d -> Number -> (Array D3Element) -> D3Element -> r)
-type PredicateB d     = PredicateFn Boolean d
 
 data ClassSetter  d = ClassB Boolean
                     | ClassFn (PredicateB d)
@@ -94,18 +114,17 @@ d3SelectAll selector      = runEffFn1 d3SelectAllFn selector
 selectAll :: forall d eff. String                    -> Selection d -> Eff (d3::D3|eff) (Selection d)
 selectAll selector        = runEffFn2 selectAllFn selector
 
-select' :: forall d eff. D3Element                                  -> Eff (d3::D3|eff) (Selection d)
-select' element           = runEffFn1 selectElFn element
+selectElem :: forall d eff. D3Element                                  -> Eff (d3::D3|eff) (Selection d)
+selectElem element           = runEffFn1 selectElFn element
 
 select  :: forall d eff.  String                     -> Selection d -> Eff (d3::D3|eff) (Selection d)
 select selector           = runEffFn2 selectFn selector
 
-dataBind :: forall d eff. Array d                    -> Selection d -> Eff (d3::D3|eff) (Selection d)
-dataBind dataArray        = runEffFn2 bindDataFn dataArray
-
--- alternative bind takes a function which will yield a sort key from each datum, Ord constraint here is symbolic only
-dataBindKeyFn     :: forall d k eff. Ord k => Array d -> (d -> k)   -> Selection d -> Eff (d3::D3|eff) (Selection d)
-dataBindKeyFn             = runEffFn3 bindDataFnK
+dataBind :: forall d k eff. DataBind d k    -> Selection d -> Eff (d3::D3|eff) (Selection d)
+-- would be nice to express that Keyed needs k to be Ord, will have to wait for GADTs
+-- dataBind :: forall d k eff. Ord k => DataBind d k    -> Selection d -> Eff (d3::D3|eff) (Selection d)
+dataBind (Data dataArray)         = runEffFn2 bindDataFn dataArray
+dataBind (Keyed dataArray keyFn)  = runEffFn3 bindDataFnK dataArray keyFn
 
 filter  :: forall d eff.  Filter d                   -> Selection d -> Eff (d3::D3|eff) (Selection d)
 filter (Selector s)       = runEffFn2 filterFn s
@@ -119,6 +138,12 @@ enter                     = runEffFn1 enterFn
 
 exit :: forall d eff.                                   Selection d -> Eff (d3::D3|eff) (Selection d)
 exit                      = runEffFn1 exitFn
+
+remove :: forall d eff.                                 Selection d -> Eff (d3::D3|eff) (Selection d)
+remove                    = runEffFn1 removeFn
+
+size :: forall d eff.                                   Selection d -> Eff (d3::D3|eff) Int
+size                      = runEffFn1 sizeFn
 
 insert  :: forall d eff.  String                     -> Selection d -> Eff (d3::D3|eff) (Selection d)
 insert tag                = runEffFn2 insertFn tag
