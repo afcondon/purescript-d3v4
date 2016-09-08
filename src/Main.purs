@@ -60,20 +60,23 @@ fub :: forall d eff. Eff (d3::D3|eff) (Transition d)
 fub = d3Transition "erg"
         .. duration 750.0
 
+hoy :: forall eff. Eff (d3::D3|eff) (Transition String)
+hoy = d3Transition "ist"
+
 main :: forall e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
-  chart1 <- d3Select ".chart"
+
+  d3Select ".chart"
       .. selectAll "div"
         .. dataBind (Data array)
-
-  chart1 ... enter .. append "div"
-        .. style "width" (FnD (\d -> show (d * 10.0) <> "px"))
-        .. classed "twice as nice" (ClassFn (\d i nodes el -> i == 2.0 ))
-        .. classed "sweet sixteen" (ClassFn cep)
-        .. attr "name"             (AttrV "fred")
-        .. text                    (FnD (\d -> show d))
-        .. on mouseenter         awn
-        .. on mouseleave         awn
+      .. enter .. append "div"
+        .. style    "width"         (FnD (\d -> show (d * 10.0) <> "px"))
+        .. classed  "twice as nice" (ClassFn (\d i nodes el -> i == 2.0 ))
+        .. classed  "sweet sixteen" (ClassFn cep)
+        .. attr     "name"          (AttrV "fred")
+        .. text                     (FnD (\d -> show d))
+        .. on       mouseenter      awn
+        .. on       mouseleave      awn
         .. on' click "magic" "snape" bel
 
   d3Select ".chart2"
@@ -87,4 +90,5 @@ main = do
       .. text                      (FnD (\d -> show d))
       .. on' click "cep" "stringy" bel
       .. makeTransition
+
   pure unit
