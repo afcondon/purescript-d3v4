@@ -48,7 +48,7 @@ foreign import styleFn    :: forall d v eff. EffFn3 (d3::D3|eff) String v       
 foreign import attrIFn    :: forall d v eff. EffFn3 (d3::D3|eff) String (InterpolatorFn v d) (Transition d) (Transition d)
 foreign import styleIFn   :: forall d v eff. EffFn3 (d3::D3|eff) String (InterpolatorFn v d) (Transition d) (Transition d)
 
-data AttrInterpolator d v = Start v
+data AttrInterpolator d v = Target v
                           | Interpolate (InterpolatorFn v d)
 
 d3Transition :: forall d eff. String                                  -> Eff (d3::D3|eff) (Transition d)
@@ -67,9 +67,9 @@ duration :: forall d eff. Number                      -> Transition d -> Eff (d3
 duration t            = runEffFn2 durationFn t
 
 tAttr :: forall d v eff. String -> AttrInterpolator d v -> Transition d -> Eff (d3::D3|eff) (Transition d)
-tAttr name (Start v)       = runEffFn3 attrFn  name v
+tAttr name (Target v)       = runEffFn3 attrFn  name v
 tAttr name (Interpolate f) = runEffFn3 attrIFn name f
 
 tStyle :: forall d v eff. String -> AttrInterpolator d v -> Transition d -> Eff (d3::D3|eff) (Transition d)
-tStyle name (Start v)       = runEffFn3 styleFn  name v
+tStyle name (Target v)       = runEffFn3 styleFn  name v
 tStyle name (Interpolate f) = runEffFn3 styleIFn name f

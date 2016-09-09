@@ -30,7 +30,7 @@ array :: Array Number
 array = [4.0, 8.0, 15.0, 16.0, 23.0, 42.0]
 
 array2 :: Array String
-array2 = ["this", "is", "a", "sentence", "in", "pieces"]
+array2 = ["awn", "bel", "cep", "dof", "erg", "fub"]
 
 arrayMax :: Number
 arrayMax = foldr max 0.0 array
@@ -54,7 +54,7 @@ cep :: Number -> Index -> Nodes -> D3Element -> Boolean
 cep datum _ _ _ = if (datum == 16.0) then true else false
 
 dof :: String -> Index -> Nodes -> D3Element -> String
-dof datum _ _ _ = if (datum == "sentence") then "marriage" else theHorror
+dof datum _ _ _ = if (datum == "erg") then "ergo propter hoc" else theHorror
 
 hoy :: forall eff. Eff (d3::D3|eff) (Transition String)
 hoy = d3Transition "ist"
@@ -62,7 +62,7 @@ hoy = d3Transition "ist"
 main :: forall e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
   erg <- d3Transition "erg"
-    .. duration 750.0
+    .. duration 2000.0
 
   chart1 <- d3Select ".chart"
       .. selectAll "div"
@@ -70,14 +70,15 @@ main = do
       .. enter .. append "div"
         .. style    "width"         (FnD (\d -> show (d * 10.0) <> "px"))
         .. classed  "twice as nice" (ClassFn (\d i nodes el -> i == 2.0 ))
-        .. classed  "sweet sixteen" (ClassFn cep)
-        .. attr     "name"          (AttrV "fred")
+        .. classed  "sixteen candles" (ClassFn cep)
+        .. attr     "name"          (AttrV "zek")
         .. text                     (FnD (\d -> show d))
         .. on       mouseenter      awn
         .. on       mouseleave      awn
         .. on' click "magic" "snape" bel
-        -- .. makeTransition
+        -- .. makeTransition          -- this would be a non-reusable transition example
         -- .. duration 500.0
+        -- .. tStyle "background-color" (Target "#555")
 
   chart2 <- d3Select ".chart2"
     .. selectAll "div"
@@ -85,16 +86,18 @@ main = do
     .. enter .. append "div"
       .. style "background-color"  (Value "red")
       .. style "width"             (FnD (\d -> show ((length d) * 20) <> "px"))
-      .. classed "foo bar"         (ClassB true)
+      .. classed "wis xis"         (ClassB true)
       .. attr "name"               (AttrFn dof)
       .. text                      (FnD (\d -> show d))
       .. on' click "cep" "stringy" bel
-      -- .. makeTransition
-      -- .. duration 750.0
 
   chart1 ... savedTransition erg  -- works because the transition gets type (Transition Number) from chart1
-          .. tStyle "color" (Start "red")
+          .. tStyle "background-color" (Target "red")
+          .. tStyle "font-size"        (Target "2em")
+          -- .. tStyle "width"            (FnD (\d -> show ((length d) * 20) <> "px"))
 
   chart2 ... savedTransition erg  -- doesn't work because this needs to be (Transition String)
+          .. tStyle "background-color" (Target "blue")
+          .. tStyle "color"            (Target "white")
 
   pure unit
