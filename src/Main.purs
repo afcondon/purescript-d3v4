@@ -94,7 +94,14 @@ main = do
   chart1 ... savedTransition erg  -- works because the transition gets type (Transition Number) from chart1
           .. tStyle "background-color" (Target "red")
           .. tStyle "font-size"        (Target "2em")
-          -- .. tStyle "width"            (FnD (\d -> show ((length d) * 20) <> "px"))
+          -- ..
+-- selection.styleTween("fill", function() {
+--   return function(t) {
+--     return "hsl(" + t * 360 + ",100%,50%)";
+--   };
+-- });
+
+
 
   chart2 ... savedTransition erg  -- doesn't work because this needs to be (Transition String)
           .. tStyle "background-color" (Target "blue")
