@@ -11,3 +11,4 @@ exports.attrFn            = function (name, value, transition)  { return transit
 exports.attrIFn           = function (name, interp, transition) { return transition.attr(name, interp); }
 exports.styleFn           = function (name, value, transition)  { return transition.style(name, value); }
 exports.styleIFn          = function (name, interp, transition) { return transition.style(name, interp); }
+exports.styleTweenFn      = function (name, interp, transition) { return transition.styleTween(name, interp); }
