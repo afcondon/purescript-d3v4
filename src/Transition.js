@@ -12,3 +12,13 @@ exports.attrIFn           = function (name, interp, transition) { return transit
 exports.styleFn           = function (name, value, transition)  { return transition.style(name, value); }
 exports.styleIFn          = function (name, interp, transition) { return transition.style(name, interp); }
 exports.styleTweenFn      = function (name, interp, transition) { return transition.styleTween(name, interp); }
+
+exports.mkInterpolator = function (fn) {
+  return function (datum) {
+    return function (index) {
+      return function (elem) {
+          return fn(datum, index, elem);  // this is what the javascript calls
+      }
+    }
+  }
+}
