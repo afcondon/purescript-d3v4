@@ -8,6 +8,7 @@ import D3.Transitions (tStyleTween, Transition, AttrInterpolator(..), duration, 
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Array (reverse)
 import Data.Foldable (foldr)
+import Data.Function.Eff (mkEffFn4)
 import Data.String (length, toCharArray, fromCharArray)
 import Prelude (Unit, show, unit, pure, bind, max, (*), (<>), (<<<), (==))
 {-
@@ -60,12 +61,22 @@ dof datum _ _ _ = if (datum == "erg") then "ergo propter hoc" else theHorror
 hoy :: forall eff. Eff (d3::D3|eff) (Transition String)
 hoy = d3Transition "ist"
 
-jud :: Time -> String
+-- kef is given as param to transition.styleTween,
+-- it is called by D3 to get a customized interpolator fn for this D3Element
+-- since we need it to be callable from JS, the params need to be uncurried
+kef :: forall d. d -> Index -> D3Element -> (Time -> String)
+kef d i e = jud
+
+-- | jud is an interpolator function given to D3 by some other interpolator-making function,
+-- which is given as param to transition.styleTween (in JS it's just anonymous)
+jud :: Time -> String  -- this func duplicates the D3 documentation example shown in comment below
 jud t = "hsl(" <> tval <> ",100%,50%)"
   where tval = show (t * 360.0)
-
-kef :: forall d. d -> Index -> D3Element -> (Time -> String)  -- needs to be uncurried to work with JS
-kef d i e = jud
+-- selection.styleTween("fill", function() {          // equivalent of kef
+--   return function(t) {                             // equivalent of `jud`
+--     return "hsl(" + t * 360 + ",100%,50%)";
+--   };
+-- });
 
 main :: forall e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
@@ -103,16 +114,9 @@ main = do
   chart1 ... savedTransition erg  -- works because the transition gets type (Transition Number) from chart1
           .. tStyle "background-color" (Target "red")
           .. tStyle "font-size"        (Target "2em")
-          .. tStyleTween "width" (\d _ _ -> (\t -> (show (d * t * 10.0) <> "px")) )
+          .. tStyleTween "width" (\d _ _ -> (\t -> (show (d * t * 10.0) <> "px")) )  -- this doesn't work because javascript is calling uncurried...
           .. tStyleTween "fill"  kef
           -- .. tStyleTween "width" (\d i e -> "hsl(" <> (show (d * 360.0)) <> ",100%,50%"))
--- selection.styleTween("fill", function() {
---   return function(t) {
---     return "hsl(" + t * 360 + ",100%,50%)";
---   };
--- });
-
-
 
   chart2 ... savedTransition erg  -- doesn't work because this needs to be (Transition String)
           .. tStyle "background-color" (Target "blue")
