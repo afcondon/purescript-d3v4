@@ -1,4 +1,10 @@
 module D3.Interpolator
-  (Interpolator) where
+  (Interpolator, Time) where
 
-foreign import data Interpolator :: * -> *
+import D3.Base (D3Element)
+
+type Time = Number
+
+-- foreign import data InterpolatorFn :: * -> *
+
+type Interpolator v d = (d -> Number -> D3Element -> (Time -> v))
