@@ -3,7 +3,8 @@ module Main where
 import D3.Selection
 import Control.Monad.Eff.Console (CONSOLE, log)
 import D3.Base (D3, Eff, D3Element, Nodes, Index, theHorror, (..), (...))
-import D3.Transitions (Transition, AttrInterpolator(..), duration, makeTransition, namedTransition, savedTransition, d3Transition, tStyle, tAttr)
+import D3.Interpolator (Time)
+import D3.Transitions (tStyleTween, Transition, AttrInterpolator(..), duration, makeTransition, namedTransition, savedTransition, d3Transition, tStyle, tAttr)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Array (reverse)
 import Data.Foldable (foldr)
@@ -59,6 +60,13 @@ dof datum _ _ _ = if (datum == "erg") then "ergo propter hoc" else theHorror
 hoy :: forall eff. Eff (d3::D3|eff) (Transition String)
 hoy = d3Transition "ist"
 
+jud :: Time -> String
+jud t = "hsl(" <> tval <> ",100%,50%)"
+  where tval = show (t * 360.0)
+
+kef :: forall d. d -> Index -> D3Element -> (Time -> String)  -- needs to be uncurried to work with JS
+kef d i e = jud
+
 main :: forall e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
   erg <- d3Transition "erg"
@@ -68,7 +76,8 @@ main = do
       .. selectAll "div"
         .. dataBind (Data array)
       .. enter .. append "div"
-        .. style    "width"         (FnD (\d -> show (d * 10.0) <> "px"))
+        .. style    "width"         (Value "30px")
+        -- .. style    "width"         (FnD (\d -> show (d * 10.0) <> "px"))
         .. classed  "twice as nice" (ClassFn (\d i nodes el -> i == 2.0 ))
         .. classed  "sixteen candles" (ClassFn cep)
         .. attr     "name"          (AttrV "zek")
@@ -94,7 +103,9 @@ main = do
   chart1 ... savedTransition erg  -- works because the transition gets type (Transition Number) from chart1
           .. tStyle "background-color" (Target "red")
           .. tStyle "font-size"        (Target "2em")
-          -- ..
+          .. tStyleTween "width" (\d _ _ -> (\t -> (show (d * t * 10.0) <> "px")) )
+          .. tStyleTween "fill"  kef
+          -- .. tStyleTween "width" (\d i e -> "hsl(" <> (show (d * 360.0)) <> ",100%,50%"))
 -- selection.styleTween("fill", function() {
 --   return function(t) {
 --     return "hsl(" + t * 360 + ",100%,50%)";
