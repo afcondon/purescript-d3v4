@@ -25,13 +25,12 @@ module D3.Transitions
   -- , selection
   -- , size
   , tStyle
-  , tStyleTween
   -- , text
   -- , tween
   ) where
 
 import D3.Base (D3Element, D3, Eff)
-import D3.Interpolator (Time, Interpolator)
+import D3.Interpolator (D3TweenFn, D3TweenTarget, D3TweenFnUncurried, D3TweenTargetUncurried, mkTweenFunctionEffFn, mkTweenTargetEffFn)
 import D3.Selection (Selection)
 import Data.Function.Eff (EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn2, runEffFn1)
 
@@ -46,19 +45,16 @@ foreign import savedTransitionFn :: ∀ d x eff. EffFn2 (d3::D3|eff) (Transition
 foreign import durationFn        :: ∀ d eff.   EffFn2 (d3::D3|eff) Number                      (Transition d) (Transition d)
 foreign import attrFn            :: ∀ d v eff. EffFn3 (d3::D3|eff) String v                    (Transition d) (Transition d)
 foreign import styleFn           :: ∀ d v eff. EffFn3 (d3::D3|eff) String v                    (Transition d) (Transition d)
-foreign import attrIFn           :: ∀ d v eff. EffFn3 (d3::D3|eff) String (Interpolator v d)   (Transition d) (Transition d)
-foreign import styleIFn          :: ∀ d v eff. EffFn3 (d3::D3|eff) String (Interpolator v d)   (Transition d) (Transition d)
-foreign import styleTweenFn      :: ∀ d v eff. EffFn3 (d3::D3|eff) String
-                                                                  (D3EffInterpolator (d3::D3|eff) d Number D3Element (Time -> v))
-                                                                  (Transition d)
-                                                                  (Transition d)
-
-foreign import data D3EffInterpolator ::                                                                 # ! -> *  -> * -> *   -> *      -> *
-foreign import mkInterpolator    :: ∀ d v eff. (d -> Number -> D3Element -> (Time -> v))  -> D3EffInterpolator eff    d    Number D3Element (Time -> v)
+foreign import attrIFn           :: ∀ d v eff. EffFn3 (d3::D3|eff) String (D3TweenTargetUncurried v d)  (Transition d) (Transition d)
+foreign import styleIFn          :: ∀ d v eff. EffFn3 (d3::D3|eff) String (D3TweenTargetUncurried v d)  (Transition d) (Transition d)
+foreign import styleTweenFn      :: ∀ d v eff. EffFn3 (d3::D3|eff) String (D3TweenFnUncurried v d)      (Transition d) (Transition d)
 
 type InitialFn    v d = (d -> Number -> D3Element -> v)
-data AttrInterpolator d v = Target v
-                          | Interpolate (Interpolator v d)
+data AttrInterpolator d v =
+      Target v  -- straightforward target final value to tween to using built-in interpolators
+    | TweenTarget (D3TweenTarget v d) -- function which is called a single time to get a target final value
+    | TweenFn     (D3TweenFn     v d) -- function which is called once to generate a function which is then
+                                      -- called every tween frame to generate a value
 
 d3Transition :: ∀ d eff. String                                     -> Eff (d3::D3|eff) (Transition d)
 d3Transition name           = runEffFn1 d3TransitionFn name
@@ -76,15 +72,11 @@ duration :: ∀ d eff. Number                         -> Transition d -> Eff (d3
 duration t                  = runEffFn2 durationFn t
 
 tAttr :: ∀ d v eff. String -> AttrInterpolator d v  -> Transition d -> Eff (d3::D3|eff) (Transition d)
-tAttr name (Target v)       = runEffFn3 attrFn  name v
-tAttr name (Interpolate f)  = runEffFn3 attrIFn name f
+tAttr name (Target v)      = runEffFn3 attrFn       name v
+tAttr name (TweenTarget f) = runEffFn3 attrIFn      name (mkTweenTargetEffFn   f)
+tAttr name (TweenFn f)     = runEffFn3 styleTweenFn name (mkTweenFunctionEffFn f)
 
 tStyle :: ∀ d v eff. String -> AttrInterpolator d v -> Transition d -> Eff (d3::D3|eff) (Transition d)
-tStyle name (Target v)      = runEffFn3 styleFn  name v
-tStyle name (Interpolate f) = runEffFn3 styleIFn name f
-
-tStyleTween :: ∀ d v eff. String
-                       -> (d -> Number -> D3Element -> (Time -> v))
-                       -> Transition d
-                       -> Eff (d3::D3|eff) (Transition d)
-tStyleTween name f = runEffFn3 styleTweenFn name (mkInterpolator f)
+tStyle name (Target v)      = runEffFn3 styleFn      name v
+tStyle name (TweenTarget f) = runEffFn3 styleIFn     name (mkTweenTargetEffFn   f)
+tStyle name (TweenFn f)     = runEffFn3 styleTweenFn name (mkTweenFunctionEffFn f)

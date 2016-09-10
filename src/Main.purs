@@ -4,11 +4,10 @@ import D3.Selection
 import Control.Monad.Eff.Console (CONSOLE, log)
 import D3.Base (D3, Eff, D3Element, Nodes, Index, theHorror, (..), (...))
 import D3.Interpolator (Time)
-import D3.Transitions (tStyleTween, Transition, AttrInterpolator(..), duration, makeTransition, namedTransition, savedTransition, d3Transition, tStyle, tAttr)
+import D3.Transitions (Transition, AttrInterpolator(Target, TweenFn, TweenTarget), tStyle, savedTransition, duration, d3Transition)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Array (reverse)
 import Data.Foldable (foldr)
-import Data.Function.Eff (mkEffFn4)
 import Data.String (length, toCharArray, fromCharArray)
 import Prelude (Unit, show, unit, pure, bind, max, (*), (<>), (<<<), (==))
 {-
@@ -114,8 +113,8 @@ main = do
   chart1 ... savedTransition erg  -- works because the transition gets type (Transition Number) from chart1
           .. tStyle "background-color" (Target "red")
           .. tStyle "font-size"        (Target "2em")
-          .. tStyleTween "width" (\d _ _ -> (\t -> (show (d * t * 10.0) <> "px")) )  -- this doesn't work because javascript is calling uncurried...
-          .. tStyleTween "fill"  kef
+          .. tStyle "width" (TweenTarget   (\d _ _ -> (\t -> (show (d * t * 10.0) <> "px"))) )
+          .. tStyle "fill"  (TweenFn       kef)
           -- .. tStyleTween "width" (\d i e -> "hsl(" <> (show (d * 360.0)) <> ",100%,50%"))
 
   chart2 ... savedTransition erg  -- doesn't work because this needs to be (Transition String)
