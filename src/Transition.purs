@@ -81,5 +81,5 @@ tAttr name _ = unsafeCoerce unit
 tStyle :: ∀ d v eff. String -> AttrInterpolator d v -> Transition d -> Eff (d3::D3|eff) (Transition d)
 tStyle name (Target v)      = runEffFn3 styleFn      name v
 tStyle name (TweenTarget f) = runEffFn3 styleIFn     name (mkEffFn3 f)
-tStyle name _ = unsafeCoerce unit
--- tStyle name (TweenFn f)     = runEffFn3 styleTweenFn name (mkEffFn3 f)
+-- tStyle name _ = unsafeCoerce unit
+tStyle name (TweenFn f)     = runEffFn3 styleTweenFn name (mkEffFn3 f)
