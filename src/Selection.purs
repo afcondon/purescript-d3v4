@@ -75,35 +75,35 @@ data DataBind d k = Data (Array d)
                   | Keyed (Array d) (d -> k)
 
 data PolyValue d v  = Value v
-                    | FnD  (d -> v)
-                    | FnDI (d -> Number -> v)
+                    | SetEach (d -> v)
+                    | SetEachWIndex (d -> Number -> v)
 
 data Filter d       = Selector  String
                     | Predicate (d -> Boolean)
 
-data ClassSetter  d = ClassB Boolean
-                    | ClassFn (PredicateB d)
+data ClassSetter  d = SetAll Boolean
+                    | SetSome (PredicateB d)
 
-data AttrSetter v d = AttrV v
-                    | AttrFn (PredicateFn v d)
+data AttrSetter v d = SetAttr v
+                    | AttrFn (PredicateFn v d)   -- rename both data ctor and Type here
 
 classed :: ∀ d eff. String -> ClassSetter d    -> Selection d -> Eff (d3::D3|eff) (Selection d)
-classed s (ClassB b)  = runEffFn3 classedFn  s b
-classed s (ClassFn p) = runEffFn3 classedFnP s p
+classed s (SetAll b)  = runEffFn3 classedFn  s b
+classed s (SetSome p) = runEffFn3 classedFnP s p
 
 attr :: ∀ v d eff. String -> AttrSetter v d    -> Selection d -> Eff (d3::D3|eff) (Selection d)
-attr s (AttrV b)  = runEffFn3 attrFn  s b
-attr s (AttrFn p) = runEffFn3 attrFnP s p
+attr s (SetAttr b) = runEffFn3 attrFn  s b
+attr s (AttrFn p)  = runEffFn3 attrFnP s p
 
 style  :: ∀ d v eff.  String -> PolyValue d v  -> Selection d -> Eff (d3::D3|eff) (Selection d)
-style name (Value value)  = runEffFn3 styleFn name value
-style name (FnD  f)       = runEffFn3 styleFnP name f
-style name (FnDI f)       = runEffFn3 styleFnPP name f
+style name (Value value) = runEffFn3 styleFn name value
+style name (SetEach f)   = runEffFn3 styleFnP name f
+style name (SetEachWIndex f)  = runEffFn3 styleFnPP name f
 
 text  :: ∀ d v eff.  PolyValue d v             -> Selection d -> Eff (d3::D3|eff) (Selection d)
 text       (Value value)  = runEffFn2 textFn value
-text       (FnD  f)       = runEffFn2 textFnP f
-text       (FnDI f)       = runEffFn2 textFnPP f
+text       (SetEach f)       = runEffFn2 textFnP f
+text       (SetEachWIndex f)       = runEffFn2 textFnPP f
 
 d3Select :: ∀ d eff. String                                    -> Eff (d3::D3|eff) (Selection d)
 d3Select selector         = runEffFn1 d3SelectFn selector
