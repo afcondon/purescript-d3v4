@@ -117,10 +117,10 @@ main = do
       .. on' click "cep" "stringy" bel
 
   chart1 ... savedTransition erg  -- works because the transition gets type (Transition Number) from chart1
-          .. tStyle "background-color" (Target "red")
+          .. tStyle "color"            (Target "black")
           .. tStyle "font-size"        (Target "2em")
           .. tStyle "width"            (TweenTarget  ist)
-          -- .. tStyle "fill"  (TweenFn       kef)
+          .. tStyle "background-color" (TweenFn      kef)
           -- .. tStyleTween "width" (\d i e -> "hsl(" <> (show (d * 360.0)) <> ",100%,50%"))
 
   chart2 ... savedTransition erg  -- doesn't work because this needs to be (Transition String)
