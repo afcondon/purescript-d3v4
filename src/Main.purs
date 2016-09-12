@@ -66,6 +66,12 @@ hoy = d3Transition "hoy"
 ist :: forall eff. Number -> Index -> D3Element -> Eff (d3::D3|eff) String
 ist d _ _ = pure $ show val <> "px" where val = d * 10.0
 
+-- || next two functions illustrate how you can do the following JS example in PS
+-- selection.styleTween("fill", function() {          // equivalent of kef
+--   return function(t) {                             // equivalent of jud
+--     return "hsl(" + t * 360 + ",100%,50%)";
+--   };
+-- });
 -- kef is given as param to transition.styleTween,
 -- it is called by D3 to get a customized interpolator fn for this D3Element
 -- since we need it to be callable from JS, the params need to be uncurried
@@ -77,11 +83,6 @@ kef d i e = pure jud
 jud :: Time -> String  -- this func duplicates the D3 documentation example shown in comment below
 jud t = "hsl(" <> tval <> ",100%,50%)"
   where tval = show (t * 360.0)
--- selection.styleTween("fill", function() {          // equivalent of kef
---   return function(t) {                             // equivalent of `jud`
---     return "hsl(" + t * 360 + ",100%,50%)";
---   };
--- });
 
 main :: forall e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
@@ -93,27 +94,26 @@ main = do
         .. dataBind (Data array)
       .. enter .. append "div"
         .. style    "width"         (Value "30px")
-        -- .. style    "width"         (FnD (\d -> show (d * 10.0) <> "px"))
-        .. classed  "twice as nice" (ClassFn (\d i nodes el -> i == 2.0 ))
-        .. classed  "sixteen candles" (ClassFn cep)
-        .. attr     "name"          (AttrV "zek")
-        .. text                     (FnD (\d -> show d))
+        .. classed  "twice as nice" (SetSome (\d i nodes el -> i == 2.0 ))
+        .. classed  "16 candles"    (SetSome cep)
+        .. attr     "name"          (SetAttr "zek")
+        .. text                     (SetEach (\d -> show d))
         .. on       mouseenter      awn
         .. on       mouseleave      awn
         .. on' click "magic" "snape" bel
         -- .. makeTransition          -- this would be a non-reusable transition example
         -- .. duration 500.0
-        -- .. tStyle "background-color" (Target "#555")
+        -- .. tStyle "background-color" (SetAttr "#555")
 
   chart2 <- d3Select ".chart2"
     .. selectAll "div"
       .. dataBind (Keyed array2 (\d -> revString d))
     .. enter .. append "div"
       .. style "background-color"  (Value "red")
-      .. style "width"             (FnD (\d -> show ((length d) * 20) <> "px"))
-      .. classed "wis xis"         (ClassB true)
+      .. style "width"             (SetEach (\d -> show ((length d) * 20) <> "px"))
+      .. classed "wis xis"         (SetAll true)
       .. attr "name"               (AttrFn dof)
-      .. text                      (FnD (\d -> show d))
+      .. text                      (SetEach (\d -> show d))
       .. on' click "cep" "stringy" bel
 
   chart1 ... savedTransition erg  -- works because the transition gets type (Transition Number) from chart1
@@ -121,7 +121,6 @@ main = do
           .. tStyle "font-size"        (Target "2em")
           .. tStyle "width"            (TweenTarget  ist)
           .. tStyle "background-color" (TweenFn      kef)
-          -- .. tStyleTween "width" (\d i e -> "hsl(" <> (show (d * 360.0)) <> ",100%,50%"))
 
   chart2 ... savedTransition erg  -- doesn't work because this needs to be (Transition String)
           .. tStyle "background-color" (Target "blue")
