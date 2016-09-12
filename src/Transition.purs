@@ -30,11 +30,9 @@ module D3.Transitions
   ) where
 
 import D3.Base (D3Element, D3, Eff)
-import D3.Interpolator (Index, D3TweenFn, D3TweenTarget, D3TweenFnUncurried, D3TweenTargetUncurried)
+import D3.Interpolator (D3TweenFn, D3TweenTarget, Index)
 import D3.Selection (Selection)
 import Data.Function.Eff (mkEffFn3, EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn2, runEffFn1)
-import Prelude (unit)
-import Unsafe.Coerce (unsafeCoerce)
 
 foreign import data Transition :: * -> *
 
@@ -73,13 +71,11 @@ duration :: ∀ d eff. Number                         -> Transition d -> Eff (d3
 duration t                  = runEffFn2 durationFn t
 
 tAttr :: ∀ d v eff. String -> AttrInterpolator d v  -> Transition d -> Eff (d3::D3|eff) (Transition d)
-tAttr name (Target v)      = runEffFn3 attrFn       name v
-tAttr name _ = unsafeCoerce unit
--- tAttr name (TweenTarget f) = runEffFn3 attrIFn      name (mkEffFn3 f)
--- tAttr name (TweenFn f)     = runEffFn3 styleTweenFn name (mkEffFn3 f)
+tAttr name (Target v)       = runEffFn3 attrFn       name v
+tAttr name (TweenTarget f)  = runEffFn3 attrIFn      name (mkEffFn3 f)
+tAttr name (TweenFn f)      = runEffFn3 styleTweenFn name (mkEffFn3 f)
 
 tStyle :: ∀ d v eff. String -> AttrInterpolator d v -> Transition d -> Eff (d3::D3|eff) (Transition d)
 tStyle name (Target v)      = runEffFn3 styleFn      name v
 tStyle name (TweenTarget f) = runEffFn3 styleIFn     name (mkEffFn3 f)
--- tStyle name _ = unsafeCoerce unit
 tStyle name (TweenFn f)     = runEffFn3 styleTweenFn name (mkEffFn3 f)
