@@ -1,6 +1,8 @@
 module Main where
 
 import D3.Selection
+
+
 import Control.Monad.Eff.Console (CONSOLE, log)
 import D3.Base (D3, Eff, D3Element, Nodes, Index, theHorror, (..), (...))
 import D3.Interpolator (Time)
@@ -9,7 +11,7 @@ import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Array (reverse)
 import Data.Foldable (foldr)
 import Data.String (length, toCharArray, fromCharArray)
-import Prelude (Unit, show, unit, pure, bind, max, (*), (<>), (<<<), (==))
+import Prelude (Unit, show, unit, pure, bind, max, (*), (<>), (<<<), (==), ($))
 {-
 -- next target is to handle this case:
 var matrix = [
@@ -58,13 +60,17 @@ dof :: String -> Index -> Nodes -> D3Element -> String
 dof datum _ _ _ = if (datum == "erg") then "ergo propter hoc" else theHorror
 
 hoy :: forall eff. Eff (d3::D3|eff) (Transition String)
-hoy = d3Transition "ist"
+hoy = d3Transition "hoy"
+
+-- ist :: Number -> Index -> D3Element -> String
+ist :: forall eff. Number -> Index -> D3Element -> Eff (d3::D3|eff) String
+ist d _ _ = pure $ show val <> "px" where val = d * 10.0
 
 -- kef is given as param to transition.styleTween,
 -- it is called by D3 to get a customized interpolator fn for this D3Element
 -- since we need it to be callable from JS, the params need to be uncurried
-kef :: forall d. d -> Index -> D3Element -> (Time -> String)
-kef d i e = jud
+kef :: ∀ d eff. d -> Index -> D3Element -> Eff (d3::D3|eff) (Time -> String)
+kef d i e = pure jud
 
 -- | jud is an interpolator function given to D3 by some other interpolator-making function,
 -- which is given as param to transition.styleTween (in JS it's just anonymous)
@@ -113,8 +119,8 @@ main = do
   chart1 ... savedTransition erg  -- works because the transition gets type (Transition Number) from chart1
           .. tStyle "background-color" (Target "red")
           .. tStyle "font-size"        (Target "2em")
-          .. tStyle "width" (TweenTarget   (\d _ _ -> (\t -> (show (d * t * 10.0) <> "px"))) )
-          .. tStyle "fill"  (TweenFn       kef)
+          .. tStyle "width"            (TweenTarget  ist)
+          -- .. tStyle "fill"  (TweenFn       kef)
           -- .. tStyleTween "width" (\d i e -> "hsl(" <> (show (d * 360.0)) <> ",100%,50%"))
 
   chart2 ... savedTransition erg  -- doesn't work because this needs to be (Transition String)
