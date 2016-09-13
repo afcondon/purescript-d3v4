@@ -2,6 +2,12 @@ module D3.Base
   ( module Control.Monad.Eff
   , D3
   , D3Element
+  , D3SetWithIndex
+  , AttrSetter(..)
+  , ClassSetter(..)
+  , DataBind(..)
+  , Filter(..)
+  , PolyValue(..)
   , Index
   , Nodes
   , (..)
@@ -48,3 +54,24 @@ type PredicateFn r d  = (d -> Number -> (Array D3Element) -> D3Element -> r)
 type PredicateB    d  = (d -> Number -> (Array D3Element) -> D3Element -> Boolean)
 type PredicateS    d  = (d -> Number -> (Array D3Element) -> D3Element -> String)
 type PredicateN    d  = (d -> Number -> (Array D3Element) -> D3Element -> Number)
+
+-- | ADT used to wrap those polymorphic calls in D3 which take either
+--      a value, or...
+--      a function to get a value from the datum, or...
+--      a function to get a value from the datum and its index
+data DataBind d k = Data (Array d)
+                  | Keyed (Array d) (d -> k)
+
+type D3SetWithIndex d v = ∀ eff. (d -> Index -> Eff (d3::D3|eff) v)
+
+data PolyValue d v  = Value v
+                    | SetByIndex (D3SetWithIndex d v)
+
+data Filter d       = Selector  String
+                    | Predicate (d -> Boolean)
+
+data ClassSetter  d = SetAll Boolean
+                    | SetSome (PredicateB d)
+
+data AttrSetter v d = SetAttr v
+                    | AttrFn (PredicateFn v d)   -- rename both data ctor and Type here
