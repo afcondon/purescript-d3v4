@@ -1,12 +1,10 @@
 module Main where
 
 import D3.Selection
-
-
 import Control.Monad.Eff.Console (CONSOLE, log)
 import D3.Base (D3, Eff, D3Element, Nodes, Index, theHorror, (..), (...))
 import D3.Interpolator (Time)
-import D3.Transitions (Transition, AttrInterpolator(Target, TweenFn, TweenTarget), tStyle, savedTransition, duration, d3Transition)
+import D3.Transitions (tNodes, tNode, Transition, AttrInterpolator(Target, TweenFn, TweenTarget), tStyle, savedTransition, duration, d3Transition)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Array (reverse)
 import Data.Foldable (foldr)
@@ -125,5 +123,13 @@ main = do
   chart2 ... savedTransition erg
           .. tStyle "background-color" (Target "blue")
           .. tStyle "color"            (Target "white")
+
+  chart3 <- d3Select "notfound"
+
+  lev <- chart2 ... node
+  mim <- chart2 ... nodes
+
+  nim <- chart3 ... node
+  obi <- chart3 ... nodes
 
   pure unit
