@@ -8,8 +8,9 @@ import D3.Transitions (DelayValue(MilliSec), delay, addTransition, tNodes, tNode
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Array (reverse)
 import Data.Foldable (foldr)
+import Data.Int (floor)
 import Data.String (length, toCharArray, fromCharArray)
-import Prelude (Unit, show, unit, pure, bind, max, (*), (<>), (<<<), (==), ($))
+import Prelude (class Show, Unit, show, unit, pure, bind, max, (*), (<>), (<<<), (==), ($))
 {-
 -- next target is to handle this case:
 var matrix = [
@@ -82,6 +83,19 @@ jud :: Time -> String  -- this func duplicates the D3 documentation example show
 jud t = "hsl(" <> tval <> ",100%,50%)"
   where tval = show (t * 360.0)
 
+roc :: forall eff. String -> Index -> Eff (d3::D3|eff) String
+roc d i = pure $ show d <> " " <> show i
+
+suq :: forall d eff. Show d => d -> Index -> Eff (d3::D3|eff) String
+suq d _ = pure $ show d
+
+tej :: forall eff. String -> Index -> Eff (d3::D3|eff) String
+tej d i = pure $ show l <> "px" where
+  l = (length d) * 20 * (floor i)
+
+ure :: forall eff. String -> Index -> Eff (d3::D3|eff) String
+ure d _ = pure $ show d
+
 main :: forall e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
   erg <- d3Transition "erg"
@@ -95,7 +109,7 @@ main = do
         .. classed  "twice as nice" (SetSome (\d i nodes el -> i == 2.0 ))
         .. classed  "16 candles"    (SetSome cep)
         .. attr     "name"          (SetAttr "zek")
-        .. text                     (SetEach (\d -> show d))
+        .. text                     (SetByIndex suq)
         .. on       mouseenter      awn
         .. on       mouseleave      awn
         .. on' click "magic" "snape" bel
@@ -108,10 +122,11 @@ main = do
       .. dataBind (Keyed array2 (\d -> revString d))
     .. enter .. append "div"
       .. style "background-color"  (Value "red")
-      .. style "width"             (SetEach (\d -> show ((length d) * 20) <> "px"))
+      .. style "width"             (SetByIndex tej)
       .. classed "wis xis"         (SetAll true)
       .. attr "name"               (AttrFn dof)
-      .. text                      (SetEach (\d -> show d))
+      .. text                      (SetByIndex ure)
+      .. text                      (SetByIndex roc)
       .. on' click "cep" "stringy" bel
 
   chart1 ... savedTransition erg
@@ -119,7 +134,7 @@ main = do
           .. tStyle "font-size"        (Target "2em")
           .. tStyle "width"            (TweenTarget  ist)
           .. addTransition
-          .. delay  (MilliSec 2000.0)
+          .. delay  (MilliSec 500.0)
           .. tStyle "background-color" (TweenFn      kef)
 
   chart2 ... savedTransition erg
