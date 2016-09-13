@@ -4,7 +4,7 @@ import D3.Selection
 import Control.Monad.Eff.Console (CONSOLE, log)
 import D3.Base (D3, Eff, D3Element, Nodes, Index, theHorror, (..), (...))
 import D3.Interpolator (Time)
-import D3.Transitions (tNodes, tNode, Transition, AttrInterpolator(Target, TweenFn, TweenTarget), tStyle, savedTransition, duration, d3Transition)
+import D3.Transitions (DelayValue(MilliSec), delay, addTransition, tNodes, tNode, Transition, AttrInterpolator(Target, TweenFn, TweenTarget), tStyle, savedTransition, duration, d3Transition)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Array (reverse)
 import Data.Foldable (foldr)
@@ -118,6 +118,8 @@ main = do
           .. tStyle "color"            (Target "black")
           .. tStyle "font-size"        (Target "2em")
           .. tStyle "width"            (TweenTarget  ist)
+          .. addTransition
+          .. delay  (MilliSec 2000.0)
           .. tStyle "background-color" (TweenFn      kef)
 
   chart2 ... savedTransition erg
@@ -131,5 +133,7 @@ main = do
 
   nim <- chart3 ... node
   obi <- chart3 ... nodes
+  pyx <- chart3 ... empty
+  qat <- chart2 ... empty
 
   pure unit
