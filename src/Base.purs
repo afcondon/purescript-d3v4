@@ -6,7 +6,6 @@ module D3.Base
   , Nodes
   , (..)
   , (...)
-  , flipply
   , PredicateFn
   , PredicateB
   , PredicateS
@@ -16,7 +15,8 @@ module D3.Base
 
 import Control.Monad.Eff (Eff)
 import Data.Foreign.Null (writeNull)
-import Prelude (bind, flip, ($))
+import Data.Function (applyFlipped)
+import Prelude (bind)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- || FFI for D3
@@ -31,13 +31,17 @@ type Nodes = Array D3Element
 theHorror :: ∀ t0. t0
 theHorror = unsafeCoerce writeNull
 
+foreign import approxZero :: Number
+
+-- | These next two operators are really key to making this DSL look like D3 in JavaScript
+-- | All respect to pelotom for cooking them up in the original purescript-d3!
+
 -- Syntactic sugar to make chained monadic statements look similar to the
 -- "fluid interface" style of chained method calls in JavaScript
 infixl 4 bind as ..
 -- Reversed function application, useful for applying extended monadic chains
 -- to already-obtained values
-flipply = flip ($)
-infixl 4 flipply as ...   -- (...) = flip ($)
+infixl 4 applyFlipped as ...
 
 -- for selection.classed and selection.attr:
 type PredicateFn r d  = (d -> Number -> (Array D3Element) -> D3Element -> r)
