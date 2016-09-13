@@ -116,13 +116,13 @@ main = do
       .. text                      (SetEach (\d -> show d))
       .. on' click "cep" "stringy" bel
 
-  chart1 ... savedTransition erg  -- works because the transition gets type (Transition Number) from chart1
+  chart1 ... savedTransition erg
           .. tStyle "color"            (Target "black")
           .. tStyle "font-size"        (Target "2em")
           .. tStyle "width"            (TweenTarget  ist)
           .. tStyle "background-color" (TweenFn      kef)
 
-  chart2 ... savedTransition erg  -- doesn't work because this needs to be (Transition String)
+  chart2 ... savedTransition erg
           .. tStyle "background-color" (Target "blue")
           .. tStyle "color"            (Target "white")
 
