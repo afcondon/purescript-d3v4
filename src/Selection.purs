@@ -1,10 +1,5 @@
 module D3.Selection
   ( Selection         -- Types
-  , D3SetWithIndex
-  , AttrSetter(..)
-  , ClassSetter(..)
-  , DataBind(..)
-  , PolyValue(..)
   , CallbackParam
   , CallbackParamP
   , d3Select
@@ -33,7 +28,8 @@ module D3.Selection
   , text
   ) where
 
-import D3.Base
+import D3.Base (D3, DataBind(..), Filter(..), ClassSetter(..), PolyValue(..), AttrSetter(..), PredicateFn, PredicateB, D3Element, Index, Nodes)
+import Control.Monad.Eff (Eff)
 import DOM.Event.Types (EventType)
 import Data.Function.Eff (mkEffFn2, EffFn5, EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn5, runEffFn1, runEffFn2)
 import Data.Maybe (Maybe)
@@ -63,38 +59,16 @@ foreign import nodesFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)             
 foreign import orderFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import removeFn      :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import selectAllFn   :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
-foreign import selectElFn    :: ∀ d eff.      EffFn1 (d3::D3|eff) D3Element                                 (Selection d)
+foreign import selectElFn    :: ∀ d eff.      EffFn1 (d3::D3|eff) D3Element                                 (Selection d) -- is this really in D3? TODO
 foreign import selectFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
+-- missing SelectFnFn which takes a predicate fn to perform the selection
 foreign import sizeFn        :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) Int
 foreign import styleFn       :: ∀ d v eff.    EffFn3 (d3::D3|eff) String v                    (Selection d) (Selection d)
--- foreign import styleFnP      :: ∀ d v v2 eff. EffFn3 (d3::D3|eff) String (v -> v2)            (Selection d) (Selection d)
 foreign import textFn        :: ∀ d v eff.    EffFn2 (d3::D3|eff) v                           (Selection d) (Selection d)
--- foreign import textFnP       :: ∀ d v v2 eff. EffFn2 (d3::D3|eff) (v -> v2)                   (Selection d) (Selection d)
 
 -- could use some type defs to help tame these sigs TODO
 foreign import styleFnFn     :: ∀ d v v2 eff. EffFn3 (d3::D3|eff) String (EffFn2 (d3::D3|eff) v Index v2) (Selection d) (Selection d)
 foreign import textFnFn      :: ∀ d v v2 eff. EffFn2 (d3::D3|eff)        (EffFn2 (d3::D3|eff) v Index v2) (Selection d) (Selection d)
-
--- | ADT used to wrap those polymorphic calls in D3 which take either
---      a value, or...
---      a function to get a value from the datum, or...
---      a function to get a value from the datum and its index
-data DataBind d k = Data (Array d)
-                  | Keyed (Array d) (d -> k)
-
-type D3SetWithIndex d v = ∀ eff. (d -> Index -> Eff (d3::D3|eff) v)
-
-data PolyValue d v  = Value v
-                    | SetByIndex (D3SetWithIndex d v)
-
-data Filter d       = Selector  String
-                    | Predicate (d -> Boolean)
-
-data ClassSetter  d = SetAll Boolean
-                    | SetSome (PredicateB d)
-
-data AttrSetter v d = SetAttr v
-                    | AttrFn (PredicateFn v d)   -- rename both data ctor and Type here
 
 classed :: ∀ d eff. String -> ClassSetter d    -> Selection d -> Eff (d3::D3|eff) (Selection d)
 classed s (SetAll b)         = runEffFn3 classedFn  s b
@@ -121,7 +95,7 @@ d3SelectAll selector         = runEffFn1 d3SelectAllFn selector
 selectAll :: ∀ d eff. String                    -> Selection d -> Eff (d3::D3|eff) (Selection d)
 selectAll selector           = runEffFn2 selectAllFn selector
 
-selectElem :: ∀ d eff. D3Element                               -> Eff (d3::D3|eff) (Selection d)
+selectElem :: ∀ d eff. D3Element                               -> Eff (d3::D3|eff) (Selection d)  -- think this doesn't actually exist...TODO
 selectElem element           = runEffFn1 selectElFn element
 
 select  :: ∀ d eff.  String                     -> Selection d -> Eff (d3::D3|eff) (Selection d)
@@ -158,7 +132,7 @@ nodes                     = runEffFn1 nodesFn
 exit :: ∀ d eff.                                   Selection d -> Eff (d3::D3|eff) (Selection d)
 exit                      = runEffFn1 exitFn
 
-remove :: ∀ d eff.                                 Selection d -> Eff (d3::D3|eff) (Selection d)
+remove :: ∀ d eff.                                 Selection d -> Eff (d3::D3|eff) (Selection d)  -- maybe this should be Void? TODO
 remove                    = runEffFn1 removeFn
 
 size :: ∀ d eff.                                   Selection d -> Eff (d3::D3|eff) Int

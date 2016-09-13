@@ -2,9 +2,9 @@ module Main where
 
 import D3.Selection
 import Control.Monad.Eff.Console (CONSOLE, log)
-import D3.Base (D3, Eff, D3Element, Nodes, Index, theHorror, (..), (...))
+import D3.Base (D3, Eff, Index, D3Element, Nodes, AttrSetter(AttrFn, SetAttr), ClassSetter(SetAll, SetSome), DataBind(Keyed, Data), PolyValue(SetByIndex, Value), theHorror, (...), (..))
 import D3.Interpolator (Time)
-import D3.Transitions (namedTransition, TransitionName(..), DelayValue(MilliSec), delay, addTransition, tNodes, tNode, Transition, AttrInterpolator(Target, TweenFn, TweenTarget), tStyle, savedTransition, duration, d3Transition)
+import D3.Transitions (Transition, AttrInterpolator(Target, TweenFn, TweenTarget), DelayValue(MilliSec), TransitionName(Name), tStyle, namedTransition, delay, addTransition, savedTransition, duration, d3Transition)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Array (reverse)
 import Data.Foldable (foldr)
