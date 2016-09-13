@@ -14,7 +14,7 @@ module D3.Selection
   , classed
   , dataBind
   -- , each
-  -- , empty
+  , empty
   , enter
   , exit
   , insert
@@ -57,6 +57,7 @@ foreign import filterFnP     :: ∀ d eff.      EffFn2 (d3::D3|eff) (d -> Boolea
 foreign import insertFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import mergeFn       :: ∀ d eff.      EffFn2 (d3::D3|eff) (Selection d)               (Selection d) (Selection d)
 foreign import nodeFn        :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Nullable D3Element)
+foreign import emptyFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) Boolean
 foreign import nodesFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Array D3Element)
 foreign import orderFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import removeFn      :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
@@ -66,10 +67,10 @@ foreign import selectFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String      
 foreign import sizeFn        :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) Int
 foreign import styleFn       :: ∀ d v eff.    EffFn3 (d3::D3|eff) String v                    (Selection d) (Selection d)
 foreign import styleFnP      :: ∀ d v v2 eff. EffFn3 (d3::D3|eff) String (v -> v2)            (Selection d) (Selection d)
-foreign import styleFnPP     :: ∀ d v v2 eff. EffFn3 (d3::D3|eff) String (v -> Number -> v2)  (Selection d) (Selection d)
+foreign import styleFnPP     :: ∀ d v v2 eff. EffFn3 (d3::D3|eff) String (v -> Index -> v2)   (Selection d) (Selection d)
 foreign import textFn        :: ∀ d v eff.    EffFn2 (d3::D3|eff) v                           (Selection d) (Selection d)
 foreign import textFnP       :: ∀ d v v2 eff. EffFn2 (d3::D3|eff) (v -> v2)                   (Selection d) (Selection d)
-foreign import textFnPP      :: ∀ d v v2 eff. EffFn2 (d3::D3|eff) (v -> Number -> v2)         (Selection d) (Selection d)
+foreign import textFnPP      :: ∀ d v v2 eff. EffFn2 (d3::D3|eff) (v -> Index -> v2)          (Selection d) (Selection d)
 
 -- | ADT used to wrap those polymorphic calls in D3 which take either
 --      a value, or...
@@ -142,6 +143,9 @@ enter                     = runEffFn1 enterFn
 
 merge :: ∀ d eff.    Selection d                -> Selection d -> Eff (d3::D3|eff) (Selection d)
 merge                     = runEffFn2 mergeFn
+
+empty :: ∀ d eff.                                   Selection d -> Eff (d3::D3|eff) Boolean
+empty                     = runEffFn1 emptyFn
 
 node :: ∀ d eff.                                   Selection d -> Eff (d3::D3|eff) (Maybe D3Element)
 node s                    = toMaybe <$> runEffFn1 nodeFn s

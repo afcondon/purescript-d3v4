@@ -9,6 +9,7 @@ exports.attrFn      = function (attr, b, selection)      { return selection.attr
 exports.bindDataFn  = function (array, selection)        { return selection.data(array); }
 exports.bindDataFnK = function (array, keyFn, selection) { return selection.data(array, keyFn); }
 exports.classedFn   = function (names, b, selection)     { return selection.classed(names, b); }
+exports.emptyFn     = function (selection)               { return selection.empty(); }
 exports.enterFn     = function (selection)               { return selection.enter(); }
 exports.exitFn      = function (selection)               { return selection.exit(); }
 exports.filterFn    = function (selector, selection)     { return selection.filter(selector); }
