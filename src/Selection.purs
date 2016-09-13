@@ -18,7 +18,7 @@ module D3.Selection
   , enter
   , exit
   , insert
-  -- , merge
+  , merge
   -- , node
   -- , nodes
   , on
@@ -32,11 +32,11 @@ module D3.Selection
   , text
   ) where
 
+import D3.Base
 import DOM.Event.Types (EventType)
 import Data.Function.Eff (EffFn5, EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn5, runEffFn1, runEffFn2)
+import Data.Nullable (Nullable)
 import Prelude (Unit)
-
-import D3.Base
 
 foreign import data Selection :: * -> *
 
@@ -54,6 +54,9 @@ foreign import exitFn        :: ∀ d eff.      EffFn1 (d3::D3|eff)             
 foreign import filterFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import filterFnP     :: ∀ d eff.      EffFn2 (d3::D3|eff) (d -> Boolean)              (Selection d) (Selection d)
 foreign import insertFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
+foreign import mergeFn       :: ∀ d eff.      EffFn2 (d3::D3|eff) (Selection d)               (Selection d) (Selection d)
+foreign import nodeFn        :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Nullable D3Element)
+foreign import nodesFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Nullable (Array D3Element))
 foreign import orderFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import removeFn      :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import selectAllFn   :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
@@ -135,6 +138,9 @@ order                     = runEffFn1 orderFn
 
 enter :: ∀ d eff.                                  Selection d -> Eff (d3::D3|eff) (Selection d)
 enter                     = runEffFn1 enterFn
+
+merge :: ∀ d eff.    Selection d                -> Selection d -> Eff (d3::D3|eff) (Selection d)
+merge                     = runEffFn2 mergeFn
 
 exit :: ∀ d eff.                                   Selection d -> Eff (d3::D3|eff) (Selection d)
 exit                      = runEffFn1 exitFn
