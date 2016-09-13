@@ -19,8 +19,8 @@ module D3.Selection
   , exit
   , insert
   , merge
-  -- , node
-  -- , nodes
+  , node
+  , nodes
   , on
   , on'             -- revisit this and see if can be wrapped in ADT like the other polymorphic functions TODO
   , remove
@@ -35,8 +35,9 @@ module D3.Selection
 import D3.Base
 import DOM.Event.Types (EventType)
 import Data.Function.Eff (EffFn5, EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn5, runEffFn1, runEffFn2)
-import Data.Nullable (Nullable)
-import Prelude (Unit)
+import Data.Maybe (Maybe)
+import Data.Nullable (toMaybe, Nullable)
+import Prelude (Unit, ($), (<$>))
 
 foreign import data Selection :: * -> *
 
@@ -56,7 +57,7 @@ foreign import filterFnP     :: ∀ d eff.      EffFn2 (d3::D3|eff) (d -> Boolea
 foreign import insertFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import mergeFn       :: ∀ d eff.      EffFn2 (d3::D3|eff) (Selection d)               (Selection d) (Selection d)
 foreign import nodeFn        :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Nullable D3Element)
-foreign import nodesFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Nullable (Array D3Element))
+foreign import nodesFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Array D3Element)
 foreign import orderFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import removeFn      :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import selectAllFn   :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
@@ -98,12 +99,12 @@ attr :: ∀ v d eff. String -> AttrSetter v d    -> Selection d -> Eff (d3::D3|e
 attr s (SetAttr b) = runEffFn3 attrFn  s b
 attr s (AttrFn p)  = runEffFn3 attrFnP s p
 
-style  :: ∀ d v eff.  String -> PolyValue d v  -> Selection d -> Eff (d3::D3|eff) (Selection d)
+style  :: ∀ d v eff.  String -> PolyValue d v   -> Selection d -> Eff (d3::D3|eff) (Selection d)
 style name (Value value) = runEffFn3 styleFn name value
 style name (SetEach f)   = runEffFn3 styleFnP name f
 style name (SetEachWIndex f)  = runEffFn3 styleFnPP name f
 
-text  :: ∀ d v eff.  PolyValue d v             -> Selection d -> Eff (d3::D3|eff) (Selection d)
+text  :: ∀ d v eff.  PolyValue d v              -> Selection d -> Eff (d3::D3|eff) (Selection d)
 text       (Value value)  = runEffFn2 textFn value
 text       (SetEach f)       = runEffFn2 textFnP f
 text       (SetEachWIndex f)       = runEffFn2 textFnPP f
@@ -117,13 +118,13 @@ d3SelectAll selector      = runEffFn1 d3SelectAllFn selector
 selectAll :: ∀ d eff. String                    -> Selection d -> Eff (d3::D3|eff) (Selection d)
 selectAll selector        = runEffFn2 selectAllFn selector
 
-selectElem :: ∀ d eff. D3Element                                  -> Eff (d3::D3|eff) (Selection d)
+selectElem :: ∀ d eff. D3Element                               -> Eff (d3::D3|eff) (Selection d)
 selectElem element           = runEffFn1 selectElFn element
 
 select  :: ∀ d eff.  String                     -> Selection d -> Eff (d3::D3|eff) (Selection d)
 select selector           = runEffFn2 selectFn selector
 
-dataBind :: ∀ d k eff. DataBind d k    -> Selection d -> Eff (d3::D3|eff) (Selection d)
+dataBind :: ∀ d k eff. DataBind d k             -> Selection d -> Eff (d3::D3|eff) (Selection d)
 -- would be nice to express that Keyed needs k to be Ord, will have to wait for GADTs
 -- dataBind :: ∀ d k eff. Ord k => DataBind d k    -> Selection d -> Eff (d3::D3|eff) (Selection d)
 dataBind (Data dataArray)         = runEffFn2 bindDataFn dataArray
@@ -141,6 +142,12 @@ enter                     = runEffFn1 enterFn
 
 merge :: ∀ d eff.    Selection d                -> Selection d -> Eff (d3::D3|eff) (Selection d)
 merge                     = runEffFn2 mergeFn
+
+node :: ∀ d eff.                                   Selection d -> Eff (d3::D3|eff) (Maybe D3Element)
+node s                    = toMaybe <$> runEffFn1 nodeFn s
+
+nodes :: ∀ d eff.                                  Selection d -> Eff (d3::D3|eff) (Array D3Element)
+nodes                     = runEffFn1 nodesFn
 
 exit :: ∀ d eff.                                   Selection d -> Eff (d3::D3|eff) (Selection d)
 exit                      = runEffFn1 exitFn
