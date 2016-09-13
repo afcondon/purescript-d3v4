@@ -69,7 +69,7 @@ foreign import styleTweenFn      :: ∀ d v eff. EffFn3 (d3::D3|eff) String (Eff
 -- morph it from type x to type d, the type of the selection to which it is being applied
 foreign import savedTransitionFn :: ∀ d x eff. EffFn2 (d3::D3|eff) (Transition x)              (Selection d)  (Transition d)
 
-type D3DelayFn d = ∀ eff. (d -> Index -> Eff (d3::D3|eff) Time)
+type D3DelayFn        d = ∀ eff. (d -> Index -> Eff (d3::D3|eff) Time)
 
 data DelayValue d = MilliSec Time
                   | DelayFn (D3DelayFn d)

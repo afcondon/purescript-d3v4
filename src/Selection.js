@@ -25,9 +25,9 @@ exports.selectElFn  = function (element)                 { return d3.select(elem
 exports.selectFn    = function (selector, selection)     { return selection.select(selector); }
 exports.sizeFn      = function (selection)               { return selection.size(); }
 exports.styleFn     = function (key, val, selection)     { return selection.style(key, val); }
-exports.styleFnP    = function (key, val, selection)     { return selection.style(key, val); }
+exports.styleFnFn   = function (key, fn, selection)      { return selection.style(key, fn); }
 exports.textFn      = function (text, selection)         { return selection.text(text); }
-exports.textFnP     = function (text, selection)         { return selection.text(text); }
+exports.textFnFn    = function (fn, selection)           { return selection.text(fn); }
 
 // these are slightly more complicated wrappers involving multiparam functions that must be uncurried
 exports.attrFnP  = function (names, f, selection) {
@@ -35,12 +35,6 @@ exports.attrFnP  = function (names, f, selection) {
 }
 exports.classedFnP  = function (names, f, selection) {
   return selection.classed(names, function (d, i, n, e) { return f(d)(i)(n)(e); });
-}
-exports.styleFnPP   = function (key, val, selection) {
-  return selection.style(key, function (d, i) { return val(d)(i); })
-}
-exports.textFnPP    = function (text, selection) {
-  return selection.text(function (d,i) { return text(d)(i); });
 }
 
 // custom version of mkEffFn1 which passes a row containing data including element and 'this'
