@@ -3,6 +3,7 @@ module D3.Transitions
   , D3DelayFn
   , DelayValue(..)
   , AttrInterpolator(..)
+  , TransitionName(..)
   , d3Transition
   , addTransition
   , tAttr
@@ -46,8 +47,10 @@ import Prelude (($), (<$>))
 
 foreign import data Transition :: * -> *
 
-foreign import attrFn            :: ∀ d v eff. EffFn3 (d3::D3|eff) String v                    (Transition d) (Transition d)
 foreign import d3TransitionFn    :: ∀ d eff.   EffFn1 (d3::D3|eff) String                                     (Transition d)
+foreign import d3TransitionFn2   :: ∀ d eff.                                                 Eff (d3::D3|eff) (Transition d)
+
+foreign import attrFn            :: ∀ d v eff. EffFn3 (d3::D3|eff) String v                    (Transition d) (Transition d)
 foreign import durationFn        :: ∀ d eff.   EffFn2 (d3::D3|eff) Time                        (Transition d) (Transition d)
 foreign import emptyFn           :: ∀ d eff.   EffFn1 (d3::D3|eff)                             (Transition d) Boolean
 foreign import mergeFn           :: ∀ d eff.   EffFn2 (d3::D3|eff) (Transition d)              (Transition d) (Transition d)
@@ -80,10 +83,14 @@ data AttrInterpolator d v =
     | TweenFn     (D3TweenFn     v d) -- function which is called once to generate a function which is then
                                       -- called every tween frame to generate a value
 
-d3Transition :: ∀ d eff. String                                     -> Eff (d3::D3|eff) (Transition d)
-d3Transition name           = runEffFn1 d3TransitionFn name
+data TransitionName = Name String
+                      | Unnamed
 
-addTransition :: ∀ d eff.                              Transition d  -> Eff (d3::D3|eff) (Transition d)
+d3Transition :: ∀ d eff. TransitionName                             -> Eff (d3::D3|eff) (Transition d)
+d3Transition (Name name)    = runEffFn1 d3TransitionFn name
+d3Transition Unnamed        = d3TransitionFn2
+
+addTransition :: ∀ d eff.                             Transition d  -> Eff (d3::D3|eff) (Transition d)
 addTransition               = runEffFn1 transition2Fn
 
 makeTransition :: ∀ d eff.                             Selection d  -> Eff (d3::D3|eff) (Transition d)

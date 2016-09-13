@@ -4,13 +4,13 @@ import D3.Selection
 import Control.Monad.Eff.Console (CONSOLE, log)
 import D3.Base (D3, Eff, D3Element, Nodes, Index, theHorror, (..), (...))
 import D3.Interpolator (Time)
-import D3.Transitions (DelayValue(MilliSec), delay, addTransition, tNodes, tNode, Transition, AttrInterpolator(Target, TweenFn, TweenTarget), tStyle, savedTransition, duration, d3Transition)
+import D3.Transitions (namedTransition, TransitionName(..), DelayValue(MilliSec), delay, addTransition, tNodes, tNode, Transition, AttrInterpolator(Target, TweenFn, TweenTarget), tStyle, savedTransition, duration, d3Transition)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Array (reverse)
 import Data.Foldable (foldr)
 import Data.Int (floor)
 import Data.String (length, toCharArray, fromCharArray)
-import Prelude (class Show, Unit, show, unit, pure, bind, max, (*), (<>), (<<<), (==), ($))
+import Prelude (class Show, Unit, show, unit, pure, bind, max, (*), (<>), (<<<), (==), ($), (+))
 {-
 -- next target is to handle this case:
 var matrix = [
@@ -59,7 +59,7 @@ dof :: String -> Index -> Nodes -> D3Element -> String
 dof datum _ _ _ = if (datum == "erg") then "ergo propter hoc" else theHorror
 
 hoy :: forall eff. Eff (d3::D3|eff) (Transition String)
-hoy = d3Transition "hoy"
+hoy = d3Transition (Name "hoy")
 
 -- ist :: Number -> Index -> D3Element -> String
 ist :: forall eff. Number -> Index -> D3Element -> Eff (d3::D3|eff) String
@@ -91,23 +91,26 @@ suq d _ = pure $ show d
 
 tej :: forall eff. String -> Index -> Eff (d3::D3|eff) String
 tej d i = pure $ show l <> "px" where
-  l = (length d) * 20 * (floor i)
+  l = (length d) * 30 * (floor (i + 1.0))
 
 ure :: forall eff. String -> Index -> Eff (d3::D3|eff) String
 ure d _ = pure $ show d
 
 main :: forall e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
-  erg <- d3Transition "erg"
+  -- | set up a named / reusable transition
+  erg <- d3Transition (Name "erg")
     .. duration 2000.0
 
-  chart1 <- d3Select ".chart"
+  -- | a simple chart made of `div`s from a data array of Numbers
+  chartN <- d3Select ".chart"
       .. selectAll "div"
         .. dataBind (Data array)
       .. enter .. append "div"
         .. style    "width"         (Value "30px")
-        .. classed  "twice as nice" (SetSome (\d i nodes el -> i == 2.0 ))
-        .. classed  "16 candles"    (SetSome cep)
+        .. style    "font-size"     (Value "48pt")
+        .. classed  "twice as nice" (SetSome (\d i nodes el -> i == 2.0 ))  -- lambda works here because naive uncurrying is done
+        .. classed  "16 candles"    (SetSome cep)                           -- you can see that from sig of 'cep' which also works here
         .. attr     "name"          (SetAttr "zek")
         .. text                     (SetByIndex suq)
         .. on       mouseenter      awn
@@ -117,38 +120,40 @@ main = do
         -- .. duration 500.0
         -- .. tStyle "background-color" (SetAttr "#555")
 
-  chart2 <- d3Select ".chart2"
+  -- | applying our saved transition to the chart and adding a further transition
+  chartN ... savedTransition erg
+          .. tStyle "color"            (Target "black")
+          .. tStyle "font-size"        (Target "24pt")
+          .. tStyle "width"            (TweenTarget  ist)
+          .. addTransition
+          .. delay  (MilliSec 500.0)
+          .. tStyle "background-color" (TweenFn      kef)
+
+  -- | a simple chart made of `div`s from a data array of Numbers
+  chartS <- d3Select ".chart2"
     .. selectAll "div"
       .. dataBind (Keyed array2 (\d -> revString d))
     .. enter .. append "div"
       .. style "background-color"  (Value "red")
-      .. style "width"             (SetByIndex tej)
+      .. style "width"             (SetByIndex tej)       -- 'tej' uses EffFn so it can't be presented as a lambda???
       .. classed "wis xis"         (SetAll true)
       .. attr "name"               (AttrFn dof)
       .. text                      (SetByIndex ure)
       .. text                      (SetByIndex roc)
       .. on' click "cep" "stringy" bel
 
-  chart1 ... savedTransition erg
-          .. tStyle "color"            (Target "black")
-          .. tStyle "font-size"        (Target "2em")
-          .. tStyle "width"            (TweenTarget  ist)
-          .. addTransition
-          .. delay  (MilliSec 500.0)
-          .. tStyle "background-color" (TweenFn      kef)
-
-  chart2 ... savedTransition erg
+  chartS ... namedTransition "erg"
           .. tStyle "background-color" (Target "blue")
           .. tStyle "color"            (Target "white")
 
-  chart3 <- d3Select "notfound"
+  emptyChart <- d3Select "notfound"
 
-  lev <- chart2 ... node
-  mim <- chart2 ... nodes
+  lev <- chartS ... node
+  mim <- chartS ... nodes
+  qat <- chartS ... empty
 
-  nim <- chart3 ... node
-  obi <- chart3 ... nodes
-  pyx <- chart3 ... empty
-  qat <- chart2 ... empty
+  nim <- emptyChart ... node
+  obi <- emptyChart ... nodes
+  pyx <- emptyChart ... empty
 
   pure unit
