@@ -38,7 +38,9 @@ import D3.Base (D3Element, D3, Eff)
 import D3.Interpolator (D3TweenFn, D3TweenTarget, Index)
 import D3.Selection (Selection)
 import Data.Function.Eff (mkEffFn3, EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn2, runEffFn1)
-import Data.Nullable (Nullable)
+import Data.Maybe (Maybe)
+import Data.Nullable (toMaybe, Nullable)
+import Prelude (($), (<$>))
 
 foreign import data Transition :: * -> *
 
@@ -49,7 +51,7 @@ foreign import durationFn        :: ∀ d eff.   EffFn2 (d3::D3|eff) Number     
 foreign import mergeFn           :: ∀ d eff.   EffFn2 (d3::D3|eff) (Transition d)              (Transition d) (Transition d)
 foreign import namedTransitionFn :: ∀ d eff.   EffFn2 (d3::D3|eff) String                      (Selection d)  (Transition d)
 foreign import nodeFn            :: ∀ d eff.   EffFn1 (d3::D3|eff)                             (Transition d) (Nullable D3Element)
-foreign import nodesFn           :: ∀ d eff.   EffFn1 (d3::D3|eff)                             (Transition d) (Nullable (Array D3Element))
+foreign import nodesFn           :: ∀ d eff.   EffFn1 (d3::D3|eff)                             (Transition d) (Array D3Element)
 foreign import styleFn           :: ∀ d v eff. EffFn3 (d3::D3|eff) String v                    (Transition d) (Transition d)
 foreign import styleIFn          :: ∀ d v eff. EffFn3 (d3::D3|eff) String (EffFn3 (d3::D3|eff) d Index D3Element v) (Transition d) (Transition d)
 foreign import styleTweenFn      :: ∀ d v eff. EffFn3 (d3::D3|eff) String (EffFn3 (d3::D3|eff) d Index D3Element v) (Transition d) (Transition d)
@@ -81,10 +83,10 @@ savedTransition name        = runEffFn2 savedTransitionFn name
 duration :: ∀ d eff. Number                         -> Transition d -> Eff (d3::D3|eff) (Transition d)
 duration t                  = runEffFn2 durationFn t
 
-tNode :: ∀ d eff.                                      Transition d -> Eff (d3::D3|eff) (Nullable D3Element)
-tNode                       = runEffFn1 nodeFn
+tNode :: ∀ d eff.                                      Transition d -> Eff (d3::D3|eff) (Maybe D3Element)
+tNode t                     = toMaybe <$> runEffFn1 nodeFn t
 
-tNodes :: ∀ d eff.                                     Transition d -> Eff (d3::D3|eff) (Nullable (Array D3Element))
+tNodes :: ∀ d eff.                                     Transition d -> Eff (d3::D3|eff) (Array D3Element)
 tNodes                      = runEffFn1 nodesFn
 
 tMerge :: ∀ d eff.    Transition d                -> Transition d -> Eff (d3::D3|eff) (Transition d)
