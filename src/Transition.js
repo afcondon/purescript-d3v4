@@ -2,6 +2,7 @@
 "use strict";
 
 exports.d3TransitionFn    = function (name)                     { return d3.transition(name); }
+exports.d3TransitionFn2   = function ()                         { return d3.transition(); }
 
 exports.attrFn            = function (name, value, transition)  { return transition.attr(name, value); }
 exports.attrIFn           = function (name, interp, transition) { return transition.attr(name, interp); }
