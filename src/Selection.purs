@@ -28,10 +28,10 @@ module D3.Selection
   , text
   ) where
 
-import D3.Base (D3, DataBind(..), Filter(..), ClassSetter(..), PolyValue(..), AttrSetter(..), PredicateFn, PredicateB, D3Element, Index, Nodes)
 import Control.Monad.Eff (Eff)
+import D3.Base (D3, DataBind(..), Filter(..), ClassSetter(..), PolyValue(..), AttrSetter(..), PredicateFn, PredicateB, D3Element, Index, Nodes)
 import DOM.Event.Types (EventType)
-import Data.Function.Eff (mkEffFn2, EffFn5, EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn5, runEffFn1, runEffFn2)
+import Data.Function.Eff (runEffFn4, EffFn4, mkEffFn4, mkEffFn2, EffFn5, EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn5, runEffFn1, runEffFn2)
 import Data.Maybe (Maybe)
 import Data.Nullable (toMaybe, Nullable)
 import Prelude (Unit, ($), (<$>))
@@ -40,11 +40,9 @@ foreign import data Selection :: * -> *
 
 foreign import appendFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import attrFn        :: ∀ d v eff.    EffFn3 (d3::D3|eff) String v                    (Selection d) (Selection d)
-foreign import attrFnP       :: ∀ d v eff.    EffFn3 (d3::D3|eff) String (PredicateFn v d)    (Selection d) (Selection d)
 foreign import bindDataFn    :: ∀ d eff.      EffFn2 (d3::D3|eff) (Array d)                   (Selection d) (Selection d)
 foreign import bindDataFnK   :: ∀ d k eff.    EffFn3 (d3::D3|eff) (Array d) (d -> k)          (Selection d) (Selection d)
 foreign import classedFn     :: ∀ d eff.      EffFn3 (d3::D3|eff) String Boolean              (Selection d) (Selection d)
-foreign import classedFnP    :: ∀ d eff.      EffFn3 (d3::D3|eff) String (PredicateB d)       (Selection d) (Selection d)
 foreign import d3SelectAllFn :: ∀ d eff.      EffFn1 (d3::D3|eff) String                                    (Selection d)
 foreign import d3SelectFn    :: ∀ d eff.      EffFn1 (d3::D3|eff) String                                    (Selection d)
 foreign import enterFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
@@ -67,16 +65,49 @@ foreign import styleFn       :: ∀ d v eff.    EffFn3 (d3::D3|eff) String v    
 foreign import textFn        :: ∀ d v eff.    EffFn2 (d3::D3|eff) v                           (Selection d) (Selection d)
 
 -- could use some type defs to help tame these sigs TODO
-foreign import styleFnFn     :: ∀ d v v2 eff. EffFn3 (d3::D3|eff) String (EffFn2 (d3::D3|eff) v Index v2) (Selection d) (Selection d)
-foreign import textFnFn      :: ∀ d v v2 eff. EffFn2 (d3::D3|eff)        (EffFn2 (d3::D3|eff) v Index v2) (Selection d) (Selection d)
+foreign import classedFnP    :: ∀ d eff.      EffFn3 (d3::D3|eff)         -- eff
+                                                     String               -- 1st arg of classedFnP
+                                                    (EffFn4 (d3::D3|eff)  -- 2nd arg is itself a callback in EffFn4
+                                                             d                 -- 1st arg of callback
+                                                             Number            -- 2nd arg of callback
+                                                             (Array D3Element) -- 3rd arg of callback
+                                                             D3Element         -- 4th arg of callback
+                                                             Boolean)          -- result of callback
+                                                    (Selection d)             -- 3rd arg
+                                                    (Selection d)             -- result
+
+foreign import attrFnP       :: ∀ d v eff.    EffFn3 (d3::D3|eff)        -- eff of attrFnP
+                                                     String              -- 1st arg of attrFnP
+                                                     (EffFn4 (d3::D3|eff)       -- eff of callback (callback is 2nd arg of fn)
+                                                              d                 -- 1st arg of callback
+                                                              Number            -- 2nd arg of callback
+                                                              (Array D3Element) -- 3rd arg of callback
+                                                              D3Element         -- 4th arg of callback
+                                                              v)                -- result of callback
+                                                     (Selection d)          -- 3rd arg of attrFnP
+                                                     (Selection d)          -- result of attrFnP
+
+foreign import styleFnFn     :: ∀ d v v2 eff. EffFn3 (d3::D3|eff)
+                                                     String
+                                                     (EffFn2 (d3::D3|eff)       -- eff
+                                                              v                 -- 1st arg of callback
+                                                              Index             -- 2nd arg of callback
+                                                              v2)               -- result of callback
+                                                     (Selection d)
+                                                     (Selection d)
+
+foreign import textFnFn      :: ∀ d v v2 eff. EffFn2 (d3::D3|eff)
+                                                     (EffFn2 (d3::D3|eff) v Index v2)
+                                                     (Selection d)
+                                                     (Selection d)
 
 classed :: ∀ d eff. String -> ClassSetter d    -> Selection d -> Eff (d3::D3|eff) (Selection d)
 classed s (SetAll b)         = runEffFn3 classedFn  s b
-classed s (SetSome p)        = runEffFn3 classedFnP s p
+classed s (SetSome p)        = runEffFn3 classedFnP s (mkEffFn4 p)
 
 attr :: ∀ v d eff. String -> AttrSetter v d    -> Selection d -> Eff (d3::D3|eff) (Selection d)
 attr s (SetAttr b)           = runEffFn3 attrFn  s b
-attr s (AttrFn p)            = runEffFn3 attrFnP s p
+attr s (AttrFn p)            = runEffFn3 attrFnP s (mkEffFn4 p)
 
 style  :: ∀ d v eff.  String -> PolyValue d v   -> Selection d -> Eff (d3::D3|eff) (Selection d)
 style name (Value value)     = runEffFn3 styleFn name value

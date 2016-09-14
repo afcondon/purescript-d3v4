@@ -28,14 +28,8 @@ exports.styleFn     = function (key, val, selection)     { return selection.styl
 exports.styleFnFn   = function (key, fn, selection)      { return selection.style(key, fn); }
 exports.textFn      = function (text, selection)         { return selection.text(text); }
 exports.textFnFn    = function (fn, selection)           { return selection.text(fn); }
-
-// these are slightly more complicated wrappers involving multiparam functions that must be uncurried
-exports.attrFnP  = function (names, f, selection) {
-  return selection.attr(names, function (d, i, n, e) { return f(d)(i)(n)(e); });
-}
-exports.classedFnP  = function (names, f, selection) {
-  return selection.classed(names, function (d, i, n, e) { return f(d)(i)(n)(e); });
-}
+exports.attrFnP     = function (names, fn, selection)    { return selection.attr(names, fn); }
+exports.classedFnP  = function (names, fn, selection)    { return selection.classed(names, fn); }
 
 // custom version of mkEffFn1 which passes a row containing data including element and 'this'
 // enables callbacks in the D3 style which rely on 'this' for access to the D3Element associated with the datum

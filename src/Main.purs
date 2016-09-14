@@ -62,11 +62,11 @@ bel { datum: d, prop: p } = do
   log (show p)
   pure unit
 
-cep :: Number -> Index -> Nodes -> D3Element -> Boolean
-cep datum _ _ _ = if (datum == 16.0) then true else false
+cep :: forall eff. Number -> Index -> Nodes -> D3Element -> Eff (d3::D3|eff) Boolean
+cep datum _ _ _ = pure $ if (datum == 16.0) then true else false
 
-dof :: String -> Index -> Nodes -> D3Element -> String
-dof datum _ _ _ = if (datum == "erg") then "ergo propter hoc" else theHorror
+dof :: forall eff. String -> Index -> Nodes -> D3Element -> Eff (d3::D3|eff) String
+dof datum _ _ _ = pure $ if (datum == "erg") then "ergo propter hoc" else theHorror
 
 hoy :: forall eff. Eff (d3::D3|eff) (Transition String)
 hoy = d3Transition (Name "hoy")
@@ -119,7 +119,7 @@ main = do
       .. enter .. append "div"
         .. style    "width"         (Value "30px")
         .. style    "font-size"     (Value "48pt")
-        .. classed  "twice as nice" (SetSome (\d i nodes el -> i == 2.0 ))  -- lambda works here because naive uncurrying is done
+        .. classed  "twice as nice" (SetSome (\d i nodes el -> pure (i == 2.0) ))  -- lambda works here because naive uncurrying is done
         .. classed  "16 candles"    (SetSome cep)                           -- you can see that from sig of 'cep' which also works here
         .. attr     "name"          (SetAttr "zek")
         .. text                     (SetByIndex suq)
@@ -175,8 +175,8 @@ main = do
     .. selectAll "circle"
       .. dataBind (Data circleData)
     .. enter .. append "circle"
-      .. attr "cx" (AttrFn (\d i nodes el -> d.x * 40.0))
-      .. attr "cy" (AttrFn (\d i nodes el -> d.y * 40.0))
+      .. attr "cx" (AttrFn (\d i nodes el -> pure (d.x * 40.0)))
+      .. attr "cy" (AttrFn (\d i nodes el -> pure (d.y * 40.0)))
       .. attr "r"  (SetAttr 20.0)
       .. style "stroke" (Value "red")
       .. style "fill"   (Value "black")
