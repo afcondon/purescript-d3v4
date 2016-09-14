@@ -34,6 +34,16 @@ array = [4.0, 8.0, 15.0, 16.0, 23.0, 42.0]
 array2 :: Array String
 array2 = ["awn", "bel", "cep", "dof", "erg", "fub"]
 
+type Point = { x :: Number, y :: Number }
+circleData :: Array Point
+circleData = [ {x: 1.0, y: 1.0}
+             , {x: 2.0, y: 2.0}
+             , {x: 3.0, y: 3.0}
+             , {x: 4.0, y: 5.0}
+             , {x: 5.0, y: 6.0}
+             ]
+
+
 arrayMax :: Number
 arrayMax = foldr max 0.0 array
 
@@ -115,7 +125,7 @@ main = do
         .. text                     (SetByIndex suq)
         .. on       mouseenter      awn
         .. on       mouseleave      awn
-        .. on' click "magic" "snape" bel
+        .. on' click "prop" "propval" bel      -- arbitrary property {prop: "propval"} is cached in the D3Element and sent with event details
         -- .. makeTransition          -- this would be a non-reusable transition example
         -- .. duration 500.0
         -- .. tStyle "background-color" (SetAttr "#555")
@@ -155,5 +165,20 @@ main = do
   nim <- emptyChart ... node
   obi <- emptyChart ... nodes
   pyx <- emptyChart ... empty
+
+  -- | let's try some SVG stuff now so that we can work towards zooming and dragging
+
+  svg <- d3Select ".svg"
+    .. append "svg"
+      .. style "width"  (Value "500px")
+      .. style "height" (Value "500px")
+    .. selectAll "circle"
+      .. dataBind (Data circleData)
+    .. enter .. append "circle"
+      .. attr "cx" (AttrFn (\d i nodes el -> d.x * 40.0))
+      .. attr "cy" (AttrFn (\d i nodes el -> d.y * 40.0))
+      .. attr "r"  (SetAttr 20.0)
+      .. style "stroke" (Value "red")
+      .. style "fill"   (Value "black")
 
   pure unit
