@@ -195,9 +195,16 @@ foreign import onFnWithProperty :: ∀ eff a d p.
         p                           -- 5th argument for EffFn5, something to cache in the property field
         (Selection a)               -- result of EffFn5, returns selection for "fluid interface" / monadic chain
 
+type SimpleCallbackFn d   = ∀ eff. CallbackParam d    -> Eff (d3::D3|eff) Unit
+type PropCallbackFn   d p = ∀ eff. CallbackParamP d p -> Eff (d3::D3|eff) Unit
+
+data EventHandler d p = Callback (SimpleCallbackFn d)
+                      | CallbackWithProp PropertyName p (PropCallbackFn d p)
+
 -- generic "on" function works for any DOM event
 on :: ∀ a d eff. EventType
-                -> (CallbackParam d -> Eff (d3::D3|eff) Unit)
+                -> (CallbackParam d -> Eff (d3::D3|eff) Unit)        -- this formulation works
+                -- -> SimpleCallbackFn d                                -- this formulation doesn't
                 -> (Selection a) -> Eff (d3::D3|eff) (Selection a)
 on event callback selection  = runEffFn3 onFn selection event (mkCallback callback)
 
