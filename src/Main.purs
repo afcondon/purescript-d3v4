@@ -50,29 +50,29 @@ arrayMax = foldr max 0.0 array
 revString :: String -> String
 revString = fromCharArray <<< reverse <<< toCharArray
 
-awn :: forall eff. CallbackParam Number -> Eff (d3::D3, console::CONSOLE|eff) Unit
+awn :: ∀ eff. CallbackParam Number -> Eff (d3::D3, console::CONSOLE|eff) Unit
 awn { datum: d, meta: m } = do
   log (show d)
   log (show m)
   pure unit
 
-bel :: forall eff. CallbackParamP Number String -> Eff (d3::D3, console::CONSOLE|eff) Unit
+bel :: ∀ eff. CallbackParamP Number String -> Eff (d3::D3, console::CONSOLE|eff) Unit
 bel { datum: d, prop: p } = do
   log (show d)
   log (show p)
   pure unit
 
-cep :: forall eff. Number -> Index -> Nodes -> D3Element -> Eff (d3::D3|eff) Boolean
+cep :: ∀ eff. Number -> Index -> Nodes -> D3Element -> Eff (d3::D3|eff) Boolean
 cep datum _ _ _ = pure $ if (datum == 16.0) then true else false
 
-dof :: forall eff. String -> Index -> Nodes -> D3Element -> Eff (d3::D3|eff) String
+dof :: ∀ eff. String -> Index -> Nodes -> D3Element -> Eff (d3::D3|eff) String
 dof datum _ _ _ = pure $ if (datum == "erg") then "ergo propter hoc" else theHorror
 
-hoy :: forall eff. Eff (d3::D3|eff) (Transition String)
+hoy :: ∀ eff. Eff (d3::D3|eff) (Transition String)
 hoy = d3Transition (Name "hoy")
 
 -- ist :: Number -> Index -> D3Element -> String
-ist :: forall eff. Number -> Index -> D3Element -> Eff (d3::D3|eff) String
+ist :: ∀ eff. Number -> Index -> D3Element -> Eff (d3::D3|eff) String
 ist d _ _ = pure $ show val <> "px" where val = d * 10.0
 
 -- || next two functions illustrate how you can do the following JS example in PS
@@ -93,20 +93,36 @@ jud :: Time -> String  -- this func duplicates the D3 documentation example show
 jud t = "hsl(" <> tval <> ",100%,50%)"
   where tval = show (t * 360.0)
 
-roc :: forall eff. String -> Index -> Eff (d3::D3|eff) String
+roc :: ∀ eff. String -> Index -> Eff (d3::D3|eff) String
 roc d i = pure $ show d <> " " <> show i
 
-suq :: forall d eff. Show d => d -> Index -> Eff (d3::D3|eff) String
+suq :: ∀ d eff. Show d => d -> Index -> Eff (d3::D3|eff) String
 suq d _ = pure $ show d
 
-tej :: forall eff. String -> Index -> Eff (d3::D3|eff) String
+tej :: ∀ eff. String -> Index -> Eff (d3::D3|eff) String
 tej d i = pure $ show l <> "px" where
   l = (length d) * 30 * (floor (i + 1.0))
 
-ure :: forall eff. String -> Index -> Eff (d3::D3|eff) String
+ure :: ∀ eff. String -> Index -> Eff (d3::D3|eff) String
 ure d _ = pure $ show d
 
-main :: forall e. Eff (d3::D3,console::CONSOLE|e) Unit
+vis :: ∀ d eff. Selection d -> String -> String -> Eff (d3::D3|eff) (Selection d)
+vis s first last =
+  do
+    s ... attr "first-name" (SetAttr first)
+      .. attr "last-name"  (SetAttr last)
+    pure s
+{-
+  function name(selection, first, last) {
+    selection
+        .attr("first-name", first)
+        .attr("last-name", last);
+  }
+
+  d3.selectAll("div").call(name, "John", "Snow");
+-}
+
+main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
   -- | set up a named / reusable transition
   erg <- d3Transition (Name "erg")
@@ -129,6 +145,8 @@ main = do
         -- .. makeTransition          -- this would be a non-reusable transition example
         -- .. duration 500.0
         -- .. tStyle "background-color" (SetAttr "#555")
+
+  loopback <- vis chartN "mickey" "mouse"
 
   -- | applying our saved transition to the chart and adding a further transition
   chartN ... savedTransition erg
