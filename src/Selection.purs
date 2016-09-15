@@ -7,6 +7,7 @@ module D3.Selection
   , append
   , attr
   -- , call   -- TBD
+  , call1, call2, call3, call4, call5, call6, call7, call8, call9
   , classed
   , dataBind
   -- , each   -- TBD
@@ -174,6 +175,61 @@ insert tag                = runEffFn2 insertFn tag
 
 append  :: ∀ d eff.  String                     -> Selection d -> Eff (d3::D3|eff) (Selection d)
 append tag                = runEffFn2 appendFn tag
+
+-- using the slightly clunkier syntax of fn(selection, p1, p2) to mirror d3 syntax
+call1   :: ∀ x a eff.
+            (Selection x -> a -> Eff (d3::D3|eff)(Selection x))
+            -> a
+            -> Selection x -> Eff (d3::D3|eff) (Selection x)
+call1 fn a s =  fn s a
+
+call2   :: ∀ x a b eff.
+            (Selection x -> a -> b -> Eff (d3::D3|eff)(Selection x))
+            -> a -> b
+            -> Selection x -> Eff (d3::D3|eff) (Selection x)
+call2 fn a b s =  fn s a b
+
+call3   :: ∀ x a b c eff.
+            (Selection x -> a -> b -> c -> Eff (d3::D3|eff)(Selection x))
+            -> a -> b -> c
+            -> Selection x -> Eff (d3::D3|eff) (Selection x)
+call3 fn a b c s =  fn s a b c
+
+call4   :: ∀ x a b c d eff.
+            (Selection x -> a -> b -> c -> d -> Eff (d3::D3|eff)(Selection x))
+            -> a -> b -> c -> d
+            -> Selection x -> Eff (d3::D3|eff) (Selection x)
+call4 fn a b c d s =  fn s a b c d
+
+call5   :: ∀ x a b c d e eff.
+            (Selection x -> a -> b -> c -> d -> e -> Eff (d3::D3|eff)(Selection x))
+            -> a -> b -> c -> d -> e
+            -> Selection x -> Eff (d3::D3|eff) (Selection x)
+call5 fn a b c d e s =  fn s a b c d e
+
+call6   :: ∀ x a b c d e f eff.
+            (Selection x -> a -> b -> c -> d -> e -> f -> Eff (d3::D3|eff)(Selection x))
+            -> a -> b -> c -> d -> e -> f
+            -> Selection x -> Eff (d3::D3|eff) (Selection x)
+call6 fn a b c d e f s =  fn s a b c d e f
+
+call7   :: ∀ x a b c d e f g eff.
+            (Selection x -> a -> b -> c -> d -> e -> f -> g -> Eff (d3::D3|eff)(Selection x))
+            -> a -> b -> c -> d -> e -> f -> g
+            -> Selection x -> Eff (d3::D3|eff) (Selection x)
+call7 fn a b c d e f g s =  fn s a b c d e f g
+
+call8   :: ∀ x a b c d e f g h eff.
+            (Selection x -> a -> b -> c -> d -> e -> f -> g -> h -> Eff (d3::D3|eff)(Selection x))
+            -> a -> b -> c -> d -> e -> f -> g -> h
+            -> Selection x -> Eff (d3::D3|eff) (Selection x)
+call8 fn a b c d e f g h s =  fn s a b c d e f g h
+
+call9   :: ∀ x a b c d e f g h i eff.
+            (Selection x -> a -> b -> c -> d -> e -> f -> g -> h -> i -> Eff (d3::D3|eff)(Selection x))
+            -> a -> b -> c -> d -> e -> f -> g -> h -> i
+            -> Selection x -> Eff (d3::D3|eff) (Selection x)
+call9 fn a b c d e f g h i s =  fn s a b c d e f g h i
 
 -- || Callback stuff
 -- first up from Graphics.D3.EffFnExtra

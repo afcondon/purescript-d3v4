@@ -135,18 +135,18 @@ main = do
       .. enter .. append "div"
         .. style    "width"         (Value "30px")
         .. style    "font-size"     (Value "48pt")
-        .. classed  "twice as nice" (SetSome (\d i nodes el -> pure (i == 2.0) ))  -- lambda works here because naive uncurrying is done
-        .. classed  "16 candles"    (SetSome cep)                           -- you can see that from sig of 'cep' which also works here
+        .. classed  "twice as nice" (SetSome (\d i nodes el -> pure (i == 2.0) ))
+        .. classed  "16 candles"    (SetSome cep)
         .. attr     "name"          (SetAttr "zek")
         .. text                     (SetByIndex suq)
         .. on       mouseenter      awn
         .. on       mouseleave      awn
-        .. on' click "prop" "propval" bel      -- arbitrary property {prop: "propval"} is cached in the D3Element and sent with event details
+        -- next an arbitrary property {prop: "propval"} is cached in the D3Element and returned in callback
+        .. on' click "prop" "propval" bel
+        .. call2 vis "mickey" "mouse"
         -- .. makeTransition          -- this would be a non-reusable transition example
         -- .. duration 500.0
         -- .. tStyle "background-color" (SetAttr "#555")
-
-  loopback <- vis chartN "mickey" "mouse"
 
   -- | applying our saved transition to the chart and adding a further transition
   chartN ... savedTransition erg
