@@ -112,15 +112,6 @@ vis s first last =
     s ... attr "first-name" (SetAttr first)
       .. attr "last-name"  (SetAttr last)
     pure s
-{-
-  function name(selection, first, last) {
-    selection
-        .attr("first-name", first)
-        .attr("last-name", last);
-  }
-
-  d3.selectAll("div").call(name, "John", "Snow");
--}
 
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do

@@ -7,7 +7,7 @@ module D3.Selection
   , append
   , attr
   -- , call   -- TBD
-  , call1, call2, call3, call4, call5, call6, call7, call8, call9
+  , call, call1, call2, call3, call4, call5, call6, call7, call8, call9
   , classed
   , dataBind
   -- , each   -- TBD
@@ -30,9 +30,9 @@ module D3.Selection
   ) where
 
 import Control.Monad.Eff (Eff)
-import D3.Base (D3, DataBind(..), Filter(..), ClassSetter(..), PolyValue(..), AttrSetter(..), PredicateFn, PredicateB, D3Element, Index, Nodes)
+import D3.Base (D3, D3Element, Index, AttrSetter(AttrFn, SetAttr), ClassSetter(SetSome, SetAll), DataBind(Keyed, Data), Filter(Predicate, Selector), PolyValue(SetByIndex, Value))
 import DOM.Event.Types (EventType)
-import Data.Function.Eff (runEffFn4, EffFn4, mkEffFn4, mkEffFn2, EffFn5, EffFn3, EffFn2, EffFn1, runEffFn3, runEffFn5, runEffFn1, runEffFn2)
+import Data.Function.Eff (EffFn5, EffFn3, EffFn2, EffFn4, EffFn1, runEffFn5, runEffFn3, runEffFn2, runEffFn1, mkEffFn2, mkEffFn4)
 import Data.Maybe (Maybe)
 import Data.Nullable (toMaybe, Nullable)
 import Prelude (Unit, ($), (<$>))
@@ -177,6 +177,11 @@ append  :: ∀ d eff.  String                     -> Selection d -> Eff (d3::D3|
 append tag                = runEffFn2 appendFn tag
 
 -- using the slightly clunkier syntax of fn(selection, p1, p2) to mirror d3 syntax
+call   :: ∀ x eff.
+              (Selection x -> Eff (d3::D3|eff)(Selection x))
+            -> Selection x -> Eff (d3::D3|eff) (Selection x)
+call fn s =  fn s
+
 call1   :: ∀ x a eff.
             (Selection x -> a -> Eff (d3::D3|eff)(Selection x))
             -> a
