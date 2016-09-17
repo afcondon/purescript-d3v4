@@ -15,15 +15,16 @@ var g = svg.append("g"); // handle on the <g> that contains our visualisation in
 
 var dg = d3.drag();
 
-// dg.on("drag", dragged);
+var dg2 = dg.on("drag", dragged); // once you disentangle all this it's actually calling selection.on("drag", dragged)
 
-g.selectAll("circle")
+circle = g.selectAll("circle")
     .data(points)
   .enter().append("circle")
     .attr("cx", function(d) { return d.x; })
     .attr("cy", function(d) { return d.y; })
     .attr("r", 2.5)
-    .call(dg);
+
+circle.call(dg);   //  d3.selectAll(".circle").call(d3.drag().on("drag", dragged));    
 
 svg.call(d3.zoom()
     .scaleExtent([1 / 2, 8])
