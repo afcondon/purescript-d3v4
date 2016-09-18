@@ -22,4 +22,17 @@ exports.removeListenersFn = function(typenames, drag) { return drag.on(typenames
 // and returns the drag behavior. If an event listener was already registered for
 // the same type and name, the existing listener is removed before the new listener
 // is added.
-exports.addListenerFn     = function(typenames, listener, drag) { return drag.on(typenames); }
+exports.addListenerFn     = function(typenames, listener, drag) {
+  return drag.on(typenames, listener); }
+
+
+exports.applyDragFn       = function(drag, selection) {
+  return selection.call(drag)(); }
+
+exports.mkEffFn4Special   = function mkEffFn4Special(fn) {
+  return function(d, i, els) {
+    var el = this;
+    var datum = d, index = i, elements = els;
+    return fn(datum)(index)(elements)(el)();
+  };
+};

@@ -3,14 +3,17 @@ module Main where
 import D3.Selection
 import Control.Monad.Eff.Console (CONSOLE, log)
 import D3.Base (D3, Eff, Index, D3Element, Nodes, AttrSetter(AttrFn, SetAttr), ClassSetter(SetAll, SetSome), DataBind(Keyed, Data), PolyValue(SetByIndex, Value), theHorror, (...), (..))
+import D3.Drag (DragType(DragType), Typenames(TypeNames), applyDrag, addListener, d3Drag)
 import D3.Interpolator (Time)
 import D3.Transitions (Transition, AttrInterpolator(Target, TweenFn, TweenTarget), DelayValue(MilliSec), TransitionName(Name), tStyle, namedTransition, delay, addTransition, savedTransition, duration, d3Transition)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
 import Data.Array (reverse)
 import Data.Foldable (foldr)
 import Data.Int (floor)
+import Data.Maybe (Maybe(Just))
 import Data.String (length, toCharArray, fromCharArray)
 import Prelude (class Show, Unit, show, unit, pure, bind, max, (*), (<>), (<<<), (==), ($), (+))
+import Unsafe.Coerce (unsafeCoerce)
 {-
 -- next target is to handle this case:
 var matrix = [
@@ -113,6 +116,12 @@ vis s first last =
       .. attr "last-name"  (SetAttr last)
     pure s
 
+-- zek :: ∀ d eff. d -> Index -> D3Element -> Eff (d3::D3, console::CONSOLE|eff) Unit -- callback of the form (d -> i -> (Array D3Element ) -> D3Element -> r)
+zek :: ∀ d eff. Point -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
+zek d i els el = do
+  -- log "dragged"
+  pure unit
+
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
   -- | set up a named / reusable transition
@@ -148,7 +157,7 @@ main = do
           .. delay  (MilliSec 500.0)
           .. tStyle "background-color" (TweenFn      kef)
 
-  -- | a simple chart made of `div`s from a data array of Numbers
+  -- | a simple chart made of `div`s from a data array of Strings
   chartS <- d3Select ".chart2"
     .. selectAll "div"
       .. dataBind (Keyed array2 (\d -> revString d))
@@ -169,11 +178,11 @@ main = do
 
   lev <- chartS ... node
   mim <- chartS ... nodes
-  qat <- chartS ... empty
+  nim <- chartS ... empty
 
-  nim <- emptyChart ... node
-  obi <- emptyChart ... nodes
-  pyx <- emptyChart ... empty
+  obi <- emptyChart ... node
+  pyx <- emptyChart ... nodes
+  qat <- emptyChart ... empty
 
   -- | let's try some SVG stuff now so that we can work towards zooming and dragging
 
@@ -189,5 +198,16 @@ main = do
       .. attr "r"  (SetAttr 20.0)
       .. style "stroke" (Value "red")
       .. style "fill"   (Value "black")
+
+  let phantom = { x: 0.0, y: 0.0 }
+  let tn = TypeNames [ { name: Just "foo", type: DragType} ]
+  yag <- d3Drag phantom -- phantom type to ensure correct type for yag (but type only gets in the way here, potentially)
+        .. addListener tn zek
+
+  -- let foo = yag ... applyDrag svg
+  -- let foo = applyDrag svg yag
+  -- svg.call(yag) works in JavaScript (modulo not handling mkEffFn correctly, separate problem)
+  let foo = svg ... call (unsafeCoerce yag)
+
 
   pure unit

@@ -24,7 +24,7 @@ circle = g.selectAll("circle")
     .attr("cy", function(d) { return d.y; })
     .attr("r", 2.5)
 
-circle.call(dg);   //  d3.selectAll(".circle").call(d3.drag().on("drag", dragged));    
+circle.call(dg2);   //  d3.selectAll(".circle").call(d3.drag().on("drag", dragged));
 
 svg.call(d3.zoom()
     .scaleExtent([1 / 2, 8])

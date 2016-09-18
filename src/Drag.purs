@@ -1,26 +1,34 @@
 module D3.Drag where
 
 import Control.Monad.Eff (Eff)
-import D3.Base (D3)
+import D3.Base (Index, D3Element, PredicateFn, D3)
+import D3.Selection (Selection)
 import DOM.Event.Types (Event)
 import Data.Array ((:))
 import Data.Foldable (intercalate, foldr)
-import Data.Function.Eff (runEffFn2, runEffFn3, EffFn3, EffFn2)
+import Data.Function.Eff (EffFn4, mkEffFn4, mkEffFn3, runEffFn2, runEffFn3, EffFn3, EffFn2)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
 import Prelude (show, class Show, Unit, (<>), ($), (<$>))
+import Unsafe.Coerce (unsafeCoerce)
 
-foreign import data Drag :: *
+foreign import data Drag :: * -> *
 
-foreign import d3DragFn :: ∀ eff. Eff (d3::D3|eff) Drag
+mapDragToSelection :: forall d. Drag d -> Selection d
+mapDragToSelection = unsafeCoerce
+
+mapSelectionToDrag :: forall d. Selection d -> Drag d
+mapSelectionToDrag = unsafeCoerce
+
+foreign import d3DragFn :: ∀ d eff. Eff (d3::D3|eff) (Drag d)
 
 -- When a drag event listener is invoked, d3.event is set to the current drag event.
-foreign import d3DragEvent :: ∀ eff. Unit -> Eff (d3::D3|eff) DragEvent
+foreign import d3DragEvent :: ∀ d eff. Unit -> Eff (d3::D3|eff) (DragEvent d)
 
 foreign import data Subject :: *
 
-type DragEvent = {
-    target      :: Drag
+type DragEvent d = {
+    target      :: Drag d
   , type        :: String  -- either "start", "drag" or "end"
   , subject     :: Subject -- the drag subject, defined by drag.subject.
   , x           :: Number  -- the new x-coordinate of the subject
@@ -44,13 +52,13 @@ instance isShowDragType :: Show DragType where
   show DragType  = "drag"
   show EndType   = "end"
 
-foreign import data DragListener :: *
+type DragListener d = ∀ eff. (d -> Number -> Array D3Element -> D3Element -> Eff (d3::D3|eff) Unit)
 
 data Typenames = TypeNames (Array { name :: Maybe String, type :: DragType })
 
 -- create a new Drag behaviour Object/Function thingy
-d3Drag :: ∀ eff. Eff (d3::D3|eff) Drag
-d3Drag = d3DragFn
+d3Drag :: ∀ d eff.  d -> Eff (d3::D3|eff) (Drag d)
+d3Drag d = d3DragFn
 
 -- smush the Typenames down to a single string which D3 will (wastefully) parse out again)
 instance isShowTypenames :: Show Typenames where
@@ -67,21 +75,33 @@ instance isShowTypenames :: Show Typenames where
 -- || i'd like to come back to this once drag and zoom are working and see whether
 -- || it makes sense to wrap dispatch itself TODO
 
-foreign import findCallbackFn    :: ∀ eff. EffFn2 (d3::D3|eff) D3Typenames                      Drag (Nullable DragListener)
-foreign import removeListenersFn :: ∀ eff. EffFn2 (d3::D3|eff) D3Typenames                      Drag Drag
-foreign import addListenerFn     :: ∀ eff. EffFn3 (d3::D3|eff) D3Typenames DragListener         Drag Drag
+foreign import findCallbackFn    :: ∀ d eff. EffFn2 (d3::D3|eff) D3Typenames                    (Drag d) (Nullable (DragListener d))
+foreign import removeListenersFn :: ∀ d eff. EffFn2 (d3::D3|eff) D3Typenames                    (Drag d) (Drag d)
+foreign import applyDragFn       :: ∀ d eff. EffFn2 (d3::D3|eff) (Drag d)                  (Selection d) (Selection d)
+
+foreign import addListenerFn     :: ∀ d eff. EffFn3 (d3::D3|eff) D3Typenames
+                                                                (EffFn4Special (d3::D3|eff) d Number (Array D3Element) Unit)
+                                                                (Drag d)
+                                                                (Drag d)
+
+foreign import data EffFn4Special :: # ! -> * -> * -> * -> * -> *
+foreign import mkEffFn4Special    :: forall eff d r. (d -> Index -> Array D3Element -> D3Element -> Eff eff r)
+                                                  -> EffFn4Special eff d Index (Array D3Element) Unit
 
 -- lookup and remove differ in JS as listeners-not-given => lookup, listeners-as-null => remove
-lookupDrag      :: ∀ eff. Typenames                       -> Drag -> Eff (d3::D3|eff) (Nullable DragListener)
+lookupDrag      :: ∀ d eff. Typenames                     -> Drag d -> Eff (d3::D3|eff) (Nullable (DragListener d))
 lookupDrag tn = runEffFn2 findCallbackFn (show tn)
 
-removeListeners :: ∀ eff. Typenames                       -> Drag -> Eff (d3::D3|eff) Drag
+removeListeners :: ∀ d eff. Typenames                       -> Drag d -> Eff (d3::D3|eff) (Drag d)
 removeListeners tn = runEffFn2 removeListenersFn (show tn)
 
-addListener     :: ∀ eff. Typenames -> DragListener       -> Drag -> Eff (d3::D3|eff) Drag
-addListener tn = runEffFn3 addListenerFn (show tn)
+addListener     :: ∀ d eff. Typenames -> DragListener d   -> Drag d -> Eff (d3::D3|eff) (Drag d)
+addListener tn callback = runEffFn3 addListenerFn (show tn) (mkEffFn4Special callback)
 
--- on :: ∀ d eff. (d -> Eff (d3::D3|eff)(unit)) -> Drag -> Eff (d3::D3|eff) Drag
+applyDrag       :: ∀ d eff. (Drag d) -> (Selection d) -> Eff (d3::D3|eff) (Selection d)
+applyDrag      = runEffFn2 applyDragFn
+
+-- on :: ∀ d eff. (d -> Eff (d3::D3|eff)(unit)) -> Drag d -> Eff (d3::D3|eff) Drag
 -- on dragFn
 
 {-
