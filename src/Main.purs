@@ -3,7 +3,7 @@ module Main where
 import D3.Selection
 import Control.Monad.Eff.Console (CONSOLE, log)
 import D3.Base (Point, D3, Eff, Index, D3Element, Nodes, AttrSetter(AttrFn, SetAttr), ClassSetter(SetAll, SetSome), DataBind(Keyed, Data), PolyValue(SetByIndex, Value), theHorror, (...), (..))
-import D3.Drag (dragUpdate, DragType(DragType), Typenames(TypeNames), applyDrag, addListener, d3Drag)
+import D3.Drag (dragUpdate, DragType(DragType), Typenames(TypeNames), addListener, d3Drag)
 import D3.Interpolator (Time)
 import D3.Transitions (Transition, AttrInterpolator(Target, TweenFn, TweenTarget), DelayValue(MilliSec), TransitionName(Name), tStyle, namedTransition, delay, addTransition, savedTransition, duration, d3Transition)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)

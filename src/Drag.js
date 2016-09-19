@@ -32,9 +32,8 @@ exports.dragUpdateFn      = function(datum, element) {
     .attr("cy", datum.y = d3.event.y)
 }
 
-
-exports.applyDragFn       = function(drag, selection) {
-  return selection.call(drag)(); }
+// exports.applyDragFn       = function(drag, selection) {
+//   return selection.call(drag)(); }
 
 exports.mkEffFn4Special   = function mkEffFn4Special(fn) {
   return function(d, i, els) {

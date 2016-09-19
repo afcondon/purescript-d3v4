@@ -1,12 +1,12 @@
 module D3.Drag where
 
 import Control.Monad.Eff (Eff)
-import D3.Base (Point, Index, D3Element, PredicateFn, D3)
+import D3.Base (D3, D3Element, Index)
 import D3.Selection (Selection)
 import DOM.Event.Types (Event)
 import Data.Array ((:))
 import Data.Foldable (intercalate, foldr)
-import Data.Function.Eff (EffFn4, mkEffFn4, mkEffFn3, runEffFn2, runEffFn3, EffFn3, EffFn2)
+import Data.Function.Eff (EffFn3, EffFn2, runEffFn2, runEffFn3)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
 import Prelude (show, class Show, Unit, (<>), ($), (<$>))
@@ -77,7 +77,7 @@ instance isShowTypenames :: Show Typenames where
 
 foreign import findCallbackFn    :: ∀ d eff. EffFn2 (d3::D3|eff) D3Typenames  (Drag d)      (Nullable (DragListener d))
 foreign import removeListenersFn :: ∀ d eff. EffFn2 (d3::D3|eff) D3Typenames  (Drag d)      (Drag d)
-foreign import applyDragFn       :: ∀ d eff. EffFn2 (d3::D3|eff) (Drag d)     (Selection d) (Selection d)
+-- foreign import applyDragFn       :: ∀ d eff. EffFn2 (d3::D3|eff) (Drag d)     (Selection d) (Selection d)
 foreign import dragUpdateFn      :: ∀ d eff. EffFn2 (d3::D3|eff) d            D3Element      Unit
 
 
@@ -103,8 +103,8 @@ addListener     :: ∀ d eff. Typenames -> DragListener d   -> Drag d -> Eff (d3
 addListener tn callback = runEffFn3 addListenerFn (show tn) (mkEffFn4Special callback)
 
 -- not used in current commit, this was an attempt to avoid the unsafeCoerce on the drag - TODO
-applyDrag       :: ∀ d eff. (Drag d) -> (Selection d) -> Eff (d3::D3|eff) (Selection d)
-applyDrag      = runEffFn2 applyDragFn
+-- applyDrag       :: ∀ d eff. (Drag d) -> (Selection d) -> Eff (d3::D3|eff) (Selection d)
+-- applyDrag      = runEffFn2 applyDragFn
 
 dragUpdate :: ∀ d eff. d -> D3Element -> Eff (d3::D3|eff) Unit
 dragUpdate = runEffFn2 dragUpdateFn
