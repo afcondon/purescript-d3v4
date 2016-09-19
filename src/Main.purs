@@ -119,8 +119,12 @@ vis s first last =
 -- zek :: ∀ d eff. d -> Index -> D3Element -> Eff (d3::D3, console::CONSOLE|eff) Unit -- callback of the form (d -> i -> (Array D3Element ) -> D3Element -> r)
 zek :: ∀ d eff. Point -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
 zek d i els el = do
+  let foo = zek' d
   -- log "dragged"
   pure unit
+
+zek' :: Point -> Point
+zek' { x: x, y: y } = { x: x+1.0, y: y*2.0 }
 
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do

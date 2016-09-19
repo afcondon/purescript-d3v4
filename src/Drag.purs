@@ -80,13 +80,14 @@ foreign import removeListenersFn :: ∀ d eff. EffFn2 (d3::D3|eff) D3Typenames  
 foreign import applyDragFn       :: ∀ d eff. EffFn2 (d3::D3|eff) (Drag d)                  (Selection d) (Selection d)
 
 foreign import addListenerFn     :: ∀ d eff. EffFn3 (d3::D3|eff) D3Typenames
-                                                                (EffFn4Special (d3::D3|eff) d Number (Array D3Element) Unit)
+                                                                (EffFn3PlusThis (d3::D3|eff) d Number (Array D3Element) Unit)
                                                                 (Drag d)
                                                                 (Drag d)
 
-foreign import data EffFn4Special :: # ! -> * -> * -> * -> * -> *
-foreign import mkEffFn4Special    :: forall eff d r. (d -> Index -> Array D3Element -> D3Element -> Eff eff r)
-                                                  -> EffFn4Special eff d Index (Array D3Element) Unit
+foreign import data EffFn3PlusThis :: # ! -> * -> * -> * -> * -> *    -- JS call with three params
+foreign import mkEffFn4Special :: forall eff d r.
+                                        (d -> Index -> Array D3Element -> D3Element -> Eff eff r) -- callback has 4 params
+                                        -> EffFn3PlusThis eff d Index (Array D3Element) Unit      -- JS calls with 3 params + this
 
 -- lookup and remove differ in JS as listeners-not-given => lookup, listeners-as-null => remove
 lookupDrag      :: ∀ d eff. Typenames                     -> Drag d -> Eff (d3::D3|eff) (Nullable (DragListener d))
@@ -96,6 +97,7 @@ removeListeners :: ∀ d eff. Typenames                       -> Drag d -> Eff (
 removeListeners tn = runEffFn2 removeListenersFn (show tn)
 
 addListener     :: ∀ d eff. Typenames -> DragListener d   -> Drag d -> Eff (d3::D3|eff) (Drag d)
+-- callback has 4 params but D3 will be calling it with 3 params and hiding the 4th in the `this` pointer
 addListener tn callback = runEffFn3 addListenerFn (show tn) (mkEffFn4Special callback)
 
 applyDrag       :: ∀ d eff. (Drag d) -> (Selection d) -> Eff (d3::D3|eff) (Selection d)
