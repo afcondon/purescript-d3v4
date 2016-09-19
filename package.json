@@ -1,0 +1,29 @@
+{
+  "name": "psd3-example",
+  "version": "1.0.0",
+  "description": "a clean new wrapper for (parts of) d3 at version 4",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://afcondon@github.com/afcondon/psd3-example.git"
+  },
+  "keywords": [
+    "d3",
+    "visualisation",
+    "visualization",
+    "purescript",
+    "data-science"
+  ],
+  "author": "andrew condon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/afcondon/psd3-example/issues"
+  },
+  "homepage": "https://github.com/afcondon/psd3-example#readme"
+}

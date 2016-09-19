@@ -26,10 +26,10 @@ exports.addListenerFn     = function(typenames, listener, drag) {
   return drag.on(typenames, listener); }
 
 exports.dragUpdateFn      = function(datum, element) {
-  console.log("i'm updating an element!!");
   d3.select(element)
     .attr("cx", datum.x = d3.event.x)
-    .attr("cy", datum.y = d3.event.y);
+    .attr("cy", datum.y = d3.event.y)
+    .attr("r", datum.radius = datum.radius ? (datum.radius + 1)%50 : 20);
 }
 
 

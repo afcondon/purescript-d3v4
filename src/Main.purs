@@ -38,11 +38,11 @@ array2 :: Array String
 array2 = ["awn", "bel", "cep", "dof", "erg", "fub"]
 
 circleData :: Array Point
-circleData = [ {x: 1.0, y: 1.0}
-             , {x: 2.0, y: 2.0}
-             , {x: 3.0, y: 3.0}
-             , {x: 4.0, y: 5.0}
-             , {x: 5.0, y: 6.0}
+circleData = [ {x: 100.0, y: 100.0}
+             , {x: 200.0, y: 200.0}
+             , {x: 100.0, y: 200.0}
+             , {x: 200.0, y: 100.0}
+             , {x: 150.0, y: 150.0}
              ]
 
 
@@ -194,8 +194,8 @@ main = do
     .. selectAll "circle"
       .. dataBind (Data circleData)
     .. enter .. append "circle"
-      .. attr "cx" (AttrFn (\d i nodes el -> pure (d.x * 40.0)))
-      .. attr "cy" (AttrFn (\d i nodes el -> pure (d.y * 40.0)))
+      .. attr "cx" (AttrFn (\d i nodes el -> pure d.x)) -- thing to bear in mind here:
+      .. attr "cy" (AttrFn (\d i nodes el -> pure d.y)) -- if you mod here doesn't change underlying value when you drag
       .. attr "r"  (SetAttr 20.0)
       .. style "stroke" (Value "red")
       .. style "fill"   (Value "black")
