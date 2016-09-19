@@ -1,7 +1,7 @@
 module D3.Drag where
 
 import Control.Monad.Eff (Eff)
-import D3.Base (Index, D3Element, PredicateFn, D3)
+import D3.Base (Point, Index, D3Element, PredicateFn, D3)
 import D3.Selection (Selection)
 import DOM.Event.Types (Event)
 import Data.Array ((:))
@@ -75,9 +75,11 @@ instance isShowTypenames :: Show Typenames where
 -- || i'd like to come back to this once drag and zoom are working and see whether
 -- || it makes sense to wrap dispatch itself TODO
 
-foreign import findCallbackFn    :: ∀ d eff. EffFn2 (d3::D3|eff) D3Typenames                    (Drag d) (Nullable (DragListener d))
-foreign import removeListenersFn :: ∀ d eff. EffFn2 (d3::D3|eff) D3Typenames                    (Drag d) (Drag d)
-foreign import applyDragFn       :: ∀ d eff. EffFn2 (d3::D3|eff) (Drag d)                  (Selection d) (Selection d)
+foreign import findCallbackFn    :: ∀ d eff. EffFn2 (d3::D3|eff) D3Typenames  (Drag d)      (Nullable (DragListener d))
+foreign import removeListenersFn :: ∀ d eff. EffFn2 (d3::D3|eff) D3Typenames  (Drag d)      (Drag d)
+foreign import applyDragFn       :: ∀ d eff. EffFn2 (d3::D3|eff) (Drag d)     (Selection d) (Selection d)
+foreign import dragUpdateFn      :: ∀ d eff. EffFn2 (d3::D3|eff) d            D3Element      Unit
+
 
 foreign import addListenerFn     :: ∀ d eff. EffFn3 (d3::D3|eff) D3Typenames
                                                                 (EffFn3PlusThis (d3::D3|eff) d Number (Array D3Element) Unit)
@@ -100,8 +102,12 @@ addListener     :: ∀ d eff. Typenames -> DragListener d   -> Drag d -> Eff (d3
 -- callback has 4 params but D3 will be calling it with 3 params and hiding the 4th in the `this` pointer
 addListener tn callback = runEffFn3 addListenerFn (show tn) (mkEffFn4Special callback)
 
+-- not used in current commit, this was an attempt to avoid the unsafeCoerce on the drag - TODO
 applyDrag       :: ∀ d eff. (Drag d) -> (Selection d) -> Eff (d3::D3|eff) (Selection d)
 applyDrag      = runEffFn2 applyDragFn
+
+dragUpdate :: ∀ d eff. d -> D3Element -> Eff (d3::D3|eff) Unit
+dragUpdate = runEffFn2 dragUpdateFn
 
 -- on :: ∀ d eff. (d -> Eff (d3::D3|eff)(unit)) -> Drag d -> Eff (d3::D3|eff) Drag
 -- on dragFn

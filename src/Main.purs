@@ -2,8 +2,8 @@ module Main where
 
 import D3.Selection
 import Control.Monad.Eff.Console (CONSOLE, log)
-import D3.Base (D3, Eff, Index, D3Element, Nodes, AttrSetter(AttrFn, SetAttr), ClassSetter(SetAll, SetSome), DataBind(Keyed, Data), PolyValue(SetByIndex, Value), theHorror, (...), (..))
-import D3.Drag (DragType(DragType), Typenames(TypeNames), applyDrag, addListener, d3Drag)
+import D3.Base (Point, D3, Eff, Index, D3Element, Nodes, AttrSetter(AttrFn, SetAttr), ClassSetter(SetAll, SetSome), DataBind(Keyed, Data), PolyValue(SetByIndex, Value), theHorror, (...), (..))
+import D3.Drag (dragUpdate, DragType(DragType), Typenames(TypeNames), applyDrag, addListener, d3Drag)
 import D3.Interpolator (Time)
 import D3.Transitions (Transition, AttrInterpolator(Target, TweenFn, TweenTarget), DelayValue(MilliSec), TransitionName(Name), tStyle, namedTransition, delay, addTransition, savedTransition, duration, d3Transition)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
@@ -37,7 +37,6 @@ array = [4.0, 8.0, 15.0, 16.0, 23.0, 42.0]
 array2 :: Array String
 array2 = ["awn", "bel", "cep", "dof", "erg", "fub"]
 
-type Point = { x :: Number, y :: Number }
 circleData :: Array Point
 circleData = [ {x: 1.0, y: 1.0}
              , {x: 2.0, y: 2.0}
@@ -116,15 +115,13 @@ vis s first last =
       .. attr "last-name"  (SetAttr last)
     pure s
 
--- zek :: ∀ d eff. d -> Index -> D3Element -> Eff (d3::D3, console::CONSOLE|eff) Unit -- callback of the form (d -> i -> (Array D3Element ) -> D3Element -> r)
-zek :: ∀ d eff. Point -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
-zek d i els el = do
-  let foo = zek' d
-  -- log "dragged"
+-- an example of a drag listener written in Purescript
+-- element will track pointer / finger, but other possibilities exist such as
+-- faster or slower than dragging or adding acceleration or further side-effects
+zek :: ∀ d eff. d -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
+zek d i els element = do
+  dragUpdate d element -- state mutating function from drag.purs that makes the change
   pure unit
-
-zek' :: Point -> Point
-zek' { x: x, y: y } = { x: x+1.0, y: y*2.0 }
 
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
@@ -208,10 +205,7 @@ main = do
   yag <- d3Drag phantom -- phantom type to ensure correct type for yag (but type only gets in the way here, potentially)
         .. addListener tn zek
 
-  -- let foo = yag ... applyDrag svg
-  -- let foo = applyDrag svg yag
-  -- svg.call(yag) works in JavaScript (modulo not handling mkEffFn correctly, separate problem)
-  let foo = svg ... call (unsafeCoerce yag)
-
+  let foo = svg ... call (unsafeCoerce yag) -- adds the drag callbacks for drag (yag) on selection (svg)
+  -- unsafeCoerce here is obviously undesirable, need to play with types and see if we can reformulate to lose it TODO
 
   pure unit

@@ -25,6 +25,13 @@ exports.removeListenersFn = function(typenames, drag) { return drag.on(typenames
 exports.addListenerFn     = function(typenames, listener, drag) {
   return drag.on(typenames, listener); }
 
+exports.dragUpdateFn      = function(datum, element) {
+  console.log("i'm updating an element!!");
+  d3.select(element)
+    .attr("cx", datum.x = d3.event.x)
+    .attr("cy", datum.y = d3.event.y);
+}
+
 
 exports.applyDragFn       = function(drag, selection) {
   return selection.call(drag)(); }

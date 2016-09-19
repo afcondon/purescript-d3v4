@@ -2,6 +2,7 @@ module D3.Base
   ( module Control.Monad.Eff
   , D3
   , D3Element
+  , Point
   , D3SetWithIndex
   , AttrSetter(..)
   , ClassSetter(..)
@@ -33,6 +34,7 @@ type D3Eff a = ∀ e. Eff (d3 :: D3 | e) a
 
 type Index = Number
 type Nodes = Array D3Element
+type Point = { x :: Number, y :: Number }
 
 theHorror :: ∀ t0. t0
 theHorror = unsafeCoerce writeNull
