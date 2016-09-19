@@ -119,8 +119,8 @@ vis s first last =
 -- an example of a drag listener written in Purescript
 -- element will track pointer / finger, but other possibilities exist such as
 -- faster or slower than dragging or adding acceleration or further side-effects
-zek :: ∀ eff. Point -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
-zek d i els element = do
+dragged :: ∀ eff. Point -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
+dragged d i els element = do
   selectElem element
     .. attr "cx" (SetAttr d.x) -- not changing the underlying datum here
     .. attr "cy" (SetAttr d.y) -- so nothing happens. Add further Attr options? TODO
@@ -130,9 +130,11 @@ zek d i els element = do
 -- an example of a zoom listener written in Purescript
 -- this just gives the most naive implementation but here's where you'd begin to implement
 -- semantic zooms and the like
-zek2 :: ∀ d eff. d -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
-zek2 d i els element = do
-  g  <- selectElem element
+-- in the example he's using a global var for the <g> which actually gets transformed
+-- but we're (for now) just going to look it up each time
+zoomed :: ∀ d eff. d -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
+zoomed d i els element = do
+  g  <- d3Select "g"
      .. attr "transform" (SetAttr getZoomTransform)
   pure unit
 
@@ -201,11 +203,9 @@ main = do
   -- | let's try some SVG stuff now so that we can work towards zooming and dragging
 
   svg <- d3Select ".svg"
-    .. append "svg"
-      .. style "width"  (Value "500px")
-      .. style "height" (Value "500px")
+  g <-  svg ... append "g"
 
-  circles <- svg ... selectAll "circle"
+  circles <- g ... selectAll "circle"
       .. dataBind (Data circleData)
     .. enter .. append "circle"
       .. attr "cx" (AttrFn (\d i nodes el -> pure d.x)) -- thing to bear in mind here:
@@ -217,15 +217,15 @@ main = do
   let phantom = { x: 0.0, y: 0.0 }
   let tn = TypeNames [ { name: Just "foo", type: Drag } ]
   yag <- d3Drag phantom -- phantom type to ensure correct type for yag (but type only gets in the way here, potentially)
-        .. addDragListener tn zek
+        .. addDragListener tn dragged
 
-  let foo = circles ... call (unsafeCoerce yag) -- adds the drag callbacks for drag (yag) on selection (svg)
+  let foo = circles ... call (unsafeCoerce yag) -- adds the drag callbacks for drag (yag) on selection (g)
   -- unsafeCoerce here is obviously undesirable, need to play with types and see if we can reformulate to lose it TODO
 
   let tn2 = TypeNames [ { name: Just "foo", type: Zoom } ]
   yag2 <- d3Zoom
        .. scaleExtent [ 0.5, 8.0]
-       .. addZoomListener tn2 zek2
+       .. addZoomListener tn2 zoomed
 
   let bar = svg ... call (unsafeCoerce yag2)
 
