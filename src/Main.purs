@@ -194,7 +194,8 @@ main = do
     .. append "svg"
       .. style "width"  (Value "500px")
       .. style "height" (Value "500px")
-    .. selectAll "circle"
+
+  circles <- svg ... selectAll "circle"
       .. dataBind (Data circleData)
     .. enter .. append "circle"
       .. attr "cx" (AttrFn (\d i nodes el -> pure d.x)) -- thing to bear in mind here:
@@ -208,7 +209,7 @@ main = do
   yag <- d3Drag phantom -- phantom type to ensure correct type for yag (but type only gets in the way here, potentially)
         .. addListener tn zek
 
-  let foo = svg ... call (unsafeCoerce yag) -- adds the drag callbacks for drag (yag) on selection (svg)
+  let foo = circles ... call (unsafeCoerce yag) -- adds the drag callbacks for drag (yag) on selection (svg)
   -- unsafeCoerce here is obviously undesirable, need to play with types and see if we can reformulate to lose it TODO
 
   pure unit
