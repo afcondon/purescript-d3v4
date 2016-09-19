@@ -25,11 +25,11 @@ exports.removeListenersFn = function(typenames, drag) { return drag.on(typenames
 exports.addListenerFn     = function(typenames, listener, drag) {
   return drag.on(typenames, listener); }
 
+// i think it's obvious that relying on these state changes to
 exports.dragUpdateFn      = function(datum, element) {
   d3.select(element)
     .attr("cx", datum.x = d3.event.x)
     .attr("cy", datum.y = d3.event.y)
-    .attr("r", datum.radius = datum.radius ? (datum.radius + 1)%50 : 20);
 }
 
 

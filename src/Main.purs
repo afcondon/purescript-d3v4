@@ -118,8 +118,11 @@ vis s first last =
 -- an example of a drag listener written in Purescript
 -- element will track pointer / finger, but other possibilities exist such as
 -- faster or slower than dragging or adding acceleration or further side-effects
-zek :: ∀ d eff. d -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
+zek :: ∀ eff. Point -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
 zek d i els element = do
+  selectElem element
+    .. attr "cx" (SetAttr d.x) -- not changing the underlying datum here
+    .. attr "cy" (SetAttr d.y) -- so nothing happens. Add further Attr options? TODO
   dragUpdate d element -- state mutating function from drag.purs that makes the change
   pure unit
 
