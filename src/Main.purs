@@ -2,8 +2,9 @@ module Main where
 
 import D3.Selection
 import Control.Monad.Eff.Console (CONSOLE, log)
-import D3.Base (Point, D3, Eff, Index, D3Element, Nodes, AttrSetter(AttrFn, SetAttr), ClassSetter(SetAll, SetSome), DataBind(Keyed, Data), PolyValue(SetByIndex, Value), theHorror, (...), (..))
-import D3.Drag (dragUpdate, DragType(DragType), Typenames(TypeNames), addListener, d3Drag)
+import D3.Base (Point, D3, Eff, ListenerType(..), Typenames(TypeNames), Index, D3Element, Nodes, AttrSetter(AttrFn, SetAttr), ClassSetter(SetAll, SetSome), DataBind(Keyed, Data), PolyValue(SetByIndex, Value), theHorror, (...), (..))
+import D3.Drag (dragUpdate, addDragListener, d3Drag)
+import D3.Zoom (scaleExtent, d3Zoom, addZoomListener, getZoomTransform)
 import D3.Interpolator (Time)
 import D3.Transitions (Transition, AttrInterpolator(Target, TweenFn, TweenTarget), DelayValue(MilliSec), TransitionName(Name), tStyle, namedTransition, delay, addTransition, savedTransition, duration, d3Transition)
 import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
@@ -126,6 +127,15 @@ zek d i els element = do
   dragUpdate d element -- state mutating function from drag.purs that makes the change
   pure unit
 
+-- an example of a zoom listener written in Purescript
+-- this just gives the most naive implementation but here's where you'd begin to implement
+-- semantic zooms and the like
+zek2 :: ∀ d eff. d -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
+zek2 d i els element = do
+  g  <- selectElem element
+     .. attr "transform" (SetAttr getZoomTransform)
+  pure unit
+
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
   -- | set up a named / reusable transition
@@ -205,11 +215,18 @@ main = do
       .. style "fill"   (Value "black")
 
   let phantom = { x: 0.0, y: 0.0 }
-  let tn = TypeNames [ { name: Just "foo", type: DragType} ]
+  let tn = TypeNames [ { name: Just "foo", type: Drag } ]
   yag <- d3Drag phantom -- phantom type to ensure correct type for yag (but type only gets in the way here, potentially)
-        .. addListener tn zek
+        .. addDragListener tn zek
 
   let foo = circles ... call (unsafeCoerce yag) -- adds the drag callbacks for drag (yag) on selection (svg)
   -- unsafeCoerce here is obviously undesirable, need to play with types and see if we can reformulate to lose it TODO
+
+  let tn2 = TypeNames [ { name: Just "foo", type: Zoom } ]
+  yag2 <- d3Zoom
+       .. scaleExtent [ 0.5, 8.0]
+       .. addZoomListener tn2 zek2
+
+  let bar = svg ... call (unsafeCoerce yag2)
 
   pure unit

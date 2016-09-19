@@ -2,7 +2,7 @@
 "use strict";
 
 exports.d3MouseFn = function(container) { return d3.mouse(container); }
-exports.d3EventFn = function()          { return d3.event(); }
+exports.d3EventFn = function()          { return d3.event; }
 
 // Returns the x and y coordinates of the touch with the specified identifier
 // associated with the current event relative to the specified container. The

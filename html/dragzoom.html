@@ -31,9 +31,10 @@ svg.call(d3.zoom()
     .on("zoom", zoomed));
 
 function zoomed() {
-  // this is handling both drag and zoom transforms for the containing svg.g
+  // this is handling both pan and zoom transforms for the containing svg.g
   console.log("zoomed");
-  g.attr("transform", d3.event.transform);
+  foo = d3.event.transform;
+  g.attr("transform", foo);
 }
 
 function dragged(d) {

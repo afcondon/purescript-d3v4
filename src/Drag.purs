@@ -1,31 +1,19 @@
 module D3.Drag where
 
 import Control.Monad.Eff (Eff)
-import D3.Base (D3, D3Element, Index)
-import D3.Selection (Selection)
+import D3.Base (D3, D3Element, Typenames, Index, D3Typenames)
 import DOM.Event.Types (Event)
 import Data.Array ((:))
-import Data.Foldable (intercalate, foldr)
 import Data.Function.Eff (EffFn3, EffFn2, runEffFn2, runEffFn3)
-import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
-import Prelude (show, class Show, Unit, (<>), ($), (<$>))
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (Unit, show)
 
 foreign import data Drag :: * -> *
-
-mapDragToSelection :: forall d. Drag d -> Selection d
-mapDragToSelection = unsafeCoerce
-
-mapSelectionToDrag :: forall d. Selection d -> Drag d
-mapSelectionToDrag = unsafeCoerce
 
 foreign import d3DragFn :: ∀ d eff. Eff (d3::D3|eff) (Drag d)
 
 -- When a drag event listener is invoked, d3.event is set to the current drag event.
 foreign import d3DragEvent :: ∀ d eff. Unit -> Eff (d3::D3|eff) (DragEvent d)
-
-foreign import data Subject :: *
 
 type DragEvent d = {
     target      :: Drag d
@@ -43,29 +31,11 @@ type DragEvent d = {
 
 type Draggable r = { x :: Number, y :: Number | r }  -- minimum requirement for draggable object
 
-type D3Typenames = String
-
-data DragType = StartType | DragType | EndType
-
-instance isShowDragType :: Show DragType where
-  show StartType = "start"
-  show DragType  = "drag"
-  show EndType   = "end"
-
 type DragListener d = ∀ eff. (d -> Number -> Array D3Element -> D3Element -> Eff (d3::D3|eff) Unit)
-
-data Typenames = TypeNames (Array { name :: Maybe String, type :: DragType })
 
 -- create a new Drag behaviour Object/Function thingy
 d3Drag :: ∀ d eff.  d -> Eff (d3::D3|eff) (Drag d)
 d3Drag d = d3DragFn
-
--- smush the Typenames down to a single string which D3 will (wastefully) parse out again)
-instance isShowTypenames :: Show Typenames where
-  show (TypeNames s) = intercalate " " $ foldr f [] s
-    where
-      f {name: (Just n), type: t } acc = ((show t) <> "." <> n) : acc
-      f {name: Nothing,  type: t } acc =             (show t)  : acc
 
 -- || Going to try for a slightly richer, more PureScript-y API here just
 -- because the whole polymorphic dispatch / apply on business is so confusing
@@ -95,17 +65,21 @@ foreign import mkEffFn4Special :: forall eff d r.
 lookupDrag      :: ∀ d eff. Typenames                     -> Drag d -> Eff (d3::D3|eff) (Nullable (DragListener d))
 lookupDrag tn = runEffFn2 findCallbackFn (show tn)
 
-removeListeners :: ∀ d eff. Typenames                       -> Drag d -> Eff (d3::D3|eff) (Drag d)
-removeListeners tn = runEffFn2 removeListenersFn (show tn)
+removeDragListeners :: ∀ d eff. Typenames                       -> Drag d -> Eff (d3::D3|eff) (Drag d)
+removeDragListeners tn = runEffFn2 removeListenersFn (show tn)
 
-addListener     :: ∀ d eff. Typenames -> DragListener d   -> Drag d -> Eff (d3::D3|eff) (Drag d)
+addDragListener     :: ∀ d eff. Typenames -> DragListener d   -> Drag d -> Eff (d3::D3|eff) (Drag d)
 -- callback has 4 params but D3 will be calling it with 3 params and hiding the 4th in the `this` pointer
-addListener tn callback = runEffFn3 addListenerFn (show tn) (mkEffFn4Special callback)
+addDragListener tn callback = runEffFn3 addListenerFn (show tn) (mkEffFn4Special callback)
 
--- not used in current commit, this was an attempt to avoid the unsafeCoerce on the drag - TODO
+-- applyDrag - not used in current commit, this was an attempt to avoid the unsafeCoerce on the drag - TODO
 -- applyDrag       :: ∀ d eff. (Drag d) -> (Selection d) -> Eff (d3::D3|eff) (Selection d)
 -- applyDrag      = runEffFn2 applyDragFn
 
+-- slightly suspect side-effecting function to update the dragged object Both
+-- the DOM element and the data element need to change but the D3 way of doing
+-- this is to set the data element's fields while changing the `attr` of the DOM
+-- element and that's what this function wraps
 dragUpdate :: ∀ d eff. d -> D3Element -> Eff (d3::D3|eff) Unit
 dragUpdate = runEffFn2 dragUpdateFn
 
@@ -146,6 +120,8 @@ dragUpdate = runEffFn2 dragUpdateFn
   -}
 
 type AccessorFn d = ∀ eff. (d -> Eff (d3::D3|eff) Unit)
+
+foreign import data Subject :: *
 
 -- data SubjectOpts d = GetAccessor
 --                    | SetAccessorFn (d -> ?)
