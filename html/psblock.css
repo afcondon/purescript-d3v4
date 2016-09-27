@@ -96,6 +96,8 @@ div.inner-inner .svg {
 .code, .data {
 	height: 500px;
 	margin: 10px 0px;
+	padding-left: 20px;
+	border-left: solid 2px #ddd;
 }
 
 .block-header,
@@ -109,9 +111,7 @@ div.inner-inner .svg {
 }
 
 
-.svg,
-.code,
-.data {
+.svg {
 	border: solid 1px #ddd;
 }
 
