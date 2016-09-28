@@ -5,7 +5,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(Value), AttrSetter(SetAttr, AttrFn), DataBind(Data), Point, D3, (..), (...))
 import Prelude (show, pure, unit, Unit, bind, (<>), (-))
-import D3.Scale (d3ContinuousScale, d3OrdinalScale, ContinuousScaleType(..), OrdinalScaleType(..), rangeRound)
+import D3.Scale (d3ContinuousScale, d3OrdinalScale, ContinuousScaleType(..), OrdinalScaleType(..), rangeRound, padding)
 
 -- define a margin, look to purescript-css for more sophisticated definition
 margin :: { top::Number, right::Number, bottom::Number, left::Number }
@@ -52,7 +52,8 @@ main = do
   let height = h - margin.top - margin.bottom
 
   let x = d3OrdinalScale Band
-        .. rangeRound 0.0 width -- padding 0.1
+        .. rangeRound 0.0 width
+        .. padding 0.1
   let y = d3ContinuousScale Linear
         .. rangeRound height 0.0
 
@@ -78,8 +79,8 @@ main = do
       .. dataBind (Data frequencies)
     .. enter .. append "rect"
       .. attr "class" (SetAttr "bar")
-      .. attr "x"     (AttrFn (\d i nodes el -> pure d.letter))
-      .. attr "y"     (AttrFn (\d i nodes el -> pure d.frequency))
+      .. attr "x"     (AttrFn (\d i nodes el -> pure (x d.letter)))
+      .. attr "y"     (AttrFn (\d i nodes el -> pure (y d.frequency)))
       -- .. attr "width" (AttrFn x.bandwidth)
       .. attr "width" (SetAttr 30.0)
       .. attr "height" (AttrFn (\d i nodes el -> height - (y d.frequency)))
