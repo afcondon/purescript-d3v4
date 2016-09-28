@@ -7,3 +7,6 @@
 /.psc-ide-port
 /html/app.js
 examples/*/bower_components
+examples/*/output
+npm-debug.log
+examples/default/dist/*.js
