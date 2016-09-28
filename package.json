@@ -1,5 +1,5 @@
 {
-  "name": "psd3-example",
+  "name": "purescript-d3v4",
   "version": "1.0.0",
   "description": "a clean new wrapper for (parts of) d3 at version 4",
   "main": "index.js",
@@ -7,11 +7,21 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf output && rimraf .pulp-cache",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "pulp build --censor-lib --strict",
+    "example-default": "bower link && cd examples/default && bower link purescript-d3v4 && bower install && npm run build",
+    "example-barchart": "bower link && cd examples/barchart && bower link purescript-d3v4 && bower install && npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://afcondon@github.com/afcondon/psd3-example.git"
+    "url": "git+https://afcondon@github.com/afcondon/purescript-d3v4.git"
+  },
+  "devDependencies": {
+    "pulp": "^9.0.1",
+    "purescript": "^0.9.2",
+    "purescript-psa": "^0.3.9",
+    "rimraf": "^2.5.4"
   },
   "keywords": [
     "d3",
@@ -23,7 +33,24 @@
   "author": "andrew condon",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/afcondon/psd3-example/issues"
+    "url": "https://github.com/afcondon/purescript-d3v4/issues"
   },
-  "homepage": "https://github.com/afcondon/psd3-example#readme"
+  "homepage": "https://github.com/afcondon/purescript-d3v4#readme",
+  "dependencies": {
+    "d3-array": "^1.0.1",
+    "d3-collection": "^1.0.1",
+    "d3-color": "^1.0.1",
+    "d3-dispatch": "^1.0.1",
+    "d3-drag": "^1.0.1",
+    "d3-ease": "^1.0.1",
+    "d3-format": "^1.0.2",
+    "d3-interpolate": "^1.1.1",
+    "d3-scale": "^1.0.3",
+    "d3-selection": "^1.0.2",
+    "d3-time": "^1.0.4",
+    "d3-time-format": "^2.0.2",
+    "d3-timer": "^1.0.3",
+    "d3-transition": "^1.0.2",
+    "d3-zoom": "^1.0.3"
+  }
 }

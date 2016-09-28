@@ -1,0 +1,39 @@
+{
+  "name": "purescript-enums",
+  "homepage": "https://github.com/purescript/purescript-enums",
+  "description": "Operations for sequentially ordered types",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/purescript/purescript-enums.git"
+  },
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "node_modules",
+    "output",
+    "test",
+    "bower.json",
+    "gulpfile.js",
+    "package.json"
+  ],
+  "dependencies": {
+    "purescript-either": "^1.0.0",
+    "purescript-strings": "^1.0.0",
+    "purescript-unfoldable": "^1.0.0"
+  },
+  "devDependencies": {
+    "purescript-assert": "^1.0.0",
+    "purescript-console": "^1.0.0"
+  },
+  "version": "1.1.0",
+  "_release": "1.1.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.1.0",
+    "commit": "ed60bffaadd600815e550e54b83b9f1bc2a60b49"
+  },
+  "_source": "https://github.com/purescript/purescript-enums.git",
+  "_target": "^1.0.0",
+  "_originalSource": "purescript-enums"
+}

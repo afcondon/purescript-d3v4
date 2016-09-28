@@ -1,0 +1,7 @@
+{
+  "name": "barchart",
+  "private": true,
+  "dependencies": {
+    "purescript-d3v4": "*"
+  }
+}

@@ -12,8 +12,8 @@ module D3.Zoom (
 import D3.Base (D3Element, D3Typenames, D3, Eff, Typenames)
 import D3.Drag (EffFn3PlusThis, DragListener, mkEffFn4Special)
 import DOM.Event.Types (Event)
-import Data.Function.Eff (EffFn1, runEffFn1, EffFn2, EffFn3, runEffFn2, runEffFn3)
-import Prelude (unit, show, Unit)
+import Data.Function.Eff (EffFn2, EffFn3, runEffFn2, runEffFn3)
+import Prelude (Unit, show)
 
 foreign import data Zoom :: *
 

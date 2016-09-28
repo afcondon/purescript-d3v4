@@ -1,0 +1,121 @@
+
+
+div.container {
+	background-color: #fdfdfd;
+	width: 1200px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background-color: #f9f9f9;
+  font-family: sans-serif;
+  font-size: 1.1em;
+  color: #555;
+}
+
+header span {
+	padding: 10px;
+	color: #888;
+	font-size: 0.8em;
+}
+
+header .left {
+	float: left;
+}
+
+header .right {
+	float: right;
+}
+
+.block-header {
+	width: 80%;
+}
+
+.inner h1 {
+	color: #333;
+	font-size: 2em;
+	margin-bottom: 5px;
+}
+
+.inner h2 {
+	clear: left;
+	margin-bottom: 5px
+}
+
+.inner h1 span {
+	color: #555;
+	font-size: 1.5em;
+}
+
+div.inner {
+	clear: both;
+	padding-left: 2%;
+	padding-right: 2%;
+	border-left: 1px solid #eee;
+	border-right: 1px solid #eee;
+	width: 100%
+}
+
+div.inner-inner {
+	width: 80%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+div.inner .description p {
+	width: 80%;
+	float: left;
+}
+
+div.inner .description a {
+	font-size: 0.8em;
+	color: #333;
+	float: right;
+	padding: 10px;
+	color: lightblue;
+	text-decoration: none;
+}
+
+div.inner .description a:hover {
+	text-decoration: underline;
+}
+
+div.inner-inner .svg {
+	stroke: 1px;
+	width: 100%;
+	height: auto;
+	display: block;
+	background-color: white;
+	height: 400px;
+}
+
+.code, .data {
+	height: 500px;
+	margin: 10px 0px;
+	padding-left: 20px;
+	border-left: solid 2px #ddd;
+}
+
+.block-header,
+.svg,
+.code,
+.data,
+.description {
+	clear: both;
+	height: auto;
+	display: block;
+}
+
+
+.svg {
+	border: solid 1px #ddd;
+}
+
+
+footer {
+	text-align: center;
+}

@@ -1,0 +1,32 @@
+{
+  "name": "purescript-bifunctors",
+  "homepage": "https://github.com/purescript/purescript-bifunctors",
+  "description": "Bifunctors and biapplicatives",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/purescript/purescript-bifunctors.git"
+  },
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "node_modules",
+    "output",
+    "test",
+    "bower.json",
+    "package.json"
+  ],
+  "dependencies": {
+    "purescript-control": "^1.0.0"
+  },
+  "version": "1.0.0",
+  "_release": "1.0.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.0.0",
+    "commit": "a2766c21b4077910925c9d249df7868f33591800"
+  },
+  "_source": "https://github.com/purescript-contrib/purescript-bifunctors.git",
+  "_target": "^1.0.0",
+  "_originalSource": "purescript-bifunctors"
+}

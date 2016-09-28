@@ -1,5 +1,5 @@
 {
-  "name": "psd3-example",
+  "name": "purescript-d3v4",
   "ignore": [
     "**/.*",
     "node_modules",

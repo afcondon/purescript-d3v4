@@ -1,0 +1,7 @@
+{
+  "name": "default",
+  "private": true,
+  "dependencies": {
+    "purescript-d3v4": "*"
+  }
+}

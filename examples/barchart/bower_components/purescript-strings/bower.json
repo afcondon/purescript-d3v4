@@ -1,0 +1,28 @@
+{
+  "name": "purescript-strings",
+  "homepage": "https://github.com/purescript/purescript-strings",
+  "description": "String and char utility functions, regular expressions.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/purescript/purescript-strings.git"
+  },
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "node_modules",
+    "output",
+    "test",
+    "bower.json",
+    "package.json"
+  ],
+  "dependencies": {
+    "purescript-either": "^1.0.0",
+    "purescript-maybe": "^1.0.0"
+  },
+  "devDependencies": {
+    "purescript-assert": "^1.0.0",
+    "purescript-console": "^1.0.0",
+    "purescript-partial": "^1.1.2"
+  }
+}
