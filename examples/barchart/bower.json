@@ -2,6 +2,7 @@
   "name": "barchart",
   "private": true,
   "dependencies": {
-    "purescript-d3v4": "*"
+    "purescript-d3v4": "*",
+    "purescript-eff-functions": "^1.0.0"
   }
 }
