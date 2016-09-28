@@ -6,6 +6,7 @@ module D3.Selection
   , d3SelectAll
   , append
   , attr
+  , getAttr   -- getters provided separate because they don't return a Selection
   -- , call   -- TBD
   , call, call1, call2, call3, call4, call5, call6, call7, call8, call9
   , classed
@@ -39,6 +40,7 @@ import Prelude (Unit, ($), (<$>))
 
 foreign import data Selection :: * -> *
 
+-- missing SelectFnFn which takes a predicate fn to perform the selection
 foreign import appendFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import attrFn        :: ∀ d v eff.    EffFn3 (d3::D3|eff) String v                    (Selection d) (Selection d)
 foreign import bindDataFn    :: ∀ d eff.      EffFn2 (d3::D3|eff) (Array d)                   (Selection d) (Selection d)
@@ -46,21 +48,21 @@ foreign import bindDataFnK   :: ∀ d k eff.    EffFn3 (d3::D3|eff) (Array d) (d
 foreign import classedFn     :: ∀ d eff.      EffFn3 (d3::D3|eff) String Boolean              (Selection d) (Selection d)
 foreign import d3SelectAllFn :: ∀ d eff.      EffFn1 (d3::D3|eff) String                                    (Selection d)
 foreign import d3SelectFn    :: ∀ d eff.      EffFn1 (d3::D3|eff) String                                    (Selection d)
+foreign import emptyFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) Boolean
 foreign import enterFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import exitFn        :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import filterFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import filterFnP     :: ∀ d eff.      EffFn2 (d3::D3|eff) (d -> Boolean)              (Selection d) (Selection d)
+foreign import getAttrFn     :: ∀ v d eff.    EffFn2 (d3::D3|eff) String                      (Selection d) v
 foreign import insertFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import mergeFn       :: ∀ d eff.      EffFn2 (d3::D3|eff) (Selection d)               (Selection d) (Selection d)
 foreign import nodeFn        :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Nullable D3Element)
-foreign import emptyFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) Boolean
 foreign import nodesFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Array D3Element)
 foreign import orderFn       :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import removeFn      :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) (Selection d)
 foreign import selectAllFn   :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import selectElFn    :: ∀ d eff.      EffFn1 (d3::D3|eff) D3Element                                 (Selection d) -- is this really in D3? TODO
 foreign import selectFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
--- missing SelectFnFn which takes a predicate fn to perform the selection
 foreign import sizeFn        :: ∀ d eff.      EffFn1 (d3::D3|eff)                             (Selection d) Int
 foreign import styleFn       :: ∀ d v eff.    EffFn3 (d3::D3|eff) String v                    (Selection d) (Selection d)
 foreign import textFn        :: ∀ d v eff.    EffFn2 (d3::D3|eff) v                           (Selection d) (Selection d)
@@ -105,6 +107,9 @@ foreign import textFnFn      :: ∀ d v v2 eff. EffFn2 (d3::D3|eff)
 classed :: ∀ d eff. String -> ClassSetter d    -> Selection d -> Eff (d3::D3|eff) (Selection d)
 classed s (SetAll b)         = runEffFn3 classedFn  s b
 classed s (SetSome p)        = runEffFn3 classedFnP s (mkEffFn4 p)
+
+getAttr :: ∀ v d eff. String                   -> Selection d -> Eff (d3::D3|eff) v
+getAttr s                    = runEffFn2 getAttrFn  s
 
 attr :: ∀ v d eff. String -> AttrSetter v d    -> Selection d -> Eff (d3::D3|eff) (Selection d)
 attr s (SetAttr b)           = runEffFn3 attrFn  s b

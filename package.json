@@ -11,6 +11,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "pulp build --censor-lib --strict",
     "example-default": "bower link && cd examples/default && bower link purescript-d3v4 && bower install && npm run build",
+    "example-block": "bower link && cd examples/block && bower link purescript-d3v4 && bower install && npm run build",
+    "example-fivecircles": "bower link && cd examples/fivecircles && bower link purescript-d3v4 && bower install && npm run build",
     "example-barchart": "bower link && cd examples/barchart && bower link purescript-d3v4 && bower install && npm run build"
   },
   "repository": {

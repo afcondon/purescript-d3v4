@@ -6,14 +6,17 @@ exports.d3SelectAllFn = function (selector)              { return d3.selectAll(s
 
 exports.appendFn    = function (tag, selection)          { return selection.append(tag); }
 exports.attrFn      = function (attr, b, selection)      { return selection.attr(attr, b); }
+exports.attrFnP     = function (names, fn, selection)    { return selection.attr(names, fn); }
 exports.bindDataFn  = function (array, selection)        { return selection.data(array); }
 exports.bindDataFnK = function (array, keyFn, selection) { return selection.data(array, keyFn); }
 exports.classedFn   = function (names, b, selection)     { return selection.classed(names, b); }
+exports.classedFnP  = function (names, fn, selection)    { return selection.classed(names, fn); }
 exports.emptyFn     = function (selection)               { return selection.empty(); }
 exports.enterFn     = function (selection)               { return selection.enter(); }
 exports.exitFn      = function (selection)               { return selection.exit(); }
 exports.filterFn    = function (selector, selection)     { return selection.filter(selector); }
 exports.filterFnP   = function (predicate, selection)    { return selection.filter(predicate); }
+exports.getAttrFn   = function (attr, selection)         { return selection.attr(attr); }
 exports.insertFn    = function (selector, selection)     { return selection.insert(selector); }
 exports.mergeFn     = function (other, selection)        { return selection.merge(other); }
 exports.nodeFn      = function (selection)               { return selection.node(); }
@@ -28,8 +31,6 @@ exports.styleFn     = function (key, val, selection)     { return selection.styl
 exports.styleFnFn   = function (key, fn, selection)      { return selection.style(key, fn); }
 exports.textFn      = function (text, selection)         { return selection.text(text); }
 exports.textFnFn    = function (fn, selection)           { return selection.text(fn); }
-exports.attrFnP     = function (names, fn, selection)    { return selection.attr(names, fn); }
-exports.classedFnP  = function (names, fn, selection)    { return selection.classed(names, fn); }
 
 // custom version of mkEffFn1 which passes a row containing data including element and 'this'
 // enables callbacks in the D3 style which rely on 'this' for access to the D3Element associated with the datum
