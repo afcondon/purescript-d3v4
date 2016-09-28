@@ -46,8 +46,10 @@ main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
   svg <- d3Select ".svg"
 
-  let width = (svg ... getAttr "width") - margin.left - margin.right
-  let height = (svg ... getAttr "height") - margin.top - margin.bottom
+  w <- svg ... getAttr "width"
+  h <- svg ... getAttr "height"
+  let width =  w - margin.left - margin.right
+  let height = h - margin.top - margin.bottom
 
   let x = d3OrdinalScale Band
         .. rangeRound 0.0 width -- padding 0.1
@@ -55,11 +57,11 @@ main = do
         .. rangeRound height 0.0
 
   g <-  svg ... append "g"
-        .. attr "transform" (SetAttr "translate(" <> show margin.left <> "," <> show margin.top <> ")")
+        .. attr "transform" (SetAttr ("translate(" <> show margin.left <> "," <> show margin.top <> ")"))
 
   g ... append "g"
     ..  attr "class"      (SetAttr "axis axis--x")
-    ..  attr "transform"  (SetAttr "translate(0," <> show height <> ")")
+    ..  attr "transform"  (SetAttr ("translate(0," <> show height <> ")"))
     -- ..  call d3AxisBottom x
 
   g ... append "g"
@@ -70,10 +72,10 @@ main = do
     .. attr "y"           (SetAttr 6.0)
     .. attr "dy"          (SetAttr "0.71em")
     .. attr "text-anchor" (SetAttr "end")
-    .. text "Frequency"
+    .. text (Value "Frequency")
 
   g ... selectAll (".bar")
-      .. dataBind frequencies
+      .. dataBind (Data frequencies)
     .. enter .. append "rect"
       .. attr "class" (SetAttr "bar")
       .. attr "x"     (AttrFn (\d i nodes el -> pure d.letter))

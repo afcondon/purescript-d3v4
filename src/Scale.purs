@@ -7,6 +7,7 @@ module D3.Scale
   , ScaleOrdinal
   , SchemeCategory
   , rangeRound
+  , class Ranged
   ) where
 
 import Control.Monad.Eff (Eff)
@@ -42,7 +43,8 @@ data QuantileScaleType   = Quantile
 data ThresholdScaleType  = Threshold
 
 -- | Probably want to use the type system to distinguish between rangeRound[start, end] and rangeRound[v1, v2, v3...]
-foreign import rangeRoundFn :: ∀ eff. EffFn3 (d3::D3|eff) Number Number ScaleContinuous ScaleContinuous
+foreign import rangeRoundCFn :: ∀ eff. EffFn3 (d3::D3|eff) Number Number ScaleContinuous ScaleContinuous
+foreign import rangeRoundOFn :: ∀ eff. EffFn3 (d3::D3|eff) Number Number ScaleOrdinal    ScaleOrdinal
 
 
 d3ContinuousScale :: ∀ eff. ContinuousScaleType -> Eff (d3::D3|eff) ScaleContinuous
@@ -57,6 +59,11 @@ d3OrdinalScale Band              = d3BandScaleFn
 d3OrdinalScale Point             = d3PointScaleFn
 d3OrdinalScale (Category scheme) = runEffFn1 d3CategoryScaleFn scheme
 
+class Ranged a where
+  rangeRound :: ∀ eff. Number -> Number -> a -> Eff (d3::D3|eff) a
 
-rangeRound :: ∀ eff. Number -> Number -> ScaleContinuous -> Eff (d3::D3|eff) ScaleContinuous
-rangeRound start end = runEffFn3 rangeRoundFn start end
+instance rangeRoundContinuous :: Ranged ScaleContinuous where
+  rangeRound start end = runEffFn3 rangeRoundCFn start end
+
+instance rangeRoundOrdinal :: Ranged ScaleOrdinal where
+  rangeRound start end = runEffFn3 rangeRoundOFn start end

@@ -11,4 +11,5 @@ exports.d3BandScaleFn     = function()       { return d3.scaleBand(); }
 exports.d3PointScaleFn    = function()       { return d3.scalePoint(); }
 exports.d3CategoryScaleFn = function(scheme) { return d3.scaleCategory(scheme); }
 
-exports.rangeRoundFn      = function(start, end, scale)    { return scale.rangeRound([start, end]); }
+exports.rangeRoundCFn      = function(start, end, scale)    { return scale.rangeRound([start, end]); }
+exports.rangeRoundOFn      = exports.rangeRoundCFn
