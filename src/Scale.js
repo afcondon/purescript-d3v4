@@ -14,6 +14,8 @@ exports.d3CategoryScaleFn = function(scheme) { return d3.scaleCategory(scheme); 
 exports.rangeRoundFn      = function(start, end, scale)    { return scale.rangeRound([start, end]); }
 exports.applyScaleFn      = function(d, scale)             { return scale(d); }
 
+// these functions are particular to Band scales
 exports.paddingFn         = function(p, scale) { return scale.padding(p); }
 exports.paddingInnerFn    = function(p, scale) { return scale.paddingInner(p); }
 exports.paddingOuterFn    = function(p, scale) { return scale.paddingOuter(p); }
+exports.bandwidthFn       = function(scale)    { return scale.bandwidth(); }

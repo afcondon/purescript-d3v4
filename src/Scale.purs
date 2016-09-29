@@ -11,6 +11,7 @@ module D3.Scale
   , padding
   , paddingInner
   , paddingOuter
+  , bandwidth
   , class Scale
   , scale
   ) where
@@ -39,6 +40,7 @@ foreign import d3CategoryScaleFn :: ∀ d r eff. EffFn1 (d3::D3|eff) SchemeCateg
 foreign import paddingFn         :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (ScaleOrdinal d r) (ScaleOrdinal d r)
 foreign import paddingInnerFn    :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (ScaleOrdinal d r) (ScaleOrdinal d r)
 foreign import paddingOuterFn    :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (ScaleOrdinal d r) (ScaleOrdinal d r)
+foreign import bandwidthFn       :: ∀ d r eff. EffFn1 (d3::D3|eff)        (ScaleOrdinal d r) Number
 
 -- | This belongs in d3-scale-chromatic here just for now, to be broken out later
 foreign import data SchemeCategory :: *       -- in practice it's just a string, i think
@@ -51,7 +53,7 @@ data QuantileScaleType   = Quantile
 data ThresholdScaleType  = Threshold
 
 
-d3ContinuousScale :: ∀ d r eff. ContinuousScaleType -> Eff (d3::D3|eff) (ScaleContinuous d r)
+d3ContinuousScale :: ∀ d r eff. ContinuousScaleType  -> Eff (d3::D3|eff) (ScaleContinuous d r)
 d3ContinuousScale Linear   = d3LinearScaleFn
 d3ContinuousScale Log      = d3LogScaleFn
 d3ContinuousScale Power    = d3PowerScaleFn
@@ -88,7 +90,7 @@ instance scaleContinuous :: Scale (ScaleContinuous d r) where
 instance scaleOrdinal :: Scale (ScaleOrdinal d r) where
   scale d = runEffFn2 applyScaleFn d
 
--- this function should only apply to scales of type band, tricky to express the
+-- these functions should only apply to scales of type band, tricky to express the
 -- way it's written right now...TODO revisit the types here
 
 padding      :: ∀ d r eff. Number -> ScaleOrdinal d r -> Eff (d3::D3|eff) (ScaleOrdinal d r)
@@ -99,3 +101,6 @@ paddingInner = runEffFn2 paddingInnerFn
 
 paddingOuter :: ∀ d r eff. Number -> ScaleOrdinal d r -> Eff (d3::D3|eff) (ScaleOrdinal d r)
 paddingOuter = runEffFn2 paddingOuterFn
+
+bandwidth    :: ∀ d r eff.           ScaleOrdinal d r -> Eff (d3::D3|eff) Number
+bandwidth    = runEffFn1 bandwidthFn

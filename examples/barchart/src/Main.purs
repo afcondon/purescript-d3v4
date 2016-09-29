@@ -4,7 +4,7 @@ import D3.Selection
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(Value), AttrSetter(SetAttr, AttrFn), DataBind(Data), D3, (..), (...))
-import D3.Scale (d3ContinuousScale, d3OrdinalScale, ContinuousScaleType(..), OrdinalScaleType(..), rangeRound, padding, scale)
+import D3.Scale (d3ContinuousScale, d3OrdinalScale, ContinuousScaleType(..), OrdinalScaleType(..), rangeRound, padding, bandwidth, scale)
 import Prelude (flip, show, pure, unit, Unit, bind, (<>), (-))
 
 -- define a margin, look to purescript-css for more sophisticated definition
@@ -61,7 +61,7 @@ main = do
   let scaleY = flip scale y
 
   g <-  svg ... append "g"
-        .. attr "transform" (SetAttr ("translate(" <> show margin.left <> "," <> show margin.top <> ")"))
+    .. attr "transform" (SetAttr ("translate(" <> show margin.left <> "," <> show margin.top <> ")"))
 
   g ... append "g"
     ..  attr "class"      (SetAttr "axis axis--x")
@@ -84,7 +84,7 @@ main = do
       .. attr "class"  (SetAttr "bar")
       .. attr "x"      (AttrFn (\d i nodes el -> pure (scaleX d.letter)))
       .. attr "y"      (AttrFn (\d i nodes el -> pure (scaleY d.frequency)))
-      -- .. attr "width" (AttrFn x.bandwidth)
+      .. attr "width"  (SetAttr (x .. bandwidth))
       .. attr "width"  (SetAttr 30.0)
       .. attr "height" (AttrFn (\d i nodes el -> do
                                                     scaled <- scaleY d.frequency
