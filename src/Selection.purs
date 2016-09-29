@@ -108,6 +108,7 @@ classed :: ∀ d eff. String -> ClassSetter d    -> Selection d -> Eff (d3::D3|e
 classed s (SetAll b)         = runEffFn3 classedFn  s b
 classed s (SetSome p)        = runEffFn3 classedFnP s (mkEffFn4 p)
 
+-- | turrrrrns out this is a Nullable value TODO 
 getAttr :: ∀ v d eff. String                   -> Selection d -> Eff (d3::D3|eff) v
 getAttr s                    = runEffFn2 getAttrFn  s
 

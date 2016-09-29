@@ -67,28 +67,33 @@ d3OrdinalScale (Category scheme) = runEffFn1 d3CategoryScaleFn scheme
 
 -- | rangeRounds can be applied to various scale types, using a typeclass to capture this
 -- | Probably want to use the type system to distinguish between rangeRound[start, end] and rangeRound[v1, v2, v3...]
-foreign import rangeRoundFn  :: ∀ s eff. (Ranged s) => EffFn3 (d3::D3|eff) Number Number s s
+foreign import rangeRoundFn :: ∀ s eff.     EffFn3 (d3::D3|eff) Number Number s s
+foreign import applyScaleFn :: ∀ s d r eff. EffFn2 (d3::D3|eff) d s r
+
+rangeRoundConstrained :: ∀ s eff.     (Ranged s) => Number -> Number -> s -> Eff (d3::D3|eff) s
+rangeRoundConstrained start end ranged = runEffFn3 rangeRoundFn start end ranged
+
+applyScaleConstrained :: ∀ s d r eff. (Scale s)  => d      -> s -> Eff (d3::D3|eff) r
+applyScaleConstrained d scale          = runEffFn2 applyScaleFn d scale
 
 class Ranged a where
   rangeRound :: ∀ eff. Number -> Number -> a -> Eff (d3::D3|eff) a
 
 instance rangeRoundContinuous :: Ranged (ScaleContinuous d r) where
-  rangeRound start end = runEffFn3 rangeRoundFn start end
+  rangeRound start end = rangeRoundConstrained start end
 
 instance rangeRoundOrdinal :: Ranged (ScaleOrdinal d r) where
-  rangeRound start end = runEffFn3 rangeRoundFn start end
+  rangeRound start end = rangeRoundConstrained start end
 
 -- | all the various scale types can be applied as a function, using a typeclass to capture this
-foreign import applyScaleFn :: ∀ s d r eff. (Scale s) => EffFn2 (d3::D3|eff) d s r
-
 class Scale a where
   scale :: ∀ d r eff. d -> a -> Eff (d3::D3|eff) r
 
 instance scaleContinuous :: Scale (ScaleContinuous d r) where
-  scale d = runEffFn2 applyScaleFn d
+  scale d = applyScaleConstrained d
 
 instance scaleOrdinal :: Scale (ScaleOrdinal d r) where
-  scale d = runEffFn2 applyScaleFn d
+  scale d = applyScaleConstrained d
 
 -- these functions should only apply to scales of type band, tricky to express the
 -- way it's written right now...TODO revisit the types here

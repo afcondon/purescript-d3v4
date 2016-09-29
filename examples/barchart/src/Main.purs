@@ -58,7 +58,7 @@ main = do
         .. rangeRound height 0.0
 
   g <-  svg ... append "g"
-    .. attr "transform" (SetAttr ("translate(" <> show margin.left <> "," <> show margin.top <> ")"))
+    ..  attr "transform"  (SetAttr ("translate(" <> show margin.left <> "," <> show margin.top <> ")"))
 
   g ... append "g"
     ..  attr "class"      (SetAttr "axis axis--x")
