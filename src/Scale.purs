@@ -11,6 +11,8 @@ module D3.Scale
   , padding
   , paddingInner
   , paddingOuter
+  , class Scale
+  , scale
   ) where
 
 import Control.Monad.Eff (Eff)
@@ -38,8 +40,7 @@ foreign import paddingFn         :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (Sca
 foreign import paddingInnerFn    :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (ScaleOrdinal d r) (ScaleOrdinal d r)
 foreign import paddingOuterFn    :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (ScaleOrdinal d r) (ScaleOrdinal d r)
 
--- | Incorporating some of d3-scale-chromatic here just for now, to be broken out later
-
+-- | This belongs in d3-scale-chromatic here just for now, to be broken out later
 foreign import data SchemeCategory :: *       -- in practice it's just a string, i think
 
 data ContinuousScaleType = Linear | Log | Power | Identity | Time
@@ -48,10 +49,6 @@ data SequentialScaleType = Sequential
 data QuantizeScaleType   = Quantize
 data QuantileScaleType   = Quantile
 data ThresholdScaleType  = Threshold
-
--- | Probably want to use the type system to distinguish between rangeRound[start, end] and rangeRound[v1, v2, v3...]
-foreign import rangeRoundCFn :: ∀ d r eff. EffFn3 (d3::D3|eff) Number Number (ScaleContinuous d r) (ScaleContinuous d r)
-foreign import rangeRoundOFn :: ∀ d r eff. EffFn3 (d3::D3|eff) Number Number (ScaleOrdinal d r)    (ScaleOrdinal d r)
 
 
 d3ContinuousScale :: ∀ d r eff. ContinuousScaleType -> Eff (d3::D3|eff) (ScaleContinuous d r)
@@ -66,14 +63,30 @@ d3OrdinalScale Band              = d3BandScaleFn
 d3OrdinalScale Point             = d3PointScaleFn
 d3OrdinalScale (Category scheme) = runEffFn1 d3CategoryScaleFn scheme
 
+-- | rangeRounds can be applied to various scale types, using a typeclass to capture this
+-- | Probably want to use the type system to distinguish between rangeRound[start, end] and rangeRound[v1, v2, v3...]
+foreign import rangeRoundFn  :: ∀ s eff. (Ranged s) => EffFn3 (d3::D3|eff) Number Number s s
+
 class Ranged a where
   rangeRound :: ∀ eff. Number -> Number -> a -> Eff (d3::D3|eff) a
 
 instance rangeRoundContinuous :: Ranged (ScaleContinuous d r) where
-  rangeRound start end = runEffFn3 rangeRoundCFn start end
+  rangeRound start end = runEffFn3 rangeRoundFn start end
 
 instance rangeRoundOrdinal :: Ranged (ScaleOrdinal d r) where
-  rangeRound start end = runEffFn3 rangeRoundOFn start end
+  rangeRound start end = runEffFn3 rangeRoundFn start end
+
+-- | all the various scale types can be applied as a function, using a typeclass to capture this
+foreign import applyScaleFn :: ∀ s d r eff. (Scale s) => EffFn2 (d3::D3|eff) d s r
+
+class Scale a where
+  scale :: ∀ d r eff. d -> a -> Eff (d3::D3|eff) r
+
+instance scaleContinuous :: Scale (ScaleContinuous d r) where
+  scale d = runEffFn2 applyScaleFn d
+
+instance scaleOrdinal :: Scale (ScaleOrdinal d r) where
+  scale d = runEffFn2 applyScaleFn d
 
 -- this function should only apply to scales of type band, tricky to express the
 -- way it's written right now...TODO revisit the types here
@@ -86,15 +99,3 @@ paddingInner = runEffFn2 paddingInnerFn
 
 paddingOuter :: ∀ d r eff. Number -> ScaleOrdinal d r -> Eff (d3::D3|eff) (ScaleOrdinal d r)
 paddingOuter = runEffFn2 paddingOuterFn
-
-class Scaling a where
-  scaling :: ∀ d r eff. a -> d -> Eff (d3::D3|eff) r
-
-instance scalingContinuous :: Scaling (ScaleContinuous d r) where
-  scaling s d = runEffFn2 applyScaleCFn s d
-
-instance scalingOrdinal :: Scaling (ScaleOrdinal d r) where
-  scaling s d = runEffFn2 applyScaleOFn s d
-
-foreign import applyScaleCFn :: ∀ d r eff. EffFn2 (d3::D3|eff) (ScaleContinuous d r) d r
-foreign import applyScaleOFn :: ∀ d r eff. EffFn2 (d3::D3|eff) (ScaleOrdinal d r) d r
