@@ -4,8 +4,8 @@ import D3.Selection
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(Value), AttrSetter(SetAttr, AttrFn), DataBind(Data), D3, (..), (...))
-import D3.Scale (d3ContinuousScale, d3OrdinalScale, ContinuousScaleType(..), OrdinalScaleType(..), rangeRound, padding, bandwidth, scale)
-import Prelude (flip, show, pure, unit, Unit, bind, (<>), (-))
+import D3.Scale (ContinuousScaleType(Linear), OrdinalScaleType(Band), scale, rangeRound, d3ContinuousScale, padding, d3OrdinalScale)
+import Prelude (Unit, unit, pure, bind, show, (-), (<>))
 
 -- define a margin, look to purescript-css for more sophisticated definition
 margin :: { top::Number, right::Number, bottom::Number, left::Number }
@@ -51,14 +51,11 @@ main = do
   let width =  w - margin.left - margin.right
   let height = h - margin.top - margin.bottom
 
-  let x = d3OrdinalScale Band
+  x <- d3OrdinalScale Band
         .. rangeRound 0.0 width
         .. padding 0.1
-  let y = d3ContinuousScale Linear
+  y <- d3ContinuousScale Linear
         .. rangeRound height 0.0
-
-  let scaleX = flip scale x
-  let scaleY = flip scale y
 
   g <-  svg ... append "g"
     .. attr "transform" (SetAttr ("translate(" <> show margin.left <> "," <> show margin.top <> ")"))
@@ -82,12 +79,16 @@ main = do
       .. dataBind (Data frequencies)
     .. enter .. append "rect"
       .. attr "class"  (SetAttr "bar")
-      .. attr "x"      (AttrFn (\d i nodes el -> pure (scaleX d.letter)))
-      .. attr "y"      (AttrFn (\d i nodes el -> pure (scaleY d.frequency)))
-      .. attr "width"  (SetAttr (x .. bandwidth))
+      .. attr "x"      (AttrFn (\d i nodes el -> do scaled <- scale d.letter x
+                                                    pure scaled
+                               ))
+      .. attr "y"      (AttrFn (\d i nodes el -> do scaled <- scale d.frequency y
+                                                    pure scaled
+                               ))
+      -- .. attr "width"  (SetAttr (x .. bandwidth))
       .. attr "width"  (SetAttr 30.0)
       .. attr "height" (AttrFn (\d i nodes el -> do
-                                                    scaled <- scaleY d.frequency
+                                                    scaled <- scale d.frequency y
                                                     pure (height - scaled)
                                ))
 
