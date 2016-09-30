@@ -298,7 +298,8 @@ var PS = {};
   exports.applyScaleFn      = function(d, scale)             { return scale(d); }
 
   // these functions are particular to Band scales
-  exports.paddingFn         = function(p, scale) { return scale.padding(p); }
+  exports.paddingFn         = function(p, scale) { return scale.padding(p); }     
+  exports.bandwidthFn       = function(scale)    { return scale.bandwidth(); }
 })(PS["D3.Scale"] = PS["D3.Scale"] || {});
 (function(exports) {
 
@@ -481,7 +482,8 @@ var PS = {};
           return $foreign.d3TimeScaleFn;
       };
       throw new Error("Failed pattern match at D3.Scale line 57, column 1 - line 57, column 45: " + [ v.constructor.name ]);
-  };                                                                
+  };
+  var bandwidth = Data_Function_Eff.runEffFn1($foreign.bandwidthFn);
   var applyScaleConstrained = function (dictScale) {
       return function (d) {
           return function (scale1) {
@@ -505,6 +507,7 @@ var PS = {};
   exports["Category"] = Category;
   exports["Ranged"] = Ranged;
   exports["Scale"] = Scale;
+  exports["bandwidth"] = bandwidth;
   exports["d3ContinuousScale"] = d3ContinuousScale;
   exports["d3OrdinalScale"] = d3OrdinalScale;
   exports["padding"] = padding;
@@ -564,7 +567,7 @@ var PS = {};
       if (v instanceof D3_Base.SetByIndex) {
           return Data_Function_Eff.runEffFn2($foreign.textFnFn)(Data_Function_Eff.mkEffFn2(v.value0));
       };
-      throw new Error("Failed pattern match at D3.Selection line 123, column 1 - line 123, column 54: " + [ v.constructor.name ]);
+      throw new Error("Failed pattern match at D3.Selection line 124, column 1 - line 124, column 54: " + [ v.constructor.name ]);
   };
   var selectAll = function (selector) {
       return Data_Function_Eff.runEffFn2($foreign.selectAllFn)(selector);
@@ -580,7 +583,7 @@ var PS = {};
       if (v instanceof D3_Base.Keyed) {
           return Data_Function_Eff.runEffFn3($foreign.bindDataFnK)(v.value0)(v.value1);
       };
-      throw new Error("Failed pattern match at D3.Selection line 144, column 1 - line 144, column 67: " + [ v.constructor.name ]);
+      throw new Error("Failed pattern match at D3.Selection line 145, column 1 - line 145, column 67: " + [ v.constructor.name ]);
   };
   var d3Select = function (selector) {
       return Data_Function_Eff.runEffFn1($foreign.d3SelectFn)(selector);
@@ -593,7 +596,7 @@ var PS = {};
           if (v instanceof D3_Base.AttrFn) {
               return Data_Function_Eff.runEffFn3($foreign.attrFnP)(s)(Data_Function_Eff.mkEffFn4(v.value0));
           };
-          throw new Error("Failed pattern match at D3.Selection line 115, column 1 - line 115, column 53: " + [ s.constructor.name, v.constructor.name ]);
+          throw new Error("Failed pattern match at D3.Selection line 116, column 1 - line 116, column 53: " + [ s.constructor.name, v.constructor.name ]);
       };
   };
   var append = function (tag) {
@@ -725,7 +728,7 @@ var PS = {};
               return function (nodes) {
                   return function (el) {
                       return function __do() {
-                          var v6 = D3_Scale.scale(D3_Scale.scaleOrdinal)(d.letter)(v3)();
+                          var v6 = D3_Scale.scale(D3_Scale.scaleOrdinal)(i)(v3)();
                           return v6;
                       };
                   };
@@ -742,7 +745,7 @@ var PS = {};
                   };
               };
           };
-      }))))(D3_Selection.attr("width")(new D3_Base.SetAttr(30.0))))(D3_Selection.attr("height")(new D3_Base.AttrFn(function (d) {
+      }))))(D3_Selection.attr("width")(new D3_Base.SetAttr(D3_Scale.bandwidth(v3)))))(D3_Selection.attr("height")(new D3_Base.AttrFn(function (d) {
           return function (i) {
               return function (nodes) {
                   return function (el) {

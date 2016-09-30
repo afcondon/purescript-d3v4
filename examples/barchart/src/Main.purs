@@ -4,7 +4,7 @@ import D3.Selection
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(Value), AttrSetter(SetAttr, AttrFn), DataBind(Data), D3, (..), (...))
-import D3.Scale (ContinuousScaleType(Linear), OrdinalScaleType(Band), scale, rangeRound, d3ContinuousScale, padding, d3OrdinalScale)
+import D3.Scale (bandwidth, ContinuousScaleType(Linear), OrdinalScaleType(Band), scale, rangeRound, d3ContinuousScale, padding, d3OrdinalScale)
 import Prelude (Unit, unit, pure, bind, show, (-), (<>))
 
 -- define a margin, look to purescript-css for more sophisticated definition
@@ -79,14 +79,13 @@ main = do
       .. dataBind (Data frequencies)
     .. enter .. append "rect"
       .. attr "class"  (SetAttr "bar")
-      .. attr "x"      (AttrFn (\d i nodes el -> do scaled <- scale d.letter x
+      .. attr "x"      (AttrFn (\d i nodes el -> do scaled <- scale i x
                                                     pure scaled
                                ))
       .. attr "y"      (AttrFn (\d i nodes el -> do scaled <- scale d.frequency y
                                                     pure scaled
                                ))
-      -- .. attr "width"  (SetAttr (x .. bandwidth))
-      .. attr "width"  (SetAttr 30.0)
+      .. attr "width"  (SetAttr (bandwidth x))
       .. attr "height" (AttrFn (\d i nodes el -> do
                                                     scaled <- scale d.frequency y
                                                     pure (height - scaled)

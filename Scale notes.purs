@@ -1,6 +1,7 @@
 module Main where
 
-import D3.Scale (bandwidth)
+import D3.Scale (rangeRound, bandwidth)
+import Data.Int (hexadecimal, toStringAs)
 
 data ContinuousScale d r = {            -- type parameters for domain and range, respectively
     domain      :: (Array d -> scale d r      -> scale d r)  -- sets the domain
@@ -101,17 +102,74 @@ data BandScale = {
   , bandwidth    ::
   , step         ::
   , align        ::
-
 }
 
 data PointScale = {
     domain      :: ordinalScale.domain
   , range       :: ordinalScale.range
   , unknown     :: ordinalScale.unknown   -- disabled
+  , rangeRound  :: bandScale.rangeRound
+  , padding     :: bandScale.padding
+  , paddingInner :: bandScale.paddingInner
+  , paddingOuter :: bandScale.paddingOuter
+  , align        :: bandScale.align
+  , bandwidth    :: bandScale.bandwidth     -- returns zero
+  , step         :: bandScale.step
+  , align        :: bandScale.align
 }
 
 data CategoryScale = {
     domain      :: ordinalScale.domain
   , range       :: ordinalScale.range
   , unknown     :: ordinalScale.unknown
+}
+
+data SequentialScale = {  -- no invert, range, rangeRound, interpolate
+    domain      :: continuousScale.domain
+  , clamp       :: continuousScale.clamp
+  , interpolator :: Interpolator -> scale d r -> scale d r
+}
+
+type RGBString :: String  -- constrained to format "#AABBCC"
+data RGB :: RGB String String String
+makeRGB :: Int -> Int -> Int -> Maybe RGB
+makeRGB r g b = if valid r && valid g && valid b
+                then Just (RGB (toStringAs hexadecimal r) (toStringAs hexadecimal g) (toStringAs hexadecimal b))
+                else Nothing
+
+instance showRGB = Show RGB where
+  show (RGB r g b) = "#" <> r <> g <> b
+
+type Interpolator :: (Number -> String)
+
+  d3.interpolateViridis - a dark-to-light color scheme.
+  d3.interpolateInferno - a dark-to-light color scheme.
+  d3.interpolateMagma - a dark-to-light color scheme.
+  d3.interpolatePlasma - a dark-to-light color scheme.
+  d3.interpolateWarm - a rotating-hue color scheme.
+  d3.interpolateCool - a rotating-hue color scheme.
+  d3.interpolateRainbow - a cyclical rotating-hue color scheme.
+  d3.interpolateCubehelixDefault - a dark-to-light, rotating-hue color scheme.
+
+
+data QuantizeScale {
+    domain :: [Coercable1, Coercable2] -> scale d r -> scale d r
+  , range  :: [Things] -> scale d r -> scale d r
+  , nice        :: continuousScale.nice
+  , ticks       :: continuousScale.ticks
+  , tickFormat  :: continuousScale.tickFormat
+  , invertExtent :: r -> Array d -> scale d r  -- Returns the extent of values in the domain for the corresponding value in the range
+}
+
+data QuantileScale {
+    domain ::
+  , range  ::
+  , invertExtent ::
+  , quantiles ::  -- get the quantile thresholds.
+}
+
+data ThresholdScale {
+    domain :: -- ascending array of Ord
+    range ::
+    invertExtent ::
 }
