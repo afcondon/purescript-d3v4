@@ -1,5 +1,6 @@
 module Main where
 
+import D3.Scale (bandwidth)
 
 data ContinuousScale d r = {            -- type parameters for domain and range, respectively
     domain      :: (Array d -> scale d r      -> scale d r)  -- sets the domain
@@ -14,22 +15,22 @@ data ContinuousScale d r = {            -- type parameters for domain and range,
   , tickFormat  :: (Number -> Maybe Format -> scale d r -> (Number -> String))
 }
 
-data logScale = {
+data LogScale = {
     domain      :: continuousScale.domain
   , range       :: continuousScale.range
   , rangeRound  :: continuousScale.rangeRound
   , clamp       :: continuousScale.clamp
   , interpolate :: continuousScale.interpolate
-  , nice        ::
+  , nice        :: -- custom for base
   , invert      :: continuousScale.invert
   , scale       :: continuousScale.scale
-  , ticks       ::
-  , tickFormat  ::
+  , ticks       :: -- custom for log scale
+  , tickFormat  :: -- custom for log scale
   , base        :: (Number -> logScale d r -> logScale d r) -- set the base for this logScale
 
 }
 
-data powScale = {
+data PowScale = {
     domain      :: continuousScale.domain
   , range       :: continuousScale.range
   , rangeRound  :: continuousScale.rangeRound
@@ -42,7 +43,7 @@ data powScale = {
   , tickFormat  :: continuousScale.tickFormat
 }
 
-data timeScale = {      -- domain is JavaScript Date
+data TimeScale = {      -- domain is JavaScript Date
     domain      :: continuousScale.domain
   , range       :: continuousScale.range
   , rangeRound  :: continuousScale.rangeRound
@@ -55,7 +56,7 @@ data timeScale = {      -- domain is JavaScript Date
   , tickFormat  :: continuousScale.tickFormat
 }
 
-data identityScale = {
+data IdentityScale = {
     domain      :: continuousScale.domain
   , range       :: continuousScale.range
   , rangeRound  :: continuousScale.rangeRound  -- disabled
@@ -68,7 +69,7 @@ data identityScale = {
   , tickFormat  :: continuousScale.tickFormat
 }
 
-data linearScale = {
+data LinearScale = {
     domain      :: continuousScale.domain
   , range       :: continuousScale.range
   , rangeRound  :: continuousScale.rangeRound
@@ -79,4 +80,38 @@ data linearScale = {
   , scale       :: continuousScale.scale
   , ticks       :: continuousScale.ticks
   , tickFormat  :: continuousScale.tickFormat
+}
+
+
+data OrdinalScale d r = {  -- domain doesn't have to be numeric
+    domain      :: Array d -> scale d r -> scale d r
+    range       :: Array r -> scale d r -> scale d r
+    unknown     :: Maybe r -> scale d r -> scale d r -- defaults to implicit extension of domain when unknowns are provided
+}
+
+data BandScale = {
+    domain      :: ordinalScale.domain
+  , range       :: ordinalScale.range
+  , unknown     :: ordinalScale.unknown
+  , rangeRound  ::
+  , padding     ::
+  , paddingInner ::
+  , paddingOuter ::
+  , align        ::
+  , bandwidth    ::
+  , step         ::
+  , align        ::
+
+}
+
+data PointScale = {
+    domain      :: ordinalScale.domain
+  , range       :: ordinalScale.range
+  , unknown     :: ordinalScale.unknown   -- disabled
+}
+
+data CategoryScale = {
+    domain      :: ordinalScale.domain
+  , range       :: ordinalScale.range
+  , unknown     :: ordinalScale.unknown
 }
