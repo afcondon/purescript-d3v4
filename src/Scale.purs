@@ -1,127 +1,171 @@
 module D3.Scale
-  ( d3ContinuousScale
-  , d3OrdinalScale
-  , ContinuousScaleType (..)
-  , ScaleContinuous
-  , OrdinalScaleType (..)
-  , ScaleOrdinal
+  ( Scale
+  , ScaleType(..)
   , SchemeCategory
-  , rangeRound
-  , class Ranged
-  , round
-  , range
+  , d3Scale
+  , bandwidth
+  , clamp
+  , domain
+  , interpolate
+  , invert
+  , nice
   , padding
   , paddingInner
   , paddingOuter
-  , bandwidth
-  , class Scale
+  , range
+  , rangeRound
+  , round
   , scale
+  , tickFormat
+  , ticks
   ) where
 
 import Control.Monad.Eff (Eff)
 import D3.Base (D3)
-import Data.Function.Eff (EffFn2, runEffFn2, EffFn3, EffFn1, runEffFn3, runEffFn1)
+import Data.Function.Eff (runEffFn2, runEffFn3, runEffFn1, EffFn2, EffFn3, EffFn1)
+import Data.Maybe (Maybe(..))
 
-foreign import data ScaleContinuous :: * -> * -> *
-foreign import data ScaleOrdinal    :: * -> * -> *
-foreign import data ScaleSequential :: * -> * -> *
-foreign import data ScaleQuantize   :: * -> * -> *
-foreign import data ScaleQuantile   :: * -> * -> *
-foreign import data ScaleThreshold  :: * -> * -> *
+foreign import data Scale :: * -> * -> *
 
-foreign import d3LinearScaleFn   :: ∀ d r eff. Eff (d3::D3|eff) (ScaleContinuous d r)
-foreign import d3LogScaleFn      :: ∀ d r eff. Eff (d3::D3|eff) (ScaleContinuous d r)
-foreign import d3PowerScaleFn    :: ∀ d r eff. Eff (d3::D3|eff) (ScaleContinuous d r)
-foreign import d3IdentityScaleFn :: ∀ d r eff. Eff (d3::D3|eff) (ScaleContinuous d r)
-foreign import d3TimeScaleFn     :: ∀ d r eff. Eff (d3::D3|eff) (ScaleContinuous d r)
-
-foreign import d3BandScaleFn     :: ∀ d r eff. Eff (d3::D3|eff)                   (ScaleOrdinal d r)
-foreign import d3PointScaleFn    :: ∀ d r eff. Eff (d3::D3|eff)                   (ScaleOrdinal d r)
-foreign import d3CategoryScaleFn :: ∀ d r eff. EffFn1 (d3::D3|eff) SchemeCategory (ScaleOrdinal d r)
-
-foreign import paddingFn         :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (ScaleOrdinal d r) (ScaleOrdinal d r)
-foreign import paddingInnerFn    :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (ScaleOrdinal d r) (ScaleOrdinal d r)
-foreign import paddingOuterFn    :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (ScaleOrdinal d r) (ScaleOrdinal d r)
-foreign import bandwidthFn       :: ∀ d r eff. EffFn1 (d3::D3|eff)        (ScaleOrdinal d r) Number
+type Interpolator = (Number -> String)
+type Format       = String
 
 -- | This belongs in d3-scale-chromatic here just for now, to be broken out later
 foreign import data SchemeCategory :: *       -- in practice it's just a string, i think
 
-data ContinuousScaleType = Linear | Log | Power | Identity | Time
-data OrdinalScaleType    = Band   | Point |  Category SchemeCategory
-data SequentialScaleType = Sequential
-data QuantizeScaleType   = Quantize
-data QuantileScaleType   = Quantile
-data ThresholdScaleType  = Threshold
+type D3LinearScale d r    = Scale d r
+type D3LogScale d r       = Scale d r
+type D3PowerScale d r     = Scale d r
+type D3IdentityScale d r  = Scale d r
+type D3TimeScale d r      = Scale d r
+type D3BandScale d r      = Scale d r
+type D3PointScale d r     = Scale d r
+type D3CategoryScale d r  = Scale d r
+type D3QuantizeScale d r  = Scale d r
+type D3QuantileScale d r  = Scale d r
+type D3ThresholdScale d r = Scale d r
 
+-- || The Continuous Scale Constructors
+foreign import d3LinearScaleFn   :: ∀ d r eff. Eff (d3::D3|eff) (D3LinearScale d r)
+foreign import d3LogScaleFn      :: ∀ d r eff. Eff (d3::D3|eff) (D3LogScale d r)
+foreign import d3PowerScaleFn    :: ∀ d r eff. Eff (d3::D3|eff) (D3PowerScale d r)
+foreign import d3IdentityScaleFn :: ∀ d r eff. Eff (d3::D3|eff) (D3IdentityScale d r)
+foreign import d3TimeScaleFn     :: ∀ d r eff. Eff (d3::D3|eff) (D3TimeScale d r)
 
-d3ContinuousScale :: ∀ d r eff. ContinuousScaleType  -> Eff (d3::D3|eff) (ScaleContinuous d r)
-d3ContinuousScale Linear   = d3LinearScaleFn
-d3ContinuousScale Log      = d3LogScaleFn
-d3ContinuousScale Power    = d3PowerScaleFn
-d3ContinuousScale Identity = d3IdentityScaleFn
-d3ContinuousScale Time     = d3TimeScaleFn
+-- || The Ordinal Scale Constructors
+foreign import d3BandScaleFn     :: ∀ d r eff. Eff (d3::D3|eff)                   (D3BandScale d r)
+foreign import d3PointScaleFn    :: ∀ d r eff. Eff (d3::D3|eff)                   (D3PointScale d r)
+foreign import d3CategoryScaleFn :: ∀ d r eff. EffFn1 (d3::D3|eff) SchemeCategory (D3CategoryScale d r)
 
-d3OrdinalScale :: ∀ d r eff. OrdinalScaleType       -> Eff (d3::D3|eff) (ScaleOrdinal d r)
-d3OrdinalScale Band              = d3BandScaleFn
-d3OrdinalScale Point             = d3PointScaleFn
-d3OrdinalScale (Category scheme) = runEffFn1 d3CategoryScaleFn scheme
+-- || Other Scale Constructors
+foreign import d3QuantizeScaleFn :: ∀ d r eff. Eff (d3::D3|eff)                   (D3QuantizeScale d r)
+foreign import d3QuantileScaleFn :: ∀ d r eff. Eff (d3::D3|eff)                   (D3QuantileScale d r)
+foreign import d3ThresholdScaleFn :: ∀ d r eff. Eff (d3::D3|eff)                  (D3ThresholdScale d r)
 
--- | rangeRounds can be applied to various scale types, using a typeclass to capture this
--- | Probably want to use the type system to distinguish between rangeRound[start, end] and rangeRound[v1, v2, v3...]
-foreign import rangeRoundFn :: ∀ s eff.     EffFn3 (d3::D3|eff) Number Number s s
-foreign import rangeFn      :: ∀ s eff.     EffFn3 (d3::D3|eff) Number Number s s
-foreign import roundFn      :: ∀ s eff.     EffFn2 (d3::D3|eff) Boolean s s
-foreign import applyScaleFn :: ∀ s d r eff. EffFn2 (d3::D3|eff) d s r
+-- functions
+foreign import domainFn      :: ∀ d r eff. EffFn2 (d3::D3|eff) (Array d)             (Scale d r) (Scale d r)
+foreign import rangeFn       :: ∀ d r eff. EffFn3 (d3::D3|eff) r r                   (Scale d r) (Scale d r)
+foreign import rangeRoundFn  :: ∀ d r eff. EffFn3 (d3::D3|eff) r r                   (Scale d r) (Scale d r)
+foreign import roundFn       :: ∀ d r eff. EffFn2 (d3::D3|eff) Boolean               (Scale d r) (Scale d r)
+foreign import clampFn       :: ∀ d r eff. EffFn2 (d3::D3|eff) Boolean               (Scale d r) (Scale d r)
+foreign import interpolateFn :: ∀ d r eff. EffFn2 (d3::D3|eff) Interpolator          (Scale d r) (Scale d r)
+foreign import niceFn        :: ∀ d r eff. EffFn1 (d3::D3|eff)                       (Scale d r) (Scale d r)
+foreign import nicePFn       :: ∀ d r eff. EffFn2 (d3::D3|eff) Number                (Scale d r) (Scale d r)
+foreign import invertFn      :: ∀ d r eff. EffFn2 (d3::D3|eff) r                     (Scale d r) d
+foreign import ticksFn       :: ∀ d r eff. EffFn1 (d3::D3|eff)                       (Scale d r) (Array d)
+foreign import ticksPFn      :: ∀ d r eff. EffFn2 (d3::D3|eff) Number                (Scale d r) (Array d)
+foreign import tickFormatFn  :: ∀ d r eff. EffFn2 (d3::D3|eff) Number                (Scale d r) (Number -> String)
+foreign import tickFormatPFn :: ∀ d r eff. EffFn3 (d3::D3|eff) Number Format         (Scale d r) (Number -> String)
+foreign import applyScaleFn  :: ∀ d r eff. EffFn2 (d3::D3|eff) d                  (Scale d r) r
 
-rangeRoundConstrained :: ∀ s eff.     (Ranged s) => Number -> Number -> s -> Eff (d3::D3|eff) s
-rangeRoundConstrained start end ranged = runEffFn3 rangeRoundFn start end ranged
+-- || Foreign functions for the BandScale type
+foreign import paddingFn         :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (D3BandScale d r) (D3BandScale d r)
+foreign import paddingInnerFn    :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (D3BandScale d r) (D3BandScale d r)
+foreign import paddingOuterFn    :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (D3BandScale d r) (D3BandScale d r)
+foreign import bandwidthFn       :: ∀ d r eff. EffFn1 (d3::D3|eff)        (D3BandScale d r) Number
 
-rangeConstrained :: ∀ s eff.          (Ranged s) => Number -> Number -> s -> Eff (d3::D3|eff) s
-rangeConstrained start end ranged = runEffFn3 rangeFn start end ranged
+-- | Put at least a bit of structure on the construction of the Scales even tho they end up being untyped after creation
+data ScaleType = Band
+               | Category SchemeCategory
+               | Identity
+               | Linear
+               | Log
+               | Point
+               | Power
+               | Quantile
+               | Quantize
+               | Threshold
+               | Time
 
-roundConstrained :: ∀ s eff.          (Ranged s) => Boolean -> s -> Eff (d3::D3|eff) s
-roundConstrained val ranged       = runEffFn2 roundFn val ranged
+d3Scale :: ∀ d r eff. ScaleType  -> Eff (d3::D3|eff) (Scale d r)
+d3Scale (Category scheme) = runEffFn1 d3CategoryScaleFn scheme
+d3Scale Band       = d3BandScaleFn
+d3Scale Identity   = d3IdentityScaleFn
+d3Scale Linear     = d3LinearScaleFn
+d3Scale Log        = d3LogScaleFn
+d3Scale Point      = d3PointScaleFn
+d3Scale Power      = d3PowerScaleFn
+d3Scale Quantile   = d3QuantileScaleFn
+d3Scale Quantize   = d3QuantizeScaleFn
+d3Scale Threshold  = d3ThresholdScaleFn
+d3Scale Time       = d3TimeScaleFn
 
-applyScaleConstrained :: ∀ s d r eff. (Scale s)  => d      -> s -> Eff (d3::D3|eff) r
-applyScaleConstrained d scale          = runEffFn2 applyScaleFn d scale
+-- || Scale functions, not all available to all Scales, caution! TODO
+scale :: ∀ d r eff. d -> Scale d r -> Eff (d3::D3|eff) r
+scale = runEffFn2 applyScaleFn
 
-class Ranged a where
-  rangeRound :: ∀ eff. Number -> Number -> a -> Eff (d3::D3|eff) a
-  range      :: ∀ eff. Number -> Number -> a -> Eff (d3::D3|eff) a
-  round      :: ∀ eff. Boolean          -> a -> Eff (d3::D3|eff) a
+-- sets the domain
+domain :: ∀ d r eff. (Array d) -> Scale d r         -> Eff (d3::D3|eff)(Scale d r)
+domain = runEffFn2 domainFn
 
-instance rangeRoundContinuous :: Ranged (ScaleContinuous d r) where
-  rangeRound start end = rangeRoundConstrained start end
-  range      start end = rangeConstrained start end
-  round      val       = roundConstrained val
+-- sets the range (not necessarily numeric)
+range :: ∀ d r eff. r -> r  -> Scale d r          -> Eff (d3::D3|eff)(Scale d r)
+range = runEffFn3 rangeFn
 
-instance rangeRoundOrdinal :: Ranged (ScaleOrdinal d r) where
-  rangeRound start end = rangeRoundConstrained start end
-  range      start end = rangeConstrained start end
-  round      val       = roundConstrained val
+-- sets the range and sets rounding
+rangeRound :: ∀ d r eff. r -> r  -> Scale d r     -> Eff (d3::D3|eff)(Scale d r)
+rangeRound = runEffFn3 rangeRoundFn
 
--- | all the various scale types can be applied as a function, using a typeclass to capture this
-class Scale a where
-  scale :: ∀ d r eff. d -> a -> Eff (d3::D3|eff) r
+-- set rounding on or off
+round :: ∀ d r eff. Boolean -> Scale d r           -> Eff (d3::D3|eff)(Scale d r)
+round = runEffFn2 roundFn
 
-instance scaleContinuous :: Scale (ScaleContinuous d r) where
-  scale d = applyScaleConstrained d
+-- limit return to range (domain in case of invert)
+clamp :: ∀ d r eff. Boolean -> Scale d r           ->Eff (d3::D3|eff) (Scale d r)
+clamp = runEffFn2 clampFn
 
-instance scaleOrdinal :: Scale (ScaleOrdinal d r) where
-  scale d = applyScaleConstrained d
+-- specifies interpolator to use
+interpolate :: ∀ d r eff. Interpolator -> Scale d r     ->Eff (d3::D3|eff) (Scale d r)
+interpolate = runEffFn2 interpolateFn
+
+nice :: ∀ d r eff. (Maybe Number) -> Scale d r          -> Eff (d3::D3|eff) (Scale d r)
+nice (Just count) = runEffFn2 nicePFn count
+nice Nothing      = runEffFn1 niceFn
+
+-- maps back from range to domain, NB invert can't be called on SequentialScales
+invert :: ∀ d r eff. r -> (Scale d r)                ->  Eff (d3::D3|eff) d
+invert = runEffFn2 invertFn
+
+-- get a list of n vals from domain
+ticks :: ∀ d r eff. (Maybe Number) -> Scale d r       -> Eff (d3::D3|eff) (Array d)
+ticks (Just n) = runEffFn2 ticksPFn n
+ticks Nothing  = runEffFn1 ticksFn
+
+tickFormat :: ∀ d r eff. Number -> Maybe Format -> Scale d r   -> Eff (d3::D3|eff) (Number -> String)
+tickFormat n (Just f) = runEffFn3 tickFormatPFn n f
+tickFormat n Nothing  = runEffFn2 tickFormatFn n
+
 
 -- these functions should only apply to scales of type band, tricky to express the
 -- way it's written right now...TODO revisit the types here
-
-padding      :: ∀ d r eff. Number -> ScaleOrdinal d r -> Eff (d3::D3|eff) (ScaleOrdinal d r)
+padding      :: ∀ d r eff. Number -> D3BandScale d r -> Eff (d3::D3|eff) (D3BandScale d r)
 padding      = runEffFn2 paddingFn
 
-paddingInner :: ∀ d r eff. Number -> ScaleOrdinal d r -> Eff (d3::D3|eff) (ScaleOrdinal d r)
+paddingInner :: ∀ d r eff. Number -> D3BandScale d r -> Eff (d3::D3|eff) (D3BandScale d r)
 paddingInner = runEffFn2 paddingInnerFn
 
-paddingOuter :: ∀ d r eff. Number -> ScaleOrdinal d r -> Eff (d3::D3|eff) (ScaleOrdinal d r)
+paddingOuter :: ∀ d r eff. Number -> D3BandScale d r -> Eff (d3::D3|eff) (D3BandScale d r)
 paddingOuter = runEffFn2 paddingOuterFn
 
-bandwidth    :: ∀ d r eff.           ScaleOrdinal d r -> Eff (d3::D3|eff) Number
+bandwidth    :: ∀ d r eff.           D3BandScale d r -> Eff (d3::D3|eff) Number
 bandwidth    = runEffFn1 bandwidthFn

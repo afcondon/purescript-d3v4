@@ -284,18 +284,26 @@ var PS = {};
   /* global exports */
   "use strict";
 
+  // constructors - continuous scales
   exports.d3IdentityScaleFn = function() { return d3.scaleIdentity(); }
   exports.d3LinearScaleFn   = function() { return d3.scaleLinear(); }
   exports.d3LogScaleFn      = function() { return d3.scaleLog(); }
   exports.d3PowerScaleFn    = function() { return d3.scalePow(); }
   exports.d3TimeScaleFn     = function() { return d3.scaleTime(); }
 
+  // constructors - ordinal scales
   exports.d3BandScaleFn     = function()       { return d3.scaleBand(); }
   exports.d3PointScaleFn    = function()       { return d3.scalePoint(); }
   exports.d3CategoryScaleFn = function(scheme) { return d3.scaleCategory(scheme); }
 
-  exports.rangeRoundFn      = function(start, end, scale)    { return scale.rangeRound([start, end]); }
-  exports.applyScaleFn      = function(d, scale)             { return scale(d); }
+  // constructors - QuantizeScale
+  exports.d3QuantizeScaleFn  = function()      { return d3.scaleQuantize(); }
+  exports.d3QuantileScaleFn  = function()      { return d3.scaleQuantile(); }
+  exports.d3ThresholdScaleFn = function()      { return d3.ScaleThreshold(); }                      //  a dark-to-light, rotating-hue color scheme.
+
+  // functions on scales (not all applicable to all scale types however)
+  exports.rangeRoundFn  = function(start, end, scale) { return scale.rangeRound([start, end]); }
+  exports.applyScaleFn  = function(d, scale)          { return scale(d); }    // disabled for PointScale
 
   // these functions are particular to Band scales
   exports.paddingFn         = function(p, scale) { return scale.padding(p); }     
@@ -363,19 +371,13 @@ var PS = {};
   var Control_Monad_Eff = PS["Control.Monad.Eff"];
   var D3_Base = PS["D3.Base"];
   var Data_Function_Eff = PS["Data.Function.Eff"];
+  var Data_Maybe = PS["Data.Maybe"];        
   var Band = (function () {
       function Band() {
 
       };
       Band.value = new Band();
       return Band;
-  })();
-  var Point = (function () {
-      function Point() {
-
-      };
-      Point.value = new Point();
-      return Point;
   })();
   var Category = (function () {
       function Category(value0) {
@@ -385,6 +387,13 @@ var PS = {};
           return new Category(value0);
       };
       return Category;
+  })();
+  var Identity = (function () {
+      function Identity() {
+
+      };
+      Identity.value = new Identity();
+      return Identity;
   })();
   var Linear = (function () {
       function Linear() {
@@ -400,6 +409,13 @@ var PS = {};
       Log.value = new Log();
       return Log;
   })();
+  var Point = (function () {
+      function Point() {
+
+      };
+      Point.value = new Point();
+      return Point;
+  })();
   var Power = (function () {
       function Power() {
 
@@ -407,12 +423,26 @@ var PS = {};
       Power.value = new Power();
       return Power;
   })();
-  var Identity = (function () {
-      function Identity() {
+  var Quantile = (function () {
+      function Quantile() {
 
       };
-      Identity.value = new Identity();
-      return Identity;
+      Quantile.value = new Quantile();
+      return Quantile;
+  })();
+  var Quantize = (function () {
+      function Quantize() {
+
+      };
+      Quantize.value = new Quantize();
+      return Quantize;
+  })();
+  var Threshold = (function () {
+      function Threshold() {
+
+      };
+      Threshold.value = new Threshold();
+      return Threshold;
   })();
   var Time = (function () {
       function Time() {
@@ -421,102 +451,62 @@ var PS = {};
       Time.value = new Time();
       return Time;
   })();
-  var Ranged = function (rangeRound) {
-      this.rangeRound = rangeRound;
-  };
-  var Scale = function (scale) {
-      this.scale = scale;
-  };
-  var scale = function (dict) {
-      return dict.scale;
-  };
-  var rangeRoundConstrained = function (dictRanged) {
-      return function (start) {
-          return function (end) {
-              return function (ranged) {
-                  return Data_Function_Eff.runEffFn3($foreign.rangeRoundFn)(start)(end)(ranged);
-              };
-          };
-      };
-  };
-  var rangeRoundContinuous = new Ranged(function (start) {
-      return function (end) {
-          return rangeRoundConstrained(rangeRoundContinuous)(start)(end);
-      };
-  });
-  var rangeRoundOrdinal = new Ranged(function (start) {
-      return function (end) {
-          return rangeRoundConstrained(rangeRoundOrdinal)(start)(end);
-      };
-  });
-  var rangeRound = function (dict) {
-      return dict.rangeRound;
-  };                                                                      
+  var scale = Data_Function_Eff.runEffFn2($foreign.applyScaleFn);
+  var rangeRound = Data_Function_Eff.runEffFn3($foreign.rangeRoundFn);    
   var padding = Data_Function_Eff.runEffFn2($foreign.paddingFn);
-  var d3OrdinalScale = function (v) {
-      if (v instanceof Band) {
-          return $foreign.d3BandScaleFn;
-      };
-      if (v instanceof Point) {
-          return $foreign.d3PointScaleFn;
-      };
+  var d3Scale = function (v) {
       if (v instanceof Category) {
           return Data_Function_Eff.runEffFn1($foreign.d3CategoryScaleFn)(v.value0);
       };
-      throw new Error("Failed pattern match at D3.Scale line 64, column 1 - line 64, column 49: " + [ v.constructor.name ]);
-  };
-  var d3ContinuousScale = function (v) {
+      if (v instanceof Band) {
+          return $foreign.d3BandScaleFn;
+      };
+      if (v instanceof Identity) {
+          return $foreign.d3IdentityScaleFn;
+      };
       if (v instanceof Linear) {
           return $foreign.d3LinearScaleFn;
       };
       if (v instanceof Log) {
           return $foreign.d3LogScaleFn;
       };
+      if (v instanceof Point) {
+          return $foreign.d3PointScaleFn;
+      };
       if (v instanceof Power) {
           return $foreign.d3PowerScaleFn;
       };
-      if (v instanceof Identity) {
-          return $foreign.d3IdentityScaleFn;
+      if (v instanceof Quantile) {
+          return $foreign.d3QuantileScaleFn;
+      };
+      if (v instanceof Quantize) {
+          return $foreign.d3QuantizeScaleFn;
+      };
+      if (v instanceof Threshold) {
+          return $foreign.d3ThresholdScaleFn;
       };
       if (v instanceof Time) {
           return $foreign.d3TimeScaleFn;
       };
-      throw new Error("Failed pattern match at D3.Scale line 57, column 1 - line 57, column 45: " + [ v.constructor.name ]);
-  };
+      throw new Error("Failed pattern match at D3.Scale line 101, column 1 - line 101, column 63: " + [ v.constructor.name ]);
+  };                                                        
   var bandwidth = Data_Function_Eff.runEffFn1($foreign.bandwidthFn);
-  var applyScaleConstrained = function (dictScale) {
-      return function (d) {
-          return function (scale1) {
-              return Data_Function_Eff.runEffFn2($foreign.applyScaleFn)(d)(scale1);
-          };
-      };
-  };
-  var scaleContinuous = new Scale(function (d) {
-      return applyScaleConstrained(scaleContinuous)(d);
-  });
-  var scaleOrdinal = new Scale(function (d) {
-      return applyScaleConstrained(scaleOrdinal)(d);
-  });
+  exports["Band"] = Band;
+  exports["Category"] = Category;
+  exports["Identity"] = Identity;
   exports["Linear"] = Linear;
   exports["Log"] = Log;
-  exports["Power"] = Power;
-  exports["Identity"] = Identity;
-  exports["Time"] = Time;
-  exports["Band"] = Band;
   exports["Point"] = Point;
-  exports["Category"] = Category;
-  exports["Ranged"] = Ranged;
-  exports["Scale"] = Scale;
+  exports["Power"] = Power;
+  exports["Quantile"] = Quantile;
+  exports["Quantize"] = Quantize;
+  exports["Threshold"] = Threshold;
+  exports["Time"] = Time;
   exports["bandwidth"] = bandwidth;
-  exports["d3ContinuousScale"] = d3ContinuousScale;
-  exports["d3OrdinalScale"] = d3OrdinalScale;
+  exports["d3Scale"] = d3Scale;
   exports["padding"] = padding;
   exports["rangeRound"] = rangeRound;
   exports["scale"] = scale;
-  exports["rangeRoundContinuous"] = rangeRoundContinuous;
-  exports["rangeRoundOrdinal"] = rangeRoundOrdinal;
-  exports["scaleContinuous"] = scaleContinuous;
-  exports["scaleOrdinal"] = scaleOrdinal;
 })(PS["D3.Scale"] = PS["D3.Scale"] || {});
 (function(exports) {
   /* global exports */
@@ -612,8 +602,7 @@ var PS = {};
   exports["text"] = text;
 })(PS["D3.Selection"] = PS["D3.Selection"] || {});
 (function(exports) {
-  // Generated by psc version 0.9.2
-  "use strict";
+    "use strict";
   var D3_Selection = PS["D3.Selection"];
   var Control_Monad_Eff = PS["Control.Monad.Eff"];
   var Control_Monad_Eff_Console = PS["Control.Monad.Eff.Console"];
@@ -627,6 +616,10 @@ var PS = {};
   var Data_Show = PS["Data.Show"];
   var Control_Applicative = PS["Control.Applicative"];
   var Data_Unit = PS["Data.Unit"];        
+
+  /**
+ *  define a margin, look to purescript-css for more sophisticated definition
+ */  
   var margin = {
       top: 20.0, 
       right: 20.0, 
@@ -718,8 +711,8 @@ var PS = {};
       var v2 = Data_Function.applyFlipped(v)(D3_Selection.getAttr("height"))();
       var width = v1 - margin.left - margin.right;
       var height = v2 - margin.top - margin.bottom;
-      var v3 = Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(D3_Scale.d3OrdinalScale(D3_Scale.Band.value))(D3_Scale.rangeRound(D3_Scale.rangeRoundOrdinal)(0.0)(width)))(D3_Scale.padding(0.1))();
-      var v4 = Control_Bind.bind(Control_Monad_Eff.bindEff)(D3_Scale.d3ContinuousScale(D3_Scale.Linear.value))(D3_Scale.rangeRound(D3_Scale.rangeRoundContinuous)(height)(0.0))();
+      var v3 = Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(D3_Scale.d3Scale(D3_Scale.Band.value))(D3_Scale.rangeRound(0.0)(width)))(D3_Scale.padding(0.1))();
+      var v4 = Control_Bind.bind(Control_Monad_Eff.bindEff)(D3_Scale.d3Scale(D3_Scale.Linear.value))(D3_Scale.rangeRound(height)(0.0))();
       var v5 = Control_Bind.bind(Control_Monad_Eff.bindEff)(Data_Function.applyFlipped(v)(D3_Selection.append("g")))(D3_Selection.attr("transform")(new D3_Base.SetAttr("translate(" + (Data_Show.show(Data_Show.showNumber)(margin.left) + ("," + (Data_Show.show(Data_Show.showNumber)(margin.top) + ")"))))))();
       Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Data_Function.applyFlipped(v5)(D3_Selection.append("g")))(D3_Selection.attr("class")(new D3_Base.SetAttr("axis axis--x"))))(D3_Selection.attr("transform")(new D3_Base.SetAttr("translate(0," + (Data_Show.show(Data_Show.showNumber)(height) + ")"))))();
       Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Control_Bind.bind(Control_Monad_Eff.bindEff)(Data_Function.applyFlipped(v5)(D3_Selection.append("g")))(D3_Selection.attr("class")(new D3_Base.SetAttr("axis axis--y"))))(D3_Selection.append("text")))(D3_Selection.attr("transform")(new D3_Base.SetAttr("rotate(-90)"))))(D3_Selection.attr("y")(new D3_Base.SetAttr(6.0))))(D3_Selection.attr("dy")(new D3_Base.SetAttr("0.71em"))))(D3_Selection.attr("text-anchor")(new D3_Base.SetAttr("end"))))(D3_Selection.text(new D3_Base.Value("Frequency")))();
@@ -728,7 +721,7 @@ var PS = {};
               return function (nodes) {
                   return function (el) {
                       return function __do() {
-                          var v6 = D3_Scale.scale(D3_Scale.scaleOrdinal)(i)(v3)();
+                          var v6 = D3_Scale.scale(i)(v3)();
                           return v6;
                       };
                   };
@@ -739,7 +732,7 @@ var PS = {};
               return function (nodes) {
                   return function (el) {
                       return function __do() {
-                          var v6 = D3_Scale.scale(D3_Scale.scaleContinuous)(d.frequency)(v4)();
+                          var v6 = D3_Scale.scale(d.frequency)(v4)();
                           return v6;
                       };
                   };
@@ -750,7 +743,7 @@ var PS = {};
               return function (nodes) {
                   return function (el) {
                       return function __do() {
-                          var v6 = D3_Scale.scale(D3_Scale.scaleContinuous)(d.frequency)(v4)();
+                          var v6 = D3_Scale.scale(d.frequency)(v4)();
                           return height - v6;
                       };
                   };

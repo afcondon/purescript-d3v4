@@ -4,7 +4,7 @@ import D3.Selection
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(Value), AttrSetter(SetAttr, AttrFn), DataBind(Data), D3, (..), (...))
-import D3.Scale (bandwidth, ContinuousScaleType(Linear), OrdinalScaleType(Band), scale, rangeRound, d3ContinuousScale, padding, d3OrdinalScale)
+import D3.Scale (ScaleType(..), scale, bandwidth, rangeRound, d3Scale, padding)
 import Prelude (Unit, unit, pure, bind, show, (-), (<>))
 
 -- define a margin, look to purescript-css for more sophisticated definition
@@ -51,11 +51,13 @@ main = do
   let width =  w - margin.left - margin.right
   let height = h - margin.top - margin.bottom
 
-  x <- d3OrdinalScale Band
+  x <- d3Scale Band
         .. rangeRound 0.0 width
         .. padding 0.1
-  y <- d3ContinuousScale Linear
+        -- .. domain map letters
+  y <- d3Scale Linear
         .. rangeRound height 0.0
+        -- .. domain 0 (max frequency)
 
   g <-  svg ... append "g"
     ..  attr "transform"  (SetAttr ("translate(" <> show margin.left <> "," <> show margin.top <> ")"))

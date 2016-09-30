@@ -14,17 +14,17 @@ exports.d3PointScaleFn    = function()       { return d3.scalePoint(); }
 exports.d3CategoryScaleFn = function(scheme) { return d3.scaleCategory(scheme); }
 
 // constructors - QuantizeScale
-exports.d3QuantizeScale   = function() {return d3.scaleQuantize(); }
-exports.d3QuantileScale   = function() {return d3.scaleQuantile(); }
-exports.d3ThresholdScale  = function() {return d3.ScaleThreshold(); }
+exports.d3QuantizeScaleFn  = function()      { return d3.scaleQuantize(); }
+exports.d3QuantileScaleFn  = function()      { return d3.scaleQuantile(); }
+exports.d3ThresholdScaleFn = function()      { return d3.ScaleThreshold(); }
 
 // interpolator constructors
 exports.d3InterpolateViridisFn = function() { return d3.interpolateViridis() }  //  a dark-to-light color scheme.
 exports.d3InterpolateInfernoFn = function() { return d3.interpolateInferno() }  //  a dark-to-light color scheme.
-exports.d3InterpolateMagmaFn = function() { return d3.interpolateMagma() }  //  a dark-to-light color scheme.
-exports.d3InterpolatePlasmaFn = function() { return d3.interpolatePlasma() }  //  a dark-to-light color scheme.
-exports.d3InterpolateWarmFn = function() { return d3.interpolateWarm() }  //  a rotating-hue color scheme.
-exports.d3InterpolateCoolFn = function() { return d3.interpolateCool() }  //  a rotating-hue color scheme.
+exports.d3InterpolateMagmaFn   = function() { return d3.interpolateMagma() }    //  a dark-to-light color scheme.
+exports.d3InterpolatePlasmaFn  = function() { return d3.interpolatePlasma() }   //  a dark-to-light color scheme.
+exports.d3InterpolateWarmFn    = function() { return d3.interpolateWarm() }     //  a rotating-hue color scheme.
+exports.d3InterpolateCoolFn    = function() { return d3.interpolateCool() }     //  a rotating-hue color scheme.
 exports.d3InterpolateRainbowFn = function() { return d3.interpolateRainbow() }  //  a cyclical rotating-hue color scheme.
 exports.d3InterpolateCubehelixDefaultFn = function() { return d3.interpolateCubehelixDefault() }  //  a dark-to-light, rotating-hue color scheme.
 
@@ -37,15 +37,22 @@ exports.roundFn       = function(r, scale)          { return scale.round(r); }
 exports.clampFn       = function(c, scale)          { return scale.clamp(c); }
 exports.interpolateFn = function(i, scale)          { return scale.interpolate(i); }
 exports.niceFn        = function(scale)             { return scale.nice(); }
-exports.nicePFn       = function(n, scale)          { return scale.nice(n); }    -- optional parameter provided
+exports.nicePFn       = function(n, scale)          { return scale.nice(n); }          // optional parameter provided
 exports.invertFn      = function(r, scale)          { return scale.invert(r); }
 exports.ticksFn       = function(scale)             { return scale.ticks(); }
-exports.ticksPFn      = function(n, scale)          { return scale.ticks(n); }   -- optional parameter provided
+exports.ticksPFn      = function(n, scale)          { return scale.ticks(n); }         // optional parameter provided
 exports.tickFormatFn  = function(n, scale)          { return scale.tickFormat(n); }
-exports.tickFormatPFn = function(n, f, scale)       { return scale.tickFormat(n, f); }   -- optional parameter provided
+exports.tickFormatPFn = function(n, f, scale)       { return scale.tickFormat(n, f); } // optional parameter provided
+
+// functions particular to Quantize scales (Quantize, Quantile, Threshold)
+exports.invertExtent  = function(r, scale)          { return scale.invertExtent(r); }
+
+// timescale ticks has a variation that takes an _interval_
+// not implemented at this time
+// exports.timescaleTicksFn = function(scale)          { return scale.ticks}
 
 // applicable only to LogScale
-exports.baseFn = function() {}
+exports.baseFn           = function(base, logscale) { return logscale.base(base); }
 
 // applicable only to Ordinal scales
 exports.unknownFn     = function() { }    // disabled for PointScale
