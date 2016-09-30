@@ -21,14 +21,12 @@ In essence, D3 presents a Domain Specific Language (DSL) embedded in JavaScript 
 
 ### Objectives
 
-This repo is attempting to find a balance between two objectives that are certainly in tension with one another:
+This repo is attempting to find a balance between the following objectives (*NB* the first two are certainly in tension with one another to some extent):
 
 1. define a DSL in Purescript that is so close to the JavaScript D3 style that one can read and perhaps write it without resorting to reference material
-2. leverage the undoubted advantages of strong static typing and immutability to make it easier to program by making invalid programs harder to express
-
-A third objective is to ensure that this repo sits well within the Purescript library ecosystem, eschewing redundant definitions of, for example DOM, Events, Dates etc and sitting nicely within web apps built using Pux, Thermite, Halogen etc.
-
-A fourth objective is to make explicit much of the D3 APIs (much of whose semantics is defined only by, admittedly very good, documentation) in such a way that they _may_ suggest reformulations into a more powerful / expressive functional programming style *without losing* the domain specific knowledge that D3 represents.
+2. leverage the undoubted advantages of strong static typing and immutability to make it easier to program by making invalid programs harder to express and error values such as undefined and null explicit
+3. a third objective is to ensure that this repo sits well within the Purescript library ecosystem, eschewing redundant definitions of, for example DOM, Events, Dates etc and sitting nicely within web apps built using Pux, Thermite, Halogen etc.˛
+4. a fourth objective is to make explicit much of the D3 APIs (much of whose semantics is defined only by, admittedly very good, documentation) in such a way that they _may_ suggest reformulations into a more powerful / expressive functional programming style *without losing* the domain specific knowledge that D3 represents.
 
 This last perhaps needs some elaborating. There's an open question in my mind as to how far it is useful to represent the underlying D3 API in a strict language. Many, perhaps a majority, of D3's API endpoints take the form of polymorphic functions which can be called with varying numbers and types of parameters. This is key to reducing the visual noise of the "DSL" and a big part of JavaScript's appeal to the programmer. It's also a big, big source of complexity in debugging and understanding of others' code or your own code after elapsed time.
 

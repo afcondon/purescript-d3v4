@@ -8,6 +8,8 @@ module D3.Scale
   , SchemeCategory
   , rangeRound
   , class Ranged
+  , round
+  , range
   , padding
   , paddingInner
   , paddingOuter
@@ -68,22 +70,36 @@ d3OrdinalScale (Category scheme) = runEffFn1 d3CategoryScaleFn scheme
 -- | rangeRounds can be applied to various scale types, using a typeclass to capture this
 -- | Probably want to use the type system to distinguish between rangeRound[start, end] and rangeRound[v1, v2, v3...]
 foreign import rangeRoundFn :: ∀ s eff.     EffFn3 (d3::D3|eff) Number Number s s
+foreign import rangeFn      :: ∀ s eff.     EffFn3 (d3::D3|eff) Number Number s s
+foreign import roundFn      :: ∀ s eff.     EffFn2 (d3::D3|eff) Boolean s s
 foreign import applyScaleFn :: ∀ s d r eff. EffFn2 (d3::D3|eff) d s r
 
 rangeRoundConstrained :: ∀ s eff.     (Ranged s) => Number -> Number -> s -> Eff (d3::D3|eff) s
 rangeRoundConstrained start end ranged = runEffFn3 rangeRoundFn start end ranged
+
+rangeConstrained :: ∀ s eff.          (Ranged s) => Number -> Number -> s -> Eff (d3::D3|eff) s
+rangeConstrained start end ranged = runEffFn3 rangeFn start end ranged
+
+roundConstrained :: ∀ s eff.          (Ranged s) => Boolean -> s -> Eff (d3::D3|eff) s
+roundConstrained val ranged       = runEffFn2 roundFn val ranged
 
 applyScaleConstrained :: ∀ s d r eff. (Scale s)  => d      -> s -> Eff (d3::D3|eff) r
 applyScaleConstrained d scale          = runEffFn2 applyScaleFn d scale
 
 class Ranged a where
   rangeRound :: ∀ eff. Number -> Number -> a -> Eff (d3::D3|eff) a
+  range      :: ∀ eff. Number -> Number -> a -> Eff (d3::D3|eff) a
+  round      :: ∀ eff. Boolean          -> a -> Eff (d3::D3|eff) a
 
 instance rangeRoundContinuous :: Ranged (ScaleContinuous d r) where
   rangeRound start end = rangeRoundConstrained start end
+  range      start end = rangeConstrained start end
+  round      val       = roundConstrained val
 
 instance rangeRoundOrdinal :: Ranged (ScaleOrdinal d r) where
   rangeRound start end = rangeRoundConstrained start end
+  range      start end = rangeConstrained start end
+  round      val       = roundConstrained val
 
 -- | all the various scale types can be applied as a function, using a typeclass to capture this
 class Scale a where
