@@ -35,6 +35,7 @@ This last perhaps needs some elaborating. There's an open question in my mind as
 In this current draft, i've added some visual noise by making the parameters explicit using ADTs while retaining the simplicity of the function name. An alternative, seen in `purescript-d3`, is to provide variations on the function name (`attr`, `attr'`, `attr''` etc). Another alternative would be to explicitly model the optionality of the parameters with `Maybe`s and `Either`s and `Nullable`s. Another alternative might be to do something clever with lenses.
 
 #### Ex 1. Making parameter types explicit with ADTs (`purescript-d3v4`)
+
   ``` haskell
   circles <- g ... selectAll "circle"
       .. dataBind (Data circleData)
@@ -44,9 +45,11 @@ In this current draft, i've added some visual noise by making the parameters exp
       .. attr "r"  (SetAttr 20.0)
       .. style "stroke" (Value "black")
       .. style "fill"   (Value "red")
-      ```
+   ```
+
 
 #### Ex 2. Providing variations on function names (`purescript-d3`)
+
   ``` haskell
   rootSelect ".chart"
     .. selectAll "div"
@@ -54,11 +57,14 @@ In this current draft, i've added some visual noise by making the parameters exp
     .. enter .. append "div"
       .. style' "width" (\d -> show (x d) ++ "px")
       .. text' show
-      ```
+   ```
 
 
 #### Ex 3. Explicitly modelling optionality of params (not implemented)
+
+
 #### Ex 4. (something clever with lenses)
+
 
 ### _TODO - write more on the pros and cons of these four approaches._
 
