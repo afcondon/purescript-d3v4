@@ -43,7 +43,8 @@ In this current draft, i've added some visual noise by making the parameters exp
       .. attr "cy" (AttrFn (\d i nodes el -> pure d.y))
       .. attr "r"  (SetAttr 20.0)
       .. style "stroke" (Value "black")
-      .. style "fill"   (Value "red")```
+      .. style "fill"   (Value "red")
+      ```
 
 #### Ex 2. Providing variations on function names (`purescript-d3`)
   ``` haskell
@@ -52,12 +53,13 @@ In this current draft, i've added some visual noise by making the parameters exp
       .. bindData array
     .. enter .. append "div"
       .. style' "width" (\d -> show (x d) ++ "px")
-      .. text' show```
+      .. text' show
+      ```
 
 
 #### Ex 3. Explicitly modelling optionality of params (not implemented)
 #### Ex 4. (something clever with lenses)
 
-###_TODO - write more on the pros and cons of these four approaches._
+### _TODO - write more on the pros and cons of these four approaches._
 
 Beyond these four stylistic choices there are, i intuit, possibilities for perceiving and exploiting deeper abstractions and perhaps formulating a more powerful DSL entirely, perhaps one that is sufficiently powerful to rival D3's own.
