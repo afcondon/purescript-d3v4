@@ -1,10 +1,11 @@
-module D3.Collection.Maps
+module D3.Collections.Map
   ( d3MapFn
   , D3Map
   , D3MapKey
   -- , D3MapValue
   , D3KeyValue
   , D3KVFn
+  , d3Map
   , d3mapGetFn
   , d3mapSetFn
   , d3mapHasFn

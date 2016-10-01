@@ -1,10 +1,12 @@
 module Main where
 
-import D3.Selection
+import D3.Selection (attr, append, enter, dataBind, selectAll, text, getAttr, d3Select)
+import D3.Collections (D3Collection(..), d3Map)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(Value), AttrSetter(SetAttr, AttrFn), DataBind(Data), D3, (..), (...))
-import D3.Scale (ScaleType(..), scale, bandwidth, rangeRound, d3Scale, padding)
+import D3.Scale (ScaleType(..), scale, bandwidth, rangeRound, d3Scale, padding, domain)
+import Data.Maybe (Maybe(Just))
 import Prelude (Unit, unit, pure, bind, show, (-), (<>))
 
 -- define a margin, look to purescript-css for more sophisticated definition
@@ -51,13 +53,15 @@ main = do
   let width =  w - margin.left - margin.right
   let height = h - margin.top - margin.bottom
 
+  asMap <- (d3Map frequencies (Just (\d -> d.letter)))
+
   x <- d3Scale Band
         .. rangeRound 0.0 width
         .. padding 0.1
-        -- .. domain map letters
+        .. domain (D3MapT asMap)
   y <- d3Scale Linear
         .. rangeRound height 0.0
-        -- .. domain 0 (max frequency)
+        .. domain (D3StartEnd 0.0 0.12702) -- implement max lookup later TODO
 
   g <-  svg ... append "g"
     ..  attr "transform"  (SetAttr ("translate(" <> show margin.left <> "," <> show margin.top <> ")"))
@@ -81,7 +85,7 @@ main = do
       .. dataBind (Data frequencies)
     .. enter .. append "rect"
       .. attr "class"  (SetAttr "bar")
-      .. attr "x"      (AttrFn (\d i nodes el -> do scaled <- scale i x
+      .. attr "x"      (AttrFn (\d i nodes el -> do scaled <- scale d.letter x
                                                     pure scaled
                                ))
       .. attr "y"      (AttrFn (\d i nodes el -> do scaled <- scale d.frequency y

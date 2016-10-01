@@ -22,6 +22,7 @@ module D3.Scale
 
 import Control.Monad.Eff (Eff)
 import D3.Base (D3)
+import D3.Collections
 import Data.Function.Eff (runEffFn2, runEffFn3, runEffFn1, EffFn2, EffFn3, EffFn1)
 import Data.Maybe (Maybe(..))
 
@@ -63,7 +64,8 @@ foreign import d3QuantileScaleFn :: ∀ d r eff. Eff (d3::D3|eff)               
 foreign import d3ThresholdScaleFn :: ∀ d r eff. Eff (d3::D3|eff)                  (D3ThresholdScale d r)
 
 -- functions
-foreign import domainFn      :: ∀ d r eff. EffFn2 (d3::D3|eff) (Array d)             (Scale d r) (Scale d r)
+foreign import domainArrFn   :: ∀ d r eff. EffFn2 (d3::D3|eff) (Array d)             (Scale d r) (Scale d r)
+foreign import domainMapFn   :: ∀ d r eff. EffFn2 (d3::D3|eff) (D3Map d)             (Scale d r) (Scale d r)
 foreign import rangeFn       :: ∀ d r eff. EffFn3 (d3::D3|eff) r r                   (Scale d r) (Scale d r)
 foreign import rangeRoundFn  :: ∀ d r eff. EffFn3 (d3::D3|eff) r r                   (Scale d r) (Scale d r)
 foreign import roundFn       :: ∀ d r eff. EffFn2 (d3::D3|eff) Boolean               (Scale d r) (Scale d r)
@@ -115,8 +117,10 @@ scale :: ∀ d r eff. d -> Scale d r -> Eff (d3::D3|eff) r
 scale = runEffFn2 applyScaleFn
 
 -- sets the domain
-domain :: ∀ d r eff. (Array d) -> Scale d r         -> Eff (d3::D3|eff)(Scale d r)
-domain = runEffFn2 domainFn
+domain :: ∀ d r eff. (D3Collection d) -> Scale d r         -> Eff (d3::D3|eff)(Scale d r)
+domain (D3ArrT array) = runEffFn2 domainArrFn array
+domain (D3MapT map)   = runEffFn2 domainMapFn map
+domain (D3StartEnd start end) = runEffFn2 domainArrFn [start, end]
 
 -- sets the range (not necessarily numeric)
 range :: ∀ d r eff. r -> r  -> Scale d r          -> Eff (d3::D3|eff)(Scale d r)
