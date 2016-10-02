@@ -80,7 +80,7 @@ infixl 4 bind as ..
 infixl 4 applyFlipped as ...
 
 -- for selection.classed and selection.attr:
-type PredicateFn  r d   = ∀ eff. (d -> Number -> (Array D3Element) -> D3Element -> Eff (d3::D3|eff) r)
+type PredicateFn  x d   = ∀ eff. (d -> Number -> (Array D3Element) -> D3Element -> Eff (d3::D3|eff) x)
 type PredicateB     d   = ∀ eff. (d -> Number -> (Array D3Element) -> D3Element -> Eff (d3::D3|eff) Boolean)
 type PredicateS     d   = ∀ eff. (d -> Number -> (Array D3Element) -> D3Element -> Eff (d3::D3|eff) String)
 type PredicateN     d   = ∀ eff. (d -> Number -> (Array D3Element) -> D3Element -> Eff (d3::D3|eff) Number)
@@ -102,5 +102,5 @@ data Filter d       = Selector  String
 data ClassSetter  d = SetAll Boolean
                     | SetSome (PredicateB d)
 
-data AttrSetter v d = SetAttr v
-                    | AttrFn (PredicateFn v d)   -- rename both data ctor and Type here TODO
+data AttrSetter d x = SetAttr x
+                    | AttrFn (PredicateFn d x)   -- rename both data ctor and Type here TODO
