@@ -85,16 +85,17 @@ main = do
       .. dataBind (Data frequencies)
     .. enter .. append "rect"
       .. attr "class"  (SetAttr "bar")
-      .. attr "x"      (AttrFn (\d i nodes el -> do scaled <- scale d.letter x
-                                                    pure scaled
-                               ))
-      .. attr "y"      (AttrFn (\d i nodes el -> do scaled <- scale d.frequency y
-                                                    pure scaled
-                               ))
-      .. attr "width"  (SetAttr (bandwidth x))
-      .. attr "height" (AttrFn (\d i nodes el -> do
-                                                    scaled <- scale d.frequency y
-                                                    pure (height - scaled)
-                               ))
+      .. attr "x"      (AttrFn (\d i nodes el -> 10.0))
+      -- .. attr "x"      (AttrFn (\d i nodes el -> do scaled <- scale d.letter x
+      --                                               pure scaled
+      --                          ))
+      -- .. attr "y"      (AttrFn (\d i nodes el -> do scaled <- scale d.frequency y
+      --                                               pure scaled
+      --                          ))
+      -- .. attr "width"  (SetAttr (bandwidth x))
+      -- .. attr "height" (AttrFn (\d i nodes el -> do
+      --                                               scaled <- scale d.frequency y
+      --                                               pure (height - scaled)
+                              --  ))
 
   pure unit
