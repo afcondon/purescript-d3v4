@@ -1,8 +1,8 @@
 /* global exports */
 "use strict"
 
-exports.d3MapFn          = function(data) { d3.map(data); }
-exports.d3MapFnFn        = function(data, fn) { d3.map(data, fn); }
+exports.d3MapFn          = function(data)          { return d3.map(data); }
+exports.d3MapFnFn        = function(data, fn)      { return d3.map(data, fn); }
 
 exports.d3mapGetFn     = function(key, map)        { return map.get(key); }
 exports.d3mapSetFn     = function(key, value, map) { return map.set(key, value); }
