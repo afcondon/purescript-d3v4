@@ -15,7 +15,7 @@ module D3.Scale
   , range
   , rangeRound
   , round
-  , scale
+  , scaleBy
   , tickFormat
   , ticks
   ) where
@@ -78,7 +78,7 @@ foreign import ticksFn       :: ∀ d r eff. EffFn1 (d3::D3|eff)                
 foreign import ticksPFn      :: ∀ d r eff. EffFn2 (d3::D3|eff) Number                (Scale d r) (Array d)
 foreign import tickFormatFn  :: ∀ d r eff. EffFn2 (d3::D3|eff) Number                (Scale d r) (Number -> String)
 foreign import tickFormatPFn :: ∀ d r eff. EffFn3 (d3::D3|eff) Number Format         (Scale d r) (Number -> String)
-foreign import applyScaleFn  :: ∀ d r eff. EffFn2 (d3::D3|eff) d                     (Scale d r) Number
+foreign import applyScaleFn  :: ∀ d r eff. EffFn2 (d3::D3|eff) (Scale d r)            d           Number
 
 -- || Foreign functions for the BandScale type
 foreign import paddingFn         :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (D3BandScale d r) (D3BandScale d r)
@@ -113,14 +113,14 @@ d3Scale Threshold  = d3ThresholdScaleFn
 d3Scale Time       = d3TimeScaleFn
 
 -- || Scale functions, not all available to all Scales, caution! TODO
-scale :: ∀ d r eff. d -> Scale d r -> Eff (d3::D3|eff) Number
-scale = runEffFn2 applyScaleFn
+scaleBy :: ∀ d r eff. Scale d r -> d -> Eff (d3::D3|eff) Number
+scaleBy s = runEffFn2 applyScaleFn s
 
 -- sets the domain
 domain :: ∀ d r eff. (D3Collection d) -> Scale d r         -> Eff (d3::D3|eff)(Scale d r)
 domain (D3ArrT array) = runEffFn2 domainArrFn array
 domain (D3MapT map)   = runEffFn2 domainMapFn map
-domain (D3StartEnd start end) = runEffFn2 domainArrFn [start, end]
+domain (D3Range start end) = runEffFn2 domainArrFn [start, end]
 
 -- sets the range (not necessarily numeric)
 range :: ∀ d r eff. r -> r  -> Scale d r          -> Eff (d3::D3|eff)(Scale d r)

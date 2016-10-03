@@ -5,6 +5,6 @@ module D3.Collections (
 
 import D3.Collections.Map
 
-data D3Collection d = D3StartEnd d d
-                    | D3ArrT (Array d)
-                    | D3MapT (D3Map d)
+data D3Collection d = D3Range d d    -- no effects
+                    | D3ArrT (Array d)  -- no effects
+                    | D3MapT (D3Map d)  -- effects D3
