@@ -6,6 +6,7 @@ module D3.Collections.Map
   , D3KeyValue
   , D3KVFn
   , d3Map
+  , d3MapF
   , d3mapGetFn
   , d3mapSetFn
   , d3mapHasFn
@@ -22,8 +23,7 @@ module D3.Collections.Map
 import Prelude
 import Control.Monad.Eff (Eff)
 import D3.Base (D3)
-import Data.Function.Eff (mkEffFn1, runEffFn2, runEffFn1, EffFn2, EffFn1)
-import Data.Maybe (Maybe(Just, Nothing))
+import Data.Function.Eff (EffFn2, EffFn1, runEffFn1, runEffFn2)
 
 foreign import data D3Map :: * -> *
 
@@ -45,7 +45,7 @@ type D3KVFn       = ∀ d eff. EffFn2 (d3::D3|eff) D3MapKey d Unit
 foreign import d3MapFn        :: ∀ c d eff. EffFn1 (d3::D3|eff) c                (D3Map d)
 foreign import d3MapFnFn      :: ∀ c d eff. EffFn2 (d3::D3|eff)
                                                     c
-                                                    (EffFn1 (d3::D3|eff) d D3MapKey) -- function passed in
+                                                    (d -> D3MapKey) -- function passed in
                                                     (D3Map d)
 
 
@@ -68,13 +68,14 @@ foreign import d3mapSetFn     :: ∀ d eff. EffFn2 (d3::D3|eff) D3MapKey    d   
 -- | Purescript constructor for D3Map
 -- Lot of type unsafety here - we're giving the D3 map constructor a type c and claiming it
 -- gives us back a Map of type d, assumes c is a valid homomorphous collection of d's
-d3Map :: ∀ c d eff. c -> Maybe (d -> Eff (d3::D3|eff) D3MapKey) -> Eff (d3::D3|eff) (D3Map d)
-d3Map c Nothing  = runEffFn1 d3MapFn c
+d3Map :: ∀ c d eff. c -> Eff (d3::D3|eff) (D3Map d)
+d3Map c  = runEffFn1 d3MapFn c
 -- | Also, this callback does potentially add real overhead since it's called
 -- for all elements of the map but it's gotta be done this way if you're going
 -- to pass in a Purescript lambda (maybe you could add a third variation that
 -- takes an FFI function instead of passing Lambda)
-d3Map c (Just f) = runEffFn2 d3MapFnFn c (mkEffFn1 f)
+d3MapF :: ∀ c d eff. c -> (d -> D3MapKey) -> Eff (d3::D3|eff) (D3Map d)
+d3MapF c f = runEffFn2 d3MapFnFn c f
 
 -- | Functions available on D3Maps, similar but not same to ES5 Maps
 d3mapClear   :: ∀ d eff. (D3Map d)                  -> Eff (d3::D3|eff) (D3Map d)
