@@ -78,7 +78,7 @@ foreign import ticksFn       :: ∀ d r eff. EffFn1 (d3::D3|eff)                
 foreign import ticksPFn      :: ∀ d r eff. EffFn2 (d3::D3|eff) Number                (Scale d r) (Array d)
 foreign import tickFormatFn  :: ∀ d r eff. EffFn2 (d3::D3|eff) Number                (Scale d r) (Number -> String)
 foreign import tickFormatPFn :: ∀ d r eff. EffFn3 (d3::D3|eff) Number Format         (Scale d r) (Number -> String)
-foreign import applyScaleFn  :: ∀ d r eff. EffFn2 (d3::D3|eff) (Scale d r)            d           Number
+foreign import applyScaleFn  :: ∀ d r v eff. EffFn2 (d3::D3|eff) (Scale d r)         v            Number
 
 -- || Foreign functions for the BandScale type
 foreign import paddingFn         :: ∀ d r eff. EffFn2 (d3::D3|eff) Number (D3BandScale d r) (D3BandScale d r)
@@ -113,7 +113,7 @@ d3Scale Threshold  = d3ThresholdScaleFn
 d3Scale Time       = d3TimeScaleFn
 
 -- || Scale functions, not all available to all Scales, caution! TODO
-scaleBy :: ∀ d r eff. Scale d r -> d -> Eff (d3::D3|eff) Number
+scaleBy :: ∀ d r v eff. Scale d r -> v -> Eff (d3::D3|eff) Number
 scaleBy s = runEffFn2 applyScaleFn s
 
 -- sets the domain
