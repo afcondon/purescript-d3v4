@@ -118,8 +118,8 @@ scaleBy s = runEffFn2 applyScaleFn s
 
 -- sets the domain
 domain :: ∀ d r eff. (D3Collection d) -> Scale d r         -> Eff (d3::D3|eff)(Scale d r)
-domain (D3ArrT array) = runEffFn2 domainArrFn array
-domain (D3MapT map)   = runEffFn2 domainMapFn map
+domain (D3ArrT array)      = runEffFn2 domainArrFn array
+domain (D3MapT map)        = runEffFn2 domainMapFn map
 domain (D3Range start end) = runEffFn2 domainArrFn [start, end]
 
 -- sets the range (not necessarily numeric)

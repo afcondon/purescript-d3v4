@@ -30,7 +30,8 @@ exports.d3InterpolateCubehelixDefaultFn = function() { return d3.interpolateCube
 
 // functions on scales (not all applicable to all scale types however)
 exports.rangeRoundFn  = function(start, end, scale) { return scale.rangeRound([start, end]); }
-exports.applyScaleFn  = function(d, scale)          { return scale(d); }
+exports.applyScaleFn  = function(scale, d)          {
+  return scale(d); }
 exports.domainArrFn   = function(d, scale)          { return scale.domain(d); }
 exports.domainMapFn   = function(d, scale)          { return scale.domain(d); }
 exports.rangeFn       = function(r, scale)          { return scale.range(r); }

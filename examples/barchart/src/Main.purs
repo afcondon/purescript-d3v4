@@ -59,26 +59,10 @@ freqMap =  do
         m <- d3Map frequencies
         pure (D3MapT m)             -- wrap a map made using custom function
 
--- freqMapF :: forall eff. Eff (d3::D3|eff) (D3Collection Pair)
--- freqMapF = do
---         m <- d3MapF frequencies (\d -> bel d.letter)
---         pure (D3MapT m)             -- wrap a map made using custom function
-
--- awn :: forall b c d e. (Applicative e) => Pair -> b -> c -> d -> e Number
--- awn d i nodes el =
---   do
---       svg <- d3Select ".svg"
---       w <- svg ... getAttr "width"
---       h <- svg ... getAttr "height"
---       let width =  w - margin.left - margin.right
---       let height = h - margin.top - margin.bottom
---       freqMapWOFX <- freqMap
---       x <- d3Scale Band
---            .. rangeRound 0.0 width
---            .. padding 0.1
---            .. domain freqMapWOFX
---       scaled <- scaleBy x d
---       pure scaled
+freqMapF :: forall eff. Eff (d3::D3|eff) (D3Collection Pair)
+freqMapF = do
+        m <- d3MapF frequencies (\d -> show d.letter)
+        pure (D3MapT m)             -- wrap a map made using custom function
 
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
@@ -121,15 +105,12 @@ main = do
       .. dataBind (Data frequencies)
     .. enter .. append "rect"
       .. attr "class"  (SetAttr "bar")
-      -- .. attr "x"      (AttrFn awn)
-  g' ... attr "x"      (AttrFn (\d i nodes el -> scaleBy x d))
-      -- .. attr "y"      (AttrFn (\d i nodes el -> do scaled <- scaleBy y d.frequency
-      --                                               pure scaled
-      --                          ))
-      -- .. attr "width"  (SetAttr (bandwidth x))
-      -- .. attr "height" (AttrFn (\d i nodes el -> do
-      --                                               scaled <- scaleBy y d.frequency
-      --                                               pure (height - scaled)
-                              --  ))
+      .. attr "x"      (AttrFn (\d i nodes el -> scaleBy x d))           -- somehow this is getting at the letters
+      .. attr "y"      (AttrFn (\d i nodes el -> scaleBy y d.frequency)) -- but how is this getting at the frequencies? dont' understand
+      .. attr "width"  (SetAttr (bandwidth x))
+      .. attr "height" (AttrFn (\d i nodes el -> do
+                                                    scaled <- scaleBy y d.frequency
+                                                    pure (height - scaled)
+                               ))
 
   pure unit
