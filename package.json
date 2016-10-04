@@ -40,6 +40,7 @@
   "homepage": "https://github.com/afcondon/purescript-d3v4#readme",
   "dependencies": {
     "d3-array": "^1.0.1",
+    "d3-axis": "^1.0.3",
     "d3-collection": "^1.0.1",
     "d3-color": "^1.0.1",
     "d3-dispatch": "^1.0.1",
