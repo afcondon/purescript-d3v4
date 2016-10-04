@@ -1,12 +1,13 @@
 module Main where
 
+import D3.Axis
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(Value), AttrSetter(SetAttr, AttrFn), DataBind(Data), D3, (..), (...))
 import D3.Collections (D3Collection(D3Range, D3ArrT))
-
 import D3.Scale (ScaleType(Linear, Band), scaleBy, bandwidth, domain, rangeRound, d3Scale, padding)
 import D3.Selection (attr, append, enter, dataBind, selectAll, text, getAttr, d3Select)
+import Data.Maybe (Maybe(Just))
 import Prelude (map, Unit, unit, pure, bind, show, (-), (<>), ($), (>>=), (=<<))
 
 type Pair = { letter :: Char, frequency :: Number }
@@ -58,9 +59,14 @@ main = do
         .. padding 0.1
         .. domain (D3ArrT (map (\d -> d.letter) frequencies))
 
+  xaxis <- d3AxisBottom x
+
   y <- d3Scale Linear
         .. rangeRound height 0.0
         .. domain (D3Range 0.0 0.12702) -- implement max lookup later TODO
+
+  yaxis <- d3AxisLeft y
+        .. axisTicks (Count 10.0 (Just "%"))
 
   g <-  svg ... append "g"
     ..  attr "transform"  (SetAttr ("translate(" <> show margin.left <> "," <> show margin.top <> ")"))
@@ -68,12 +74,13 @@ main = do
   g ... append "g"
     ..  attr "class"      (SetAttr "axis axis--x")
     ..  attr "transform"  (SetAttr ("translate(0," <> show height <> ")"))
-    -- ..  call d3AxisBottom x
+    ..  renderAxis xaxis
 
   g ... append "g"
     ..  attr "class"      (SetAttr "axis axis--y")
-    -- ..  call d3AxisLeft y .. ticks 10 '%'
-    .. append "text"
+
+  g  ... append "text"
+    .. renderAxis yaxis
     .. attr "transform"   (SetAttr "rotate(-90)")
     .. attr "y"           (SetAttr 6.0)
     .. attr "dy"          (SetAttr "0.71em")
