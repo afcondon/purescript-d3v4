@@ -53,9 +53,9 @@ axisTicks (Interval i (Just s)) = runEffFn3 d3AxisTicksIntervalSFn i s
 -- | pretty sure this is unnecessary - didn't i implement all those selection
 -- call functions for a reason? however, just want to get this axis working
 -- right now and revisit TODO
-foreign import renderAxisFn :: ∀ d eff. EffFn2 (d3::D3|eff) (Axis d) (Selection d) (Selection d)
+foreign import renderAxisFn :: ∀ d a eff. EffFn2 (d3::D3|eff) (Axis a) (Selection d) (Selection d)
 
-renderAxis :: ∀ d eff. Axis d -> Selection d -> Eff (d3::D3|eff) (Selection d)
+renderAxis :: ∀ a d eff. Axis a -> Selection d -> Eff (d3::D3|eff) (Selection d)
 renderAxis = runEffFn2 renderAxisFn
 
 -- # axis.ticks(arguments…) <>

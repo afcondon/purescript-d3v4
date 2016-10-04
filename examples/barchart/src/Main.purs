@@ -49,11 +49,13 @@ main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
   svg <- d3Select ".svg"
 
+  -- general setup
   w <- svg ... getAttr "width"
   h <- svg ... getAttr "height"
   let width =  w - margin.left - margin.right
   let height = h - margin.top - margin.bottom
 
+  -- creating scales and initializing axes with those scales
   x <- d3Scale Band
         .. rangeRound 0.0 width
         .. padding 0.1
@@ -68,25 +70,29 @@ main = do
   yaxis <- d3AxisLeft y
         .. axisTicks (Count 10.0 (Just "%"))
 
+  -- main body of chart svg.svg>g.transform>
   g <-  svg ... append "g"
     ..  attr "transform"  (SetAttr ("translate(" <> show margin.left <> "," <> show margin.top <> ")"))
 
+  -- add an x-axis as child of "g"
   g ... append "g"
     ..  attr "class"      (SetAttr "axis axis--x")
     ..  attr "transform"  (SetAttr ("translate(0," <> show height <> ")"))
     ..  renderAxis xaxis
 
+  -- add a y-axis as sibling of x-axis
   g ... append "g"
-    ..  attr "class"      (SetAttr "axis axis--y")
+      ..  attr "class"      (SetAttr "axis axis--y")
+      ..  renderAxis yaxis
+    ..  append "text"
+      ..  attr "transform"   (SetAttr "rotate(-90)")
+      ..  attr "y"           (SetAttr 6.0)
+      ..  attr "dy"          (SetAttr "0.71em")
+      ..  attr "text-anchor" (SetAttr "end")
+      ..  text (Value "Frequency")
 
-  g  ... append "text"
-    .. renderAxis yaxis
-    .. attr "transform"   (SetAttr "rotate(-90)")
-    .. attr "y"           (SetAttr 6.0)
-    .. attr "dy"          (SetAttr "0.71em")
-    .. attr "text-anchor" (SetAttr "end")
-    .. text (Value "Frequency")
 
+  -- add the bars as siblings of the axes
   g  ... selectAll (".bar")
       .. dataBind (Data frequencies)
     .. enter .. append "rect"
