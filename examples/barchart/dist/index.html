@@ -30,35 +30,42 @@
 
       <h2>Code:</h2>
       <div class="code">
-        <pre>
-main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
-main = do
-  svg <- d3Select ".svg"
-  g <-  svg ... append "g"
-
-  circles <- g ... selectAll "circle"
-      .. dataBind (Data circleData)
-    .. enter .. append "circle"
-      .. attr "cx" (AttrFn (\d i nodes el -> pure d.x))
-      .. attr "cy" (AttrFn (\d i nodes el -> pure d.y))
-      .. attr "r"  (SetAttr 20.0)
-      .. style "stroke" (Value "black")
-      .. style "fill"   (Value "red")
-
-  pure unit
-        </pre>
+        <script src="https://gist.github.com/afcondon/0bdf2341c1768b0e087be3ab17471a3b.js"></script>
       </div>
 
       <h2>Data:</h2>
       <div class="data">
         <pre>
-circleData :: Array Point
-circleData = [ {x: 100.0, y: 100.0}
-             , {x: 200.0, y: 200.0}
-             , {x: 100.0, y: 200.0}
-             , {x: 200.0, y: 100.0}
-             , {x: 150.0, y: 150.0}
-             ]
+type Pair = { letter :: Char, frequency :: Number }
+frequencies :: Array Pair
+frequencies = [
+    { letter: 'A',	frequency: 0.08167 }
+  , { letter: 'B',	frequency: 0.01492 }
+  , { letter: 'C',	frequency: 0.02782 }
+  , { letter: 'D',	frequency: 0.04253 }
+  , { letter: 'E',	frequency: 0.12702 }
+  , { letter: 'F',	frequency: 0.02288 }
+  , { letter: 'G',	frequency: 0.02015 }
+  , { letter: 'H',	frequency: 0.06094 }
+  , { letter: 'I',	frequency: 0.06966 }
+  , { letter: 'J',	frequency: 0.00153 }
+  , { letter: 'K',	frequency: 0.00772 }
+  , { letter: 'L',	frequency: 0.04025 }
+  , { letter: 'M',	frequency: 0.02406 }
+  , { letter: 'N',	frequency: 0.06749 }
+  , { letter: 'O',	frequency: 0.07507 }
+  , { letter: 'P',	frequency: 0.01929 }
+  , { letter: 'Q',	frequency: 0.00095 }
+  , { letter: 'R',	frequency: 0.05987 }
+  , { letter: 'S',	frequency: 0.06327 }
+  , { letter: 'T',	frequency: 0.09056 }
+  , { letter: 'U',	frequency: 0.02758 }
+  , { letter: 'V',	frequency: 0.00978 }
+  , { letter: 'W',	frequency: 0.02360 }
+  , { letter: 'X',	frequency: 0.00150 }
+  , { letter: 'Y',	frequency: 0.01974 }
+  , { letter: 'Z',	frequency: 0.00074 }
+]
         </pre>
       </div>
     </div>
