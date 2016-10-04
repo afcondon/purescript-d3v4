@@ -8,7 +8,7 @@ import D3.Collections (D3Collection(D3Range, D3ArrT))
 import D3.Scale (ScaleType(Linear, Band), scaleBy, bandwidth, domain, rangeRound, d3Scale, padding)
 import D3.Selection (attr, append, enter, dataBind, selectAll, text, getAttr, d3Select)
 import Data.Maybe (Maybe(Just))
-import Prelude (map, Unit, unit, pure, bind, show, (-), (<>), ($), (>>=), (=<<))
+import Prelude (map, Unit, unit, pure, bind, show, (-), (<>))
 
 type Pair = { letter :: Char, frequency :: Number }
 frequencies :: Array Pair
