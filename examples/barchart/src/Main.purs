@@ -3,15 +3,11 @@ module Main where
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(Value), AttrSetter(SetAttr, AttrFn), DataBind(Data), D3, (..), (...))
-import D3.Collections (D3Collection(..), d3Map)
-import D3.Collections.Map (d3MapF)
+import D3.Collections (D3Collection(D3Range, D3ArrT))
+
 import D3.Scale (ScaleType(Linear, Band), scaleBy, bandwidth, domain, rangeRound, d3Scale, padding)
 import D3.Selection (attr, append, enter, dataBind, selectAll, text, getAttr, d3Select)
 import Prelude (map, Unit, unit, pure, bind, show, (-), (<>), ($), (>>=), (=<<))
-
--- define a margin, look to purescript-css for more sophisticated definition
-margin :: { top::Number, right::Number, bottom::Number, left::Number }
-margin = { top: 20.0, right: 20.0, bottom: 30.0, left: 40.0}
 
 type Pair = { letter :: Char, frequency :: Number }
 frequencies :: Array Pair
@@ -44,23 +40,9 @@ frequencies = [
   , { letter: 'Z',	frequency: 0.00074 }
 ]
 
--- three ways of making a collection out of the frequency key value table
-freqArr :: D3Collection Pair
-freqArr = D3ArrT frequencies        -- just wrap the array
-
-freqMap :: forall eff. Eff (d3::D3|eff) (D3Collection Pair)
-freqMap =  do
-        m <- d3Map frequencies
-        pure (D3MapT m)             -- wrap a map made using custom function
-
-
-awn :: Pair -> String
-awn d = show d.letter
-
-freqMapF :: forall eff. Eff (d3::D3|eff) (D3Collection Pair)
-freqMapF = do
-        m <- d3MapF frequencies awn
-        pure (D3MapT m)             -- wrap a map made using custom function
+-- define a margin, look to purescript-css for more sophisticated definition
+margin :: { top::Number, right::Number, bottom::Number, left::Number }
+margin = { top: 20.0, right: 20.0, bottom: 30.0, left: 40.0}
 
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
@@ -70,8 +52,6 @@ main = do
   h <- svg ... getAttr "height"
   let width =  w - margin.left - margin.right
   let height = h - margin.top - margin.bottom
-
-  bazmap <- freqMapF
 
   x <- d3Scale Band
         .. rangeRound 0.0 width
@@ -107,9 +87,6 @@ main = do
       .. attr "x"      (AttrFn (\d i nodes el -> scaleBy x d.letter))
       .. attr "y"      (AttrFn (\d i nodes el -> scaleBy y d.frequency))
       .. attr "width"  (SetAttr (bandwidth x))
-      .. attr "height" (AttrFn (\d i nodes el -> do
-                                                    scaled <- scaleBy y d.frequency -- bit gross that this has to be multiline?? TODO
-                                                    pure (height - scaled)
-                               ))
-
+      .. attr "height" (AttrFn (\d i nodes el -> do scaled <- scaleBy y d.frequency
+                                                    pure (height - scaled)))
   pure unit
