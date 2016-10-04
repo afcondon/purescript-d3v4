@@ -1,16 +1,13 @@
 module Main where
 
-import Control.Alternative (class Applicative)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(Value), AttrSetter(SetAttr, AttrFn), DataBind(Data), D3, (..), (...))
 import D3.Collections (D3Collection(..), d3Map)
-import D3.Collections.Map (D3Map, d3MapF)
-import D3.Scale (Scale, ScaleType(..), scaleBy, bandwidth, rangeRound, d3Scale, padding, domain)
+import D3.Collections.Map (d3MapF)
+import D3.Scale (ScaleType(Linear, Band), scaleBy, bandwidth, domain, rangeRound, d3Scale, padding)
 import D3.Selection (attr, append, enter, dataBind, selectAll, text, getAttr, d3Select)
-import Data.Array (head)
-import Data.Maybe (Maybe(Just))
-import Prelude (Unit, unit, pure, bind, show, (-), (<>), ($), (>>=), (=<<))
+import Prelude (map, Unit, unit, pure, bind, show, (-), (<>), ($), (>>=), (=<<))
 
 -- define a margin, look to purescript-css for more sophisticated definition
 margin :: { top::Number, right::Number, bottom::Number, left::Number }
@@ -47,9 +44,6 @@ frequencies = [
   , { letter: 'Z',	frequency: 0.00074 }
 ]
 
-bel :: forall r. { letter :: Char | r} -> String
-bel { letter: l } = show l
-
 -- three ways of making a collection out of the frequency key value table
 freqArr :: D3Collection Pair
 freqArr = D3ArrT frequencies        -- just wrap the array
@@ -59,9 +53,13 @@ freqMap =  do
         m <- d3Map frequencies
         pure (D3MapT m)             -- wrap a map made using custom function
 
+
+awn :: Pair -> String
+awn d = show d.letter
+
 freqMapF :: forall eff. Eff (d3::D3|eff) (D3Collection Pair)
 freqMapF = do
-        m <- d3MapF frequencies (\d -> show d.letter)
+        m <- d3MapF frequencies awn
         pure (D3MapT m)             -- wrap a map made using custom function
 
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
@@ -73,12 +71,13 @@ main = do
   let width =  w - margin.left - margin.right
   let height = h - margin.top - margin.bottom
 
-  bazmap <- freqMap
+  bazmap <- freqMapF
 
   x <- d3Scale Band
         .. rangeRound 0.0 width
         .. padding 0.1
-        .. domain bazmap
+        .. domain (D3ArrT (map (\d -> d.letter) frequencies))
+
   y <- d3Scale Linear
         .. rangeRound height 0.0
         .. domain (D3Range 0.0 0.12702) -- implement max lookup later TODO
@@ -101,15 +100,15 @@ main = do
     .. attr "text-anchor" (SetAttr "end")
     .. text (Value "Frequency")
 
-  g' <- g ... selectAll (".bar")
+  g  ... selectAll (".bar")
       .. dataBind (Data frequencies)
     .. enter .. append "rect"
       .. attr "class"  (SetAttr "bar")
-      .. attr "x"      (AttrFn (\d i nodes el -> scaleBy x d))           -- somehow this is getting at the letters
-      .. attr "y"      (AttrFn (\d i nodes el -> scaleBy y d.frequency)) -- but how is this getting at the frequencies? dont' understand
+      .. attr "x"      (AttrFn (\d i nodes el -> scaleBy x d.letter))
+      .. attr "y"      (AttrFn (\d i nodes el -> scaleBy y d.frequency))
       .. attr "width"  (SetAttr (bandwidth x))
       .. attr "height" (AttrFn (\d i nodes el -> do
-                                                    scaled <- scaleBy y d.frequency
+                                                    scaled <- scaleBy y d.frequency -- bit gross that this has to be multiline?? TODO
                                                     pure (height - scaled)
                                ))
 
