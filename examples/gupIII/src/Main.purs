@@ -1,14 +1,14 @@
 module Main where
 
 import D3.Selection
-import Control.Monad.Aff (Aff)
+import Control.Monad.Aff (later', Aff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (D3Element, Index, PolyValue(SetByIndex, Value), DataBind(Keyed), AttrSetter(AttrFn, SetAttr), D3, Eff, (...), (..), transparent, opaque)
 import D3.Transitions (tRemove, AttrInterpolator(TweenFn, Target), tStyle, tAttr, savedTransition, TransitionName(..), duration, d3Transition)
 import Data.String (singleton, toCharArray)
 import Data.Traversable (traverse)
-import Prelude (Unit, unit, pure, bind, show, map, negate, ($), (/), (<>), (-), (*))
+import Prelude (id, Unit, unit, pure, bind, show, map, negate, ($), (/), (<>), (-), (*), (<<<))
 
 makeTweenerFn :: ∀ d eff. d -> Index -> D3Element -> Eff (d3::D3|eff) (Number -> Number)
 makeTweenerFn d i e = pure (\i -> i * 32.0)
@@ -77,9 +77,15 @@ setup = do
 
           pure g
 
+updateAff :: ∀ eff. Selection Char -> Array Char -> Aff (d3::D3|eff) Unit
+updateAff g cs = liftEff (updateFn g cs)
+
 main :: ∀ e. Aff (d3::D3,console::CONSOLE|e) Unit
 main = do
   g <- liftEff setup
-  liftEff $ updateFn g alphabet
-  liftEff $ traverse (updateFn g) wordlist
+  later' 1500 $ updateAff g alphabet
+  later' 1500 $ updateAff g (toCharArray "purescript")
+  later' 1500 $ updateAff g (toCharArray "by")
+  later' 1500 $ updateAff g (toCharArray "example")
+  -- liftEff $ traverse (later' 1500 <<< updateAff g) wordlist
   pure unit
