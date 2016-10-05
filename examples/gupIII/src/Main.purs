@@ -1,12 +1,14 @@
 module Main where
 
 import D3.Selection
+import Control.Monad.Aff (Aff)
+import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (D3Element, Index, PolyValue(SetByIndex, Value), DataBind(Keyed), AttrSetter(AttrFn, SetAttr), D3, Eff, (...), (..), transparent, opaque)
 import D3.Transitions (tRemove, AttrInterpolator(TweenFn, Target), tStyle, tAttr, savedTransition, TransitionName(..), duration, d3Transition)
 import Data.String (singleton, toCharArray)
 import Data.Traversable (traverse)
-import Prelude (flip, map, Unit, unit, pure, bind, show, negate, (/), (<>), (-), (*))
+import Prelude (Unit, unit, pure, bind, show, map, negate, ($), (/), (<>), (-), (*))
 
 makeTweenerFn :: ∀ d eff. d -> Index -> D3Element -> Eff (d3::D3|eff) (Number -> Number)
 makeTweenerFn d i e = pure (\i -> i * 32.0)
@@ -58,23 +60,26 @@ updateFn g d = do
 alphabet :: Array Char
 alphabet = toCharArray "abcdefghijklmnopqrstuvwxyz"
 
-alphabets :: Array (Array Char)
-alphabets = map toCharArray ["purescript", "by", "example"]
+wordlist :: Array (Array Char)
+wordlist = map toCharArray ["purescript", "by", "example"]
 
-main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
+-- initialize DOM
+setup :: ∀ eff. Eff (d3::D3|eff) (Selection Char)
+setup = do
+          svg <- d3Select ".svg"
+          w   <- svg ... getAttr "width"
+          h   <- svg ... getAttr "height"
+          let width =  w - margin.left - margin.right
+          let height = h - margin.top - margin.bottom
+
+          g <- svg ... append "g"
+            ..  attr "transform"  (SetAttr ("translate(32," <> show (height / 2.0) <> ")"))
+
+          pure g
+
+main :: ∀ e. Aff (d3::D3,console::CONSOLE|e) Unit
 main = do
--- general setup
-  svg <- d3Select ".svg"
-  w   <- svg ... getAttr "width"
-  h   <- svg ... getAttr "height"
-  let width =  w - margin.left - margin.right
-  let height = h - margin.top - margin.bottom
-
-  g <- svg ... append "g"
-    ..  attr "transform"  (SetAttr ("translate(32," <> show (height / 2.0) <> ")"))
-
-  updateFn g alphabet
-
-  traverse (updateFn g) alphabets
-
+  g <- liftEff setup
+  liftEff $ updateFn g alphabet
+  liftEff $ traverse (updateFn g) wordlist
   pure unit
