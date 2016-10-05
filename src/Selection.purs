@@ -43,8 +43,8 @@ foreign import data Selection :: * -> *
 -- missing SelectFnFn which takes a predicate fn to perform the selection
 foreign import appendFn      :: ∀ d eff.      EffFn2 (d3::D3|eff) String                      (Selection d) (Selection d)
 foreign import attrFn        :: ∀ d v eff.    EffFn3 (d3::D3|eff) String v                    (Selection d) (Selection d)
-foreign import bindDataFn    :: ∀ d eff.      EffFn2 (d3::D3|eff) (Array d)                   (Selection d) (Selection d)
-foreign import bindDataFnK   :: ∀ d k eff.    EffFn3 (d3::D3|eff) (Array d) (d -> k)          (Selection d) (Selection d)
+foreign import bindDataFn    :: ∀ d1 d2 eff.  EffFn2 (d3::D3|eff) (Array d2)                  (Selection d1) (Selection d2)
+foreign import bindDataFnK   :: ∀ d1 d2 k eff. EffFn3 (d3::D3|eff) (Array d2) (d2 -> k)       (Selection d1) (Selection d2)
 foreign import classedFn     :: ∀ d eff.      EffFn3 (d3::D3|eff) String Boolean              (Selection d) (Selection d)
 foreign import d3SelectAllFn :: ∀ d eff.      EffFn1 (d3::D3|eff) String                                    (Selection d)
 foreign import d3SelectFn    :: ∀ d eff.      EffFn1 (d3::D3|eff) String                                    (Selection d)
@@ -139,7 +139,7 @@ selectElem element           = runEffFn1 selectElFn element
 select  :: ∀ d eff.  String                     -> Selection d -> Eff (d3::D3|eff) (Selection d)
 select selector              = runEffFn2 selectFn selector
 
-dataBind :: ∀ d k eff. DataBind d k             -> Selection d -> Eff (d3::D3|eff) (Selection d)
+dataBind :: ∀ d1 d2 k eff. DataBind d2 k             -> Selection d1 -> Eff (d3::D3|eff) (Selection d2)
 -- would be nice to express that Keyed needs k to be Ord, will have to wait for GADTs
 -- dataBind :: ∀ d k eff. Ord k => DataBind d k    -> Selection d -> Eff (d3::D3|eff) (Selection d)
 dataBind (Data dataArray)         = runEffFn2 bindDataFn dataArray

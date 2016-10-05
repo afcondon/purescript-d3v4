@@ -23,7 +23,7 @@ margin :: { top::Number, right::Number, bottom::Number, left::Number }
 margin = { top: 20.0, right: 20.0, bottom: 30.0, left: 40.0}
 
 -- initialize DOM
-setup :: ∀ eff. Eff (d3::D3|eff) (Selection Link)
+setup :: ∀ d eff. Eff (d3::D3|eff) (Selection d)
 setup = do
           svg <- d3Select ".svg"
           w   <- svg ... getAttr "width"
@@ -46,4 +46,10 @@ main = do
     .. dataBind (Data miserables.links)
       .. enter .. append "line"
       .. attr "stroke-width" (AttrFn (\d i n e -> pure $ sqrt (d.value)))
+
+  node <- svg ... append "g"
+      .. attr "class" (SetAttr "nodes")
+      .. selectAll "circle"
+    .. dataBind (Data miserables.nodes)   -- go back and look at what you did in default to put multiple Selection types in one SVG
+
   pure unit
