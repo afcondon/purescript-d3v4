@@ -12,3 +12,5 @@ npm-debug.log
 examples/default/dist/*.js
 .psc-ide-port
 node_modules
+examples/*/dist/example.js
+/examples/gupIII/dist/example.js
