@@ -2,4 +2,5 @@
 
 "use strict"
 
-exports.approxZero = 1e-6
+exports.transparent = "1e-6"
+exports.opaque      = "1"

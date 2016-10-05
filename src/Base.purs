@@ -20,6 +20,8 @@ module D3.Base
   , PredicateB
   , PredicateS
   , PredicateN
+  , transparent
+  , opaque
   , theHorror
   ) where
 
@@ -67,7 +69,8 @@ instance isShowTypenames :: Show Typenames where
 theHorror :: ∀ t0. t0
 theHorror = unsafeCoerce writeNull
 
-foreign import approxZero :: Number
+foreign import transparent :: String
+foreign import opaque :: String
 
 -- | These next two operators are really key to making this DSL look like D3 in JavaScript
 -- | All respect to pelotom for cooking them up in the original purescript-d3!
