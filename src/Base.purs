@@ -97,7 +97,7 @@ data DataBind d k = Data (Array d)
                   | Keyed (Array d) (d -> k)
 
 data PolyValue d v  = Value v
-                    | SetByIndex (D3SetWithIndex d v)
+                    | SetByIndex (D3SetWithIndex d v) -- really want to say d OR v is convertible to String - TODO EXPLORE
 
 data Filter d       = Selector  String
                     | Predicate (d -> Boolean)
