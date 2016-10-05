@@ -107,3 +107,5 @@ data ClassSetter  d = SetAll Boolean
 
 data AttrSetter d x = SetAttr x
                     | AttrFn (PredicateFn d x)   -- rename both data ctor and Type here TODO
+
+-- || Why so many of these ADTs - that's really gross and un-mnemonic, must fix TODO

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=800px, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="psblock.css">
+  <style>
+
+  .links line {
+    stroke: #999;
+    stroke-opacity: 0.6;
+  }
+
+  .nodes circle {
+    stroke: #fff;
+    stroke-width: 1.5px;
+  }
+
+  </style>
+
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <span class="left">afc</span>
+    <span class="right"><a href="http://bl.ocks.org/mbostock/3885304">based on...</a></span>
+  </header>
+
+  <div class="inner">
+    <div class="inner-inner">
+      <h1>Simple Force Layout from JSON data <span>#5</span></h1>
+
+      <svg  width="960" height="500" class="svg"></svg>
+      <div class="description">
+
+        <p>This simple force-directed graph shows character co-occurence in <em>Les
+        Misérables</em>. A physical simulation of charged particles and springs places
+        related characters in closer proximity, while unrelated characters are farther
+        apart. Layout algorithm inspired by <a
+        href="http://www.csse.monash.edu.au/~tdwyer/">Tim Dwyer</a> and <a
+        href="http://web.archive.org/web/20080410171619/http://www.teknikus.dk/tj/gdc2001.htm">Thomas
+        Jakobsen</a>. Data based on character coappearence in Victor Hugo's <em>Les
+        Misérables</em>, compiled by <a
+        href="http://www-cs-faculty.stanford.edu/~uno/sgb.html">Donald Knuth</a>.</p>
+
+        <a target="_blank" title="Open Block 4063269 a new window." href="">Open <svg height="16" width="12"><path d="M11 10h1v3c0 0.55-0.45 1-1 1H1c-0.55 0-1-0.45-1-1V3c0-0.55 0.45-1 1-1h3v1H1v10h10V10zM6 2l2.25 2.25-3.25 3.25 1.5 1.5 3.25-3.25 2.25 2.25V2H6z"></path></svg></a>
+      </div>
+
+      <h2>Code:</h2>
+      <div class="code">
+        <!-- insert your Gist embed here -->
+      </div>
+
+      <h2>Data:</h2>
+      <div class="data">
+        <pre>
+          <!-- insert data example here -->
+        </pre>
+      </div>
+    </div>
+
+    <footer><small>Copyleft 2016 etc etc</small></footer>
+  </div>
+
+</div>
+
+<script src="/node_modules/d3-array/build/d3-array.min.js"></script>
+<script src="/node_modules/d3-collection/build/d3-collection.min.js"></script>
+<script src="/node_modules/d3-color/build/d3-color.min.js"></script>
+<script src="/node_modules/d3-dispatch/build/d3-dispatch.min.js"></script>
+<script src="/node_modules/d3-ease/build/d3-ease.min.js"></script>
+<script src="/node_modules/d3-format/build/d3-format.min.js"></script>
+<script src="/node_modules/d3-interpolate/build/d3-interpolate.min.js"></script>
+<script src="/node_modules/d3-time-format/build/d3-time-format.min.js"></script>
+<script src="/node_modules/d3-time/build/d3-time.min.js"></script>
+<script src="/node_modules/d3-timer/build/d3-timer.min.js"></script>
+
+<script src="/node_modules/d3-drag/build/d3-drag.js"></script>
+<script src="/node_modules/d3-zoom/build/d3-zoom.js"></script>
+<script src="/node_modules/d3-scale/build/d3-scale.js"></script>
+<script src="/node_modules/d3-selection/build/d3-selection.js"></script>
+<script src="/node_modules/d3-transition/build/d3-transition.js"></script>
+<script src="example.js"></script>
+
+
+</body>
+</html>
