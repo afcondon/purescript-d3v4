@@ -71,13 +71,16 @@ div.inner .description p {
 	float: left;
 }
 
-div.inner .description a {
-	font-size: 0.8em;
+div.inner .description p a {
 	color: #333;
-	float: right;
-	padding: 10px;
 	color: lightblue;
 	text-decoration: none;
+}
+
+div.inner .description p + a {
+	padding: 10px;
+	font-size: 0.8em;
+	float: right;
 }
 
 div.inner .description a:hover {
