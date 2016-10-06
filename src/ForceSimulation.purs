@@ -1,9 +1,9 @@
 module D3.ForceSimulation where
 
-import D3.Base (Index, D3, Eff)
-import Data.Function.Eff (runEffFn1, EffFn2, runEffFn2, EffFn1)
-import Data.Maybe (Maybe(Nothing, Just))
 import Data.Pair
+import D3.Base (Index, D3, Eff)
+import Data.Function.Eff (runEffFn3, EffFn3, runEffFn1, EffFn2, runEffFn2, EffFn1)
+import Data.Maybe (Maybe(Nothing, Just))
 
 foreign import data D3Simulation :: *
 foreign import data D3Force      :: *
@@ -22,24 +22,30 @@ type DraggableLayout = { nodes :: Array DraggableNode
 data ForceType      = Centering | Collision | Links | ManyBody | ForceX | ForceY
 data SimulationType = Force
 
-foreign import d3ForceSimulationFn :: ∀ eff. Eff (d3::D3|eff) D3Simulation
-
-foreign import addLinkForceFn      :: ∀ eff. EffFn2 (d3::D3|eff) D3Force D3Simulation D3Simulation
-
-foreign import makeLinkForceFnFn   :: ∀ v eff. EffFn2 (d3::D3|eff) (Array Link) (Node -> Index -> v) D3Force
-
-foreign import makeLinkForceFn     :: ∀ eff. EffFn1 (d3::D3|eff) (Array Link) D3Force
-
-foreign import makeManyBodyForceFn :: ∀ eff. Eff (d3::D3|eff) D3Force
-
-foreign import makeCenterForceFnP  :: ∀ eff. EffFn1 (d3::D3|eff) (Array Number) D3Force
-foreign import makeCenterForceFn   :: ∀ eff. Eff (d3::D3|eff) D3Force
+foreign import addForceFn          :: ∀ eff. EffFn3 (d3::D3|eff) String D3Force D3Simulation    D3Simulation
+foreign import d3ForceSimulationFn :: ∀ eff. Eff    (d3::D3|eff)                                D3Simulation
+foreign import makeCenterForceFn   :: ∀ eff. Eff    (d3::D3|eff)                                     D3Force
+foreign import makeCenterForceFnP  :: ∀ eff. EffFn1 (d3::D3|eff) (Array Number)                      D3Force
+foreign import makeLinkForceFn     :: ∀ eff. EffFn1 (d3::D3|eff) (Array Link)                        D3Force
+foreign import makeLinkForceFnFn :: ∀ v eff. EffFn2 (d3::D3|eff) (Array Link) (Node -> Index -> v)   D3Force
+foreign import makeManyBodyForceFn :: ∀ eff. Eff    (d3::D3|eff)                                     D3Force
+foreign import simulationNodesFn   :: ∀ eff. EffFn2 (d3::D3|eff) (Array Node) D3Simulation      D3Simulation
 
 d3ForceSimulation :: ∀ eff. SimulationType -> Eff (d3::D3|eff) D3Simulation
 d3ForceSimulation Force = d3ForceSimulationFn
 
-addLinkForce :: ∀ eff. D3Force -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
-addLinkForce = runEffFn2 addLinkForceFn
+initNodes :: ∀ eff. Array Node -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
+initNodes = runEffFn2 simulationNodesFn
+
+-- addTickListener  :: forall eff.
+
+addForce :: ∀ eff. ForceType -> D3Force -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
+addForce Centering = runEffFn3 addForceFn "center"
+addForce Collision = runEffFn3 addForceFn "not implemented yet"
+addForce Links     = runEffFn3 addForceFn "link"
+addForce ManyBody  = runEffFn3 addForceFn "charge"
+addForce ForceX    = runEffFn3 addForceFn "not implemented yet"
+addForce ForceY    = runEffFn3 addForceFn "not implemented yet"
 
 makeLinkForce :: ∀ v eff. Maybe (Array Link) -> Maybe (Node -> Index -> v) -> Eff (d3::D3|eff) D3Force
 makeLinkForce (Just ls) (Just f) = runEffFn2 makeLinkForceFnFn ls f
@@ -53,11 +59,11 @@ makeCenterForce :: ∀ eff. Maybe (Pair Number) -> Eff (d3::D3|eff) D3Force
 makeCenterForce (Just (Pair x y)) = runEffFn1 makeCenterForceFnP [x,y]
 makeCenterForce Nothing           = makeCenterForceFn
 
--- || Minimal implementation for simple demo:
-  -- var simulation = d3.forceSimulation()
-  --     .force("link", d3.forceLink().id(function(d) { return d.id; }))
-  --     .force("charge", d3.forceManyBody())
-  --     .force("center", d3.forceCenter(width / 2, height / 2));
+
+ -- var simulation = d3.forceSimulation()
+ --                    .force("link", d3.forceLink().id(function(d) { return d.id; }))
+ --                    .force("charge", d3.forceManyBody())
+ --                    .force("center", d3.forceCenter(width / 2, height / 2));
 
   -- simulation
   --     .nodes(graph.nodes)
@@ -66,6 +72,17 @@ makeCenterForce Nothing           = makeCenterForceFn
   -- simulation.force("link")
   --     .links(graph.links);
 
+  -- function ticked() {
+  --   link
+  --       .attr("x1", function(d) { return d.source.x; })
+  --       .attr("y1", function(d) { return d.source.y; })
+  --       .attr("x2", function(d) { return d.target.x; })
+  --       .attr("y2", function(d) { return d.target.y; });
+  --
+  --   node
+  --       .attr("cx", function(d) { return d.x; })
+  --       .attr("cy", function(d) { return d.y; });
+  -- }
 
 {-
 Simulation API

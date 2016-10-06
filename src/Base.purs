@@ -46,6 +46,7 @@ type D3Typenames = String
 type Nodes       = Array D3Element
 type Point       = { x :: Number, y :: Number }
 
+-- | types for drags and zooms
 data ListenerType = StartDrag | Drag | EndDrag
                   | StartZoom | Zoom | EndZoom
 
