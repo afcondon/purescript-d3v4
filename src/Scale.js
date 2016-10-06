@@ -66,3 +66,8 @@ exports.paddingOuterFn    = function(p, scale) { return scale.paddingOuter(p); }
 exports.bandwidthFn       = function(scale)    { return scale.bandwidth(); }
 exports.stepFN            = function(scale)    { return scale.step(); }
 exports.alignFn           = function(scale)    { return scale.align(); }
+
+exports.schemeCategory10 = d3.schemeCategory10();
+exports.schemeCategory20 = d3.schemeCategory20();
+exports.schemeCategory20b = d3.schemeCategory20b();
+exports.schemeCategory20c = d3.schemeCategory20c();

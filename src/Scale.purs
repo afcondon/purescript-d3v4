@@ -2,6 +2,10 @@ module D3.Scale
   ( Scale
   , ScaleType(..)
   , SchemeCategory
+  , schemeCategory10
+  , schemeCategory20
+  , schemeCategory20b
+  , schemeCategory20c
   , d3Scale
   , bandwidth
   , clamp
@@ -33,6 +37,10 @@ type Format       = String
 
 -- | This belongs in d3-scale-chromatic here just for now, to be broken out later
 foreign import data SchemeCategory :: *       -- in practice it's just a string, i think
+foreign import schemeCategory10  :: SchemeCategory
+foreign import schemeCategory20  :: SchemeCategory
+foreign import schemeCategory20b :: SchemeCategory
+foreign import schemeCategory20c :: SchemeCategory
 
 type D3LinearScale d r    = Scale d r
 type D3LogScale d r       = Scale d r

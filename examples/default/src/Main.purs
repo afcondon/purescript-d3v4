@@ -221,6 +221,8 @@ main = do
 
   let foo = circles ... call (unsafeCoerce yag) -- adds the drag callbacks for drag (yag) on selection (g)
   -- unsafeCoerce here is obviously undesirable, need to play with types and see if we can reformulate to lose it TODO
+  -- could for example have a changeSelectionType :: ∀ d1 d2 eff. Selection d1 -> D3Eff (Selection d2)
+  -- it would mean breaking chains but...perhaps that's better anyway
 
   let tn2 = TypeNames [ { name: Just "foo", type: Zoom } ]
   yag2 <- d3Zoom
