@@ -2,8 +2,10 @@ module D3.ForceSimulation where
 
 import Data.Pair
 import D3.Base (Index, D3, Eff)
-import Data.Function.Eff (runEffFn3, EffFn3, runEffFn1, EffFn2, runEffFn2, EffFn1)
+import D3.Selection (Selection)
+import Data.Function.Eff (mkEffFn2, runEffFn3, EffFn3, runEffFn1, EffFn2, runEffFn2, EffFn1)
 import Data.Maybe (Maybe(Nothing, Just))
+import Prelude (Unit)
 
 foreign import data D3Simulation :: *
 foreign import data D3Force      :: *
@@ -15,8 +17,9 @@ type GroupedForceLayout = { nodes :: Array Node
                           , links :: Array Link }
 
 -- for a type to be draggable it will have to have x and y fields for the drag callback to operate on
-type DraggableNode = { id :: String, group :: Number, x :: Number, y :: Number }
-type DraggableLayout = { nodes :: Array DraggableNode
+type ForceNode = { id :: String, group :: Number, x :: Number, y :: Number }
+type ForceLink = { source :: ForceNode, target :: ForceNode, value :: Number }
+type DraggableLayout = { nodes :: Array ForceNode
                        , links :: Array Link }
 
 data ForceType      = Centering | Collision | Links | ManyBody | ForceX | ForceY
@@ -30,6 +33,13 @@ foreign import makeLinkForceFn     :: ∀ eff. EffFn1 (d3::D3|eff) (Array Link) 
 foreign import makeLinkForceFnFn :: ∀ v eff. EffFn2 (d3::D3|eff) (Array Link) (Node -> Index -> v)   D3Force
 foreign import makeManyBodyForceFn :: ∀ eff. Eff    (d3::D3|eff)                                     D3Force
 foreign import simulationNodesFn   :: ∀ eff. EffFn2 (d3::D3|eff) (Array Node) D3Simulation      D3Simulation
+foreign import onTickFn            :: ∀ eff. EffFn2 (d3::D3|eff)
+                                                      (EffFn2 (d3::D3|eff)
+                                                      (Selection ForceNode)
+                                                      (Selection ForceLink)
+                                                      Unit)
+                                                    D3Simulation
+                                                    D3Simulation
 
 d3ForceSimulation :: ∀ eff. SimulationType -> Eff (d3::D3|eff) D3Simulation
 d3ForceSimulation Force = d3ForceSimulationFn
@@ -37,7 +47,8 @@ d3ForceSimulation Force = d3ForceSimulationFn
 initNodes :: ∀ eff. Array Node -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
 initNodes = runEffFn2 simulationNodesFn
 
--- addTickListener  :: forall eff.
+onTick  :: forall eff. (Selection ForceNode -> Selection ForceLink -> Eff (d3::D3|eff) Unit) -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
+onTick f   = runEffFn2 onTickFn (mkEffFn2 f)
 
 addForce :: ∀ eff. ForceType -> D3Force -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
 addForce Centering = runEffFn3 addForceFn "center"
