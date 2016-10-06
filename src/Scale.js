@@ -11,7 +11,7 @@ exports.d3TimeScaleFn     = function() { return d3.scaleTime(); }
 // constructors - ordinal scales
 exports.d3BandScaleFn     = function()       { return d3.scaleBand(); }
 exports.d3PointScaleFn    = function()       { return d3.scalePoint(); }
-exports.d3CategoryScaleFn = function(scheme) { return d3.scaleCategory(scheme); }
+exports.d3CategoryScaleFn = function(scheme) { return d3.scaleOrdinal(scheme); }
 
 // constructors - QuantizeScale
 exports.d3QuantizeScaleFn  = function()      { return d3.scaleQuantize(); }
@@ -67,7 +67,7 @@ exports.bandwidthFn       = function(scale)    { return scale.bandwidth(); }
 exports.stepFN            = function(scale)    { return scale.step(); }
 exports.alignFn           = function(scale)    { return scale.align(); }
 
-exports.schemeCategory10 = d3.schemeCategory10();
-exports.schemeCategory20 = d3.schemeCategory20();
-exports.schemeCategory20b = d3.schemeCategory20b();
-exports.schemeCategory20c = d3.schemeCategory20c();
+exports.schemeCategory10 = d3.schemeCategory10;
+exports.schemeCategory20 = d3.schemeCategory20;
+exports.schemeCategory20b = d3.schemeCategory20b;
+exports.schemeCategory20c = d3.schemeCategory20c;

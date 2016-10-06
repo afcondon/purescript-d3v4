@@ -1,13 +1,13 @@
 module Main where
 
-import D3.Selection (Selection, call, attr, append, enter, dataBind, selectAll, getAttr, d3Select, selectElem)
-import Miserables (miserables, makeDraggable)
 import Control.Monad.Eff.Console (CONSOLE)
-import D3.Base (D3, Eff, D3Element, Index, Point, AttrSetter(AttrFn, SetAttr), DataBind(Data), ListenerType(StartDrag, EndDrag, Drag), Typenames(TypeNames), (...), (..))
+import D3.Base (PolyValue(SetByIndex), D3, Eff, D3Element, Index, Point, AttrSetter(AttrFn, SetAttr), DataBind(Data), ListenerType(StartDrag, EndDrag, Drag), Typenames(TypeNames), (...), (..))
 import D3.Drag (dragUpdate, addDragListener, d3Drag)
 import D3.Scale (ScaleType(Category), scaleBy, schemeCategory20, d3Scale)
+import D3.Selection (text, Selection, call, attr, append, enter, dataBind, selectAll, getAttr, d3Select, selectElem)
 import Data.Maybe (Maybe(Just))
 import Math (sqrt)
+import Miserables (miserables, makeDraggable)
 import Prelude (Unit, unit, pure, bind, ($), (-))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -66,12 +66,18 @@ main = do
       .. attr "fill" (AttrFn (\d i n e -> do fill <- scaleBy color d.group
                                              pure fill))
 
-  yag <- d3Drag { x: 0.0, y: 0.0 } -- seems to me that phantom type + unsafeCoerce is stupid TODO
+  dragBehavior <- d3Drag { x: 0.0, y: 0.0 } -- seems to me that phantom type + unsafeCoerce is stupid TODO
       .. addDragListener (TypeNames [ { name: Just "foo", type: Drag }]) dragged
       .. addDragListener (TypeNames [ { name: Just "foo", type: EndDrag }]) dragended
       .. addDragListener (TypeNames [ { name: Just "foo", type: StartDrag }]) dragstarted
 
-  node ... call (unsafeCoerce yag)
+  -- let foo = node ... call (unsafeCoerce dragBehavior)
+  let foo = dragBehavior ?node
+
+  node ... append "title"
+        .. text (SetByIndex (\d i -> pure (d.id)))
+
+
 
   pure unit
 

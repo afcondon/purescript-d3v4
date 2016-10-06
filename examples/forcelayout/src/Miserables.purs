@@ -1,11 +1,11 @@
 module Miserables (
     Node
   , Link
+  , GroupedForceLayout
   , miserables
   , makeDraggable
   ) where
 
-import D3.Base (Nodes)
 import Prelude (map)
 
 type Node = { id :: String, group :: Number }
