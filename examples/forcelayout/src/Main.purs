@@ -3,7 +3,7 @@ module Main where
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(SetByIndex), D3, Eff, D3Element, Index, Point, AttrSetter(AttrFn, SetAttr), DataBind(Data), ListenerType(StartDrag, EndDrag, Drag), Typenames(TypeNames), (...), (..))
 import D3.Drag (dragUpdate, addDragListener, d3Drag)
-import D3.ForceSimulation (ForceType(Centering, ManyBody, Links), addForce, d3ForceSimulation, makeCenterForce, makeManyBody, makeLinkForce)
+import D3.ForceSimulation (SimulationType(Force), DraggableLayout, ForceType(Centering, ManyBody, Links), addForce, d3ForceSimulation, makeCenterForce, makeManyBody, makeLinkForce)
 import D3.Scale (ScaleType(Category), scaleBy, schemeCategory20, d3Scale)
 import D3.Selection (text, Selection, call, attr, append, enter, dataBind, selectAll, getAttr, d3Select, selectElem)
 import Data.Maybe (Maybe(Just, Nothing))
@@ -48,7 +48,8 @@ setup = do
 
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
-  let jsondata = makeDraggable miserables  -- sets them all to (0.0,0.0) we might prefer custom
+  -- get the data (to simplify this ex. to the bone, no AJAX here)
+  let jsondata = makeDraggable miserables
   svg <- setup
   link <- svg ... append "g"
       .. attr "class" (SetAttr "links")
@@ -61,12 +62,13 @@ main = do
 
   linkForce   <- makeLinkForce Nothing Nothing
   chargeForce <- makeManyBody
-  centerForce <- makeCenterForce (Just (Pair (width / 2.0) (height / 2.0)) )
+  -- centerForce <- makeCenterForce (Just (Pair (width / 2.0) (height / 2.0)) )
+  centerForce <- makeCenterForce (Just (Pair 200.0 200.0) )
 
-  simulation <- d3ForceSimulation
-            --  .. addForce Links     linkForce
-            --  .. addForce ManyBody  chargeForce
-            --  .. addForce Centering centerForce
+  simulation <- d3ForceSimulation Force
+             .. addForce Links     linkForce
+             .. addForce ManyBody  chargeForce
+             .. addForce Centering centerForce
 
   node <- svg ... append "g"
       .. attr "class" (SetAttr "nodes")
@@ -86,7 +88,5 @@ main = do
 
   node ... append "title"
         .. text (SetByIndex (\d i -> pure (d.id)))
-
-
 
   pure unit
