@@ -3,7 +3,7 @@ module Main where
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(SetByIndex), D3, Eff, D3Element, Index, Point, AttrSetter(AttrFn, SetAttr), DataBind(Data), ListenerType(StartDrag, EndDrag, Drag), Typenames(TypeNames), (...), (..))
 import D3.Drag (dragUpdate, addDragListener, d3Drag)
-import D3.ForceSimulation (SimulationType(Force), DraggableLayout, ForceType(Centering, ManyBody, Links), addForce, d3ForceSimulation, makeCenterForce, makeManyBody, makeLinkForce)
+import D3.ForceSimulation (initNodes, SimulationType(Force), DraggableLayout, ForceType(Centering, ManyBody, Links), addForce, d3ForceSimulation, makeCenterForce, makeManyBody, makeLinkForce)
 import D3.Scale (ScaleType(Category), scaleBy, schemeCategory20, d3Scale)
 import D3.Selection (text, Selection, call, attr, append, enter, dataBind, selectAll, getAttr, d3Select, selectElem)
 import Data.Maybe (Maybe(Just, Nothing))
@@ -49,7 +49,7 @@ setup = do
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
   -- get the data (to simplify this ex. to the bone, no AJAX here)
-  let jsondata = makeDraggable miserables
+  let jsondata =  miserables
   svg <- setup
   link <- svg ... append "g"
       .. attr "class" (SetAttr "links")
@@ -63,7 +63,7 @@ main = do
   linkForce   <- makeLinkForce Nothing Nothing
   chargeForce <- makeManyBody
   -- centerForce <- makeCenterForce (Just (Pair (width / 2.0) (height / 2.0)) )
-  centerForce <- makeCenterForce (Just (Pair 200.0 200.0) )
+  centerForce <- makeCenterForce (Just (Pair 200.0 200.0) ) -- d'oh, no globals, width/height not def'd here
 
   simulation <- d3ForceSimulation Force
              .. addForce Links     linkForce
@@ -78,6 +78,8 @@ main = do
       .. attr "r" (SetAttr 5.0)
       .. attr "fill" (AttrFn (\d i n e -> do fill <- scaleBy color d.group
                                              pure fill))
+
+  simulation ... initNodes jsondata.nodes
 
   dragBehavior <- d3Drag { x: 0.0, y: 0.0 } -- seems to me that phantom type + unsafeCoerce is stupid TODO
       .. addDragListener (TypeNames [ { name: Just "foo", type: Drag }]) dragged
