@@ -1,5 +1,5 @@
 {
-  "name": "barchart",
+  "name": "forcelayout",
   "private": true,
   "dependencies": {
     "purescript-d3v4": "*",

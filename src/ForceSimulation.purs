@@ -3,7 +3,7 @@ module D3.ForceSimulation where
 import D3.Base (Index, D3, Eff)
 import Data.Function.Eff (runEffFn1, EffFn2, runEffFn2, EffFn1)
 import Data.Maybe (Maybe(Nothing, Just))
-
+import Data.Pair
 
 foreign import data D3Simulation :: *
 foreign import data D3Force      :: *
@@ -28,7 +28,12 @@ foreign import addLinkForceFn      :: ∀ eff. EffFn2 (d3::D3|eff) D3Force D3Sim
 
 foreign import makeLinkForceFnFn   :: ∀ v eff. EffFn2 (d3::D3|eff) (Array Link) (Node -> Index -> v) D3Force
 
-foreign import makeLinkForceFn     :: ∀ v eff. EffFn1 (d3::D3|eff) (Array Link) D3Force
+foreign import makeLinkForceFn     :: ∀ eff. EffFn1 (d3::D3|eff) (Array Link) D3Force
+
+foreign import makeManyBodyForceFn :: ∀ eff. Eff (d3::D3|eff) D3Force
+
+foreign import makeCenterForceFnP  :: ∀ eff. EffFn1 (d3::D3|eff) (Array Number) D3Force
+foreign import makeCenterForceFn   :: ∀ eff. Eff (d3::D3|eff) D3Force
 
 d3ForceSimulation :: ∀ eff. SimulationType -> Eff (d3::D3|eff) D3Simulation
 d3ForceSimulation Force = d3ForceSimulationFn
@@ -36,9 +41,17 @@ d3ForceSimulation Force = d3ForceSimulationFn
 addLinkForce :: ∀ eff. D3Force -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
 addLinkForce = runEffFn2 addLinkForceFn
 
-makeLinkForce :: ∀ v eff. Array Link -> Maybe (Node -> Index -> v) -> Eff (d3::D3|eff) D3Force
-makeLinkForce ls (Just f) = runEffFn2 makeLinkForceFnFn ls f
-makeLinkForce ls Nothing  = runEffFn1 makeLinkForceFn   ls
+makeLinkForce :: ∀ v eff. Maybe (Array Link) -> Maybe (Node -> Index -> v) -> Eff (d3::D3|eff) D3Force
+makeLinkForce (Just ls) (Just f) = runEffFn2 makeLinkForceFnFn ls f
+makeLinkForce (Just ls) Nothing  = runEffFn1 makeLinkForceFn   ls
+makeLinkForce _ _                = runEffFn1 makeLinkForceFn   []
+
+makeManyBody :: ∀ eff. Eff (d3::D3|eff) D3Force
+makeManyBody = makeManyBodyForceFn
+
+makeCenterForce :: ∀ eff. Maybe (Pair Number) -> Eff (d3::D3|eff) D3Force
+makeCenterForce (Just (Pair x y)) = runEffFn1 makeCenterForceFnP [x,y]
+makeCenterForce Nothing           = makeCenterForceFn
 
 -- || Minimal implementation for simple demo:
   -- var simulation = d3.forceSimulation()

@@ -71,8 +71,7 @@ main = do
       .. addDragListener (TypeNames [ { name: Just "foo", type: EndDrag }]) dragended
       .. addDragListener (TypeNames [ { name: Just "foo", type: StartDrag }]) dragstarted
 
-  -- let foo = node ... call (unsafeCoerce dragBehavior)
-  let foo = dragBehavior ?node
+  let foo = node ... call (unsafeCoerce dragBehavior)
 
   node ... append "title"
         .. text (SetByIndex (\d i -> pure (d.id)))
@@ -80,8 +79,3 @@ main = do
 
 
   pure unit
-
-        -- .call(d3.drag()
-        --     .on("start", dragstarted)
-        --     .on("drag", dragged)
-        --     .on("end", dragended));

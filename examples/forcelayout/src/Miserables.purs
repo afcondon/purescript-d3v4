@@ -1,23 +1,10 @@
 module Miserables (
-    Node
-  , Link
-  , GroupedForceLayout
-  , miserables
+    miserables
   , makeDraggable
   ) where
 
 import Prelude (map)
-
-type Node = { id :: String, group :: Number }
-type Link = { source :: String, target :: String, value :: Number }
-
-type GroupedForceLayout = { nodes :: Array Node
-                          , links :: Array Link }
-
--- for a type to be draggable it will have to have x and y fields for the drag callback to operate on
-type DraggableNode = { id :: String, group :: Number, x :: Number, y :: Number }
-type DraggableLayout = { nodes :: Array DraggableNode
-                       , links :: Array Link }
+import D3.ForceSimulation
 
 foreign import miserables :: GroupedForceLayout
 
