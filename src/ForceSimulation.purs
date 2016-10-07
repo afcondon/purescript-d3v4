@@ -3,11 +3,10 @@ module D3.ForceSimulation where
 import Data.Pair
 import D3.Base (Index, D3, Eff)
 import D3.Selection (Selection)
-import Data.Foreign.Undefined (Undefined(Undefined), unUndefined)
 import Data.Function.Eff (EffFn2, EffFn1, EffFn3, runEffFn1, runEffFn2, runEffFn3)
 import Data.Function.Uncurried (mkFn2, Fn2)
 import Data.Maybe (Maybe(Nothing, Just))
-import Prelude (Unit, pure, bind)
+import Prelude (Unit)
 
 
 foreign import data D3Simulation :: *
