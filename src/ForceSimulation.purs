@@ -5,6 +5,7 @@ import D3.Base (Index, D3, Eff)
 import D3.Selection (Selection)
 import Data.Foreign.Undefined (Undefined(Undefined), unUndefined)
 import Data.Function.Eff (EffFn2, EffFn1, EffFn3, runEffFn1, runEffFn2, runEffFn3)
+import Data.Function.Uncurried (mkFn2, Fn2)
 import Data.Maybe (Maybe(Nothing, Just))
 import Prelude (Unit, pure, bind)
 
@@ -29,7 +30,7 @@ data SimulationType = Force
 
 foreign import addForceFn          :: ∀ eff. EffFn3 (d3::D3|eff) String D3Force D3Simulation    D3Simulation
 foreign import d3ForceSimulationFn :: ∀ eff. Eff    (d3::D3|eff)                                D3Simulation
-foreign import linkIDFn            :: ∀ v eff. EffFn2 (d3::D3|eff) (Node -> Index -> v) D3Force      D3Force
+foreign import linkIDFn            :: ∀ v eff. EffFn2 (d3::D3|eff) (Fn2 Node Index v) D3Force      D3Force
 foreign import makeCenterForceFn   :: ∀ eff. Eff    (d3::D3|eff)                                     D3Force
 foreign import makeCenterForceFnP  :: ∀ eff. EffFn1 (d3::D3|eff) (Array Number)                      D3Force
 foreign import makeLinkForceFn     :: ∀ eff. EffFn1 (d3::D3|eff) (Array Link)                        D3Force
@@ -74,7 +75,7 @@ makeLinkForce (Just ls) = runEffFn1 makeLinkForceFn   ls
 makeLinkForce Nothing   = runEffFn1 makeLinkForceFn   []
 
 setIDFunction :: ∀ v eff. (Node -> Index -> v) -> D3Force -> Eff (d3::D3|eff) D3Force -- Force HAS TO BE LINK FORCE HERE
-setIDFunction = runEffFn2 linkIDFn
+setIDFunction f = runEffFn2 linkIDFn (mkFn2 f)
 
 setLinks      :: ∀ eff. (Array Link) -> D3Force -> Eff (d3::D3|eff) D3Force
 setLinks      = runEffFn2 setLinksFn
