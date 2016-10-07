@@ -38,6 +38,10 @@ foreign import onTickFn            :: ∀ eff. EffFn2 (d3::D3|eff)
                                                     (Eff (d3::D3|eff) Unit)
                                                     D3Simulation
                                                     D3Simulation
+foreign import defaultTickFn       :: ∀ eff. EffFn2 (d3::D3|eff) (Selection Node) (Selection Link)      Unit
+
+defaultTick :: ∀ eff. Selection Node -> Selection Link -> Eff (d3::D3|eff) Unit
+defaultTick = runEffFn2 defaultTickFn
 
 d3ForceSimulation :: ∀ eff. SimulationType -> Eff (d3::D3|eff) D3Simulation
 d3ForceSimulation Force = d3ForceSimulationFn

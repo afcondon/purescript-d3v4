@@ -1,7 +1,6 @@
 module Main where
 
 import D3.ForceSimulation
-import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(SetByIndex), D3, Eff, D3Element, Index, Point, AttrSetter(AttrFn, SetAttr), DataBind(Data), ListenerType(StartDrag, EndDrag, Drag), Typenames(TypeNames), (...), (..))
 import D3.Drag (dragUpdate, addDragListener, d3Drag)
@@ -47,18 +46,10 @@ setup = do
   let height = h - margin.top - margin.bottom
   pure svg
 
-ticked :: ∀ eff. Selection ForceNode -> Selection ForceLink -> Eff (d3::D3|eff) (Eff (d3::D3|eff) Unit)
+ticked :: ∀ eff. Selection Node -> Selection Link -> Eff (d3::D3|eff) (Eff (d3::D3|eff) Unit)
 ticked node link = pure inner where
   inner :: Eff (d3::D3|eff) Unit
-  inner = do
-    -- link ... attr "x1" (AttrFn (\d i n e -> pure d.source.x))
-    --       .. attr "y1" (AttrFn (\d i n e -> pure d.source.y))
-    --       .. attr "x2" (AttrFn (\d i n e -> pure d.source.x))
-    --       .. attr "y2" (AttrFn (\d i n e -> pure d.source.y))
-    --
-    -- node ... attr "cx" (AttrFn (\d i n e -> pure d.x))
-    --       .. attr "cy" (AttrFn (\d i n e -> pure d.y))
-    pure unit
+  inner = defaultTick node link
 
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
@@ -71,7 +62,6 @@ main = do
     .. dataBind (Data jsondata.links)
       .. enter .. append "line"
       .. attr "stroke-width" (AttrFn (\d i n e -> pure $ sqrt (d.value)))
-      .. controlSelectionL   -- selection ends up coerced to ForceLink prematurely, not good - TODO
 
   color <- d3Scale (Category schemeCategory20)
 
@@ -93,7 +83,9 @@ main = do
       .. attr "r" (SetAttr 5.0)
       .. attr "fill" (AttrFn (\d i n e -> do fill <- scaleBy color d.group
                                              pure fill))
-      .. controlSelectionN -- selection ends up coerced to ForceNode prematurely, not good - TODO
+
+  -- controlledNodeSelection <- controlSelectionN node
+  -- controlledLinkSelection <- controlSelectionL link
 
   callback <- ticked node link
 
