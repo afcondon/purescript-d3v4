@@ -35,7 +35,7 @@ foreign import makeLinkForceFnFn :: ∀ v eff. EffFn2 (d3::D3|eff) (Array Link) 
 foreign import makeManyBodyForceFn :: ∀ eff. Eff    (d3::D3|eff)                                     D3Force
 foreign import simulationNodesFn   :: ∀ eff. EffFn2 (d3::D3|eff) (Array Node) D3Simulation      D3Simulation
 foreign import onTickFn            :: ∀ eff. EffFn2 (d3::D3|eff)
-                                                    (EffFn1 (d3::D3|eff) Unit Unit)
+                                                    (Eff (d3::D3|eff) Unit)
                                                     D3Simulation
                                                     D3Simulation
 
@@ -45,8 +45,8 @@ d3ForceSimulation Force = d3ForceSimulationFn
 initNodes :: ∀ eff. Array Node -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
 initNodes = runEffFn2 simulationNodesFn
 
-onTick  :: forall eff. (Unit -> Eff (d3::D3|eff) Unit) -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
-onTick f = runEffFn2 onTickFn (mkEffFn1 f)
+onTick  :: forall eff. Eff (d3::D3|eff) Unit -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
+onTick = runEffFn2 onTickFn
 
 controlSelectionN :: ∀ eff. Selection Node -> Eff (d3::D3|eff) (Selection ForceNode)
 controlSelectionN selection = unsafeCoerce selection

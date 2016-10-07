@@ -1,9 +1,10 @@
 module Main where
 
+import D3.ForceSimulation
+import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (PolyValue(SetByIndex), D3, Eff, D3Element, Index, Point, AttrSetter(AttrFn, SetAttr), DataBind(Data), ListenerType(StartDrag, EndDrag, Drag), Typenames(TypeNames), (...), (..))
 import D3.Drag (dragUpdate, addDragListener, d3Drag)
-import D3.ForceSimulation
 import D3.Scale (ScaleType(Category), scaleBy, schemeCategory20, d3Scale)
 import D3.Selection (text, Selection, call, attr, append, enter, dataBind, selectAll, getAttr, d3Select, selectElem)
 import Data.Maybe (Maybe(Just, Nothing))
@@ -46,24 +47,18 @@ setup = do
   let height = h - margin.top - margin.bottom
   pure svg
 
-ticked :: ∀ eff. Selection ForceNode -> Selection ForceLink -> Eff (d3::D3|eff) (Unit -> Eff (d3::D3|eff) Unit)
-ticked node link = ticked' where
-  ticked' :: forall eff. Unit -> Eff (d3::D3|eff) Unit
-  ticked' = do
-    link ... attr "x1" (AttrFn (\d i n e -> pure d.source.x))
-          .. attr "y1" (AttrFn (\d i n e -> pure d.source.y))
-          .. attr "x2" (AttrFn (\d i n e -> pure d.source.x))
-          .. attr "y2" (AttrFn (\d i n e -> pure d.source.y))
-
-    node ... attr "cx" (AttrFn (\d i n e -> pure d.x))
-          .. attr "cy" (AttrFn (\d i n e -> pure d.y))
+ticked :: ∀ eff. Selection ForceNode -> Selection ForceLink -> Eff (d3::D3|eff) (Eff (d3::D3|eff) Unit)
+ticked node link = pure inner where
+  inner :: Eff (d3::D3|eff) Unit
+  inner = do
+    -- link ... attr "x1" (AttrFn (\d i n e -> pure d.source.x))
+    --       .. attr "y1" (AttrFn (\d i n e -> pure d.source.y))
+    --       .. attr "x2" (AttrFn (\d i n e -> pure d.source.x))
+    --       .. attr "y2" (AttrFn (\d i n e -> pure d.source.y))
+    --
+    -- node ... attr "cx" (AttrFn (\d i n e -> pure d.x))
+    --       .. attr "cy" (AttrFn (\d i n e -> pure d.y))
     pure unit
--- ticked :: ∀ a b eff. a -> b -> Eff (d3::D3|eff) (Unit -> Eff (d3::D3|eff) Unit)
--- ticked node link = inner
---   where inner :: Unit -> Eff (d3::D3|eff) Unit  -- callback returned from ticked
---         inner = do
---           -- do various effectful things with node & link on every tick
---             pure unit
 
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
@@ -100,8 +95,10 @@ main = do
                                              pure fill))
       .. controlSelectionN -- selection ends up coerced to ForceNode prematurely, not good - TODO
 
+  callback <- ticked node link
+
   sim <- simulation ... initNodes jsondata.nodes -- this is the magic spot where jsondata.nodes changes type to jsondata.forcenodes
-      -- ... onTick (ticked node link)
+      .. onTick callback
 
   dragBehavior <- d3Drag { x: 0.0, y: 0.0 } -- seems to me that phantom type + unsafeCoerce is stupid TODO
       .. addDragListener (TypeNames [ { name: Just "foo", type: Drag }]) dragged
