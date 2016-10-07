@@ -35,17 +35,6 @@ dragended d i els element = pure unit
 dragstarted :: ∀ eff. Point -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
 dragstarted d i els element = pure unit
 
-
--- initialize DOM
-setup :: ∀ d eff. Eff (d3::D3|eff) (Selection d)
-setup = do
-  svg <- d3Select ".svg"
-  w   <- svg ... getAttr "width"
-  h   <- svg ... getAttr "height"
-  let width =  w - margin.left - margin.right
-  let height = h - margin.top - margin.bottom
-  pure svg
-
 ticked :: ∀ eff. Selection Node -> Selection Link -> Eff (d3::D3|eff) (Eff (d3::D3|eff) Unit)
 ticked node link = pure inner where
   inner :: Eff (d3::D3|eff) Unit
@@ -56,18 +45,21 @@ main = do
   -- get the data (to simplify this ex. to the bone, no AJAX here)
   let graph =  miserables
 
-  svg <- setup
+  svg <- d3Select ".svg"
+  w   <- svg ... getAttr "width"
+  h   <- svg ... getAttr "height"
+  let width =  w - margin.left - margin.right
+  let height = h - margin.top - margin.bottom
 
   color <- d3Scale (Category schemeCategory20)
 
   linkForce   <- makeLinkForce Nothing
                   .. setIDFunction (\d i -> d.id)
   chargeForce <- makeManyBody
-  -- centerForce <- makeCenterForce (Just (Pair (width / 2.0) (height / 2.0)) )
-  centerForce <- makeCenterForce (Just (Pair 200.0 200.0) ) -- d'oh, no globals, width/height not def'd here
+  centerForce <- makeCenterForce (Just (Pair (width / 2.0) (height / 2.0)) )
 
   simulation <- d3ForceSimulation Force
-             .. addForce Links     "link"   linkForce   -- addForce :: ForceType -> String -> D3Force -> d3Simulation -> d3Simulation
+             .. addForce Links     "link"   linkForce
              .. addForce ManyBody  "charge" chargeForce
              .. addForce Centering "center" centerForce
 
@@ -86,10 +78,12 @@ main = do
       .. attr "r" (SetAttr 5.0)
       .. attr "fill" (AttrFn (\d i n e -> do fill <- scaleBy color d.group
                                              pure fill))
-  dragBehavior <- d3Drag { x: 0.0, y: 0.0 } -- seems to me that phantom type + unsafeCoerce is stupid TODO
-      .. addDragListener (TypeNames [ { name: Just "foo", type: Drag }]) dragged
-      .. addDragListener (TypeNames [ { name: Just "foo", type: EndDrag }]) dragended
-      .. addDragListener (TypeNames [ { name: Just "foo", type: StartDrag }]) dragstarted
+
+  -- seems to me that phantom type + unsafeCoerce is stupid TODO
+  dragBehavior <- d3Drag { x: 0.0, y: 0.0 }
+      .. addDragListener (TypeNames [ { name: Just "drag", type: Drag }]) dragged
+      .. addDragListener (TypeNames [ { name: Just "end", type: EndDrag }]) dragended
+      .. addDragListener (TypeNames [ { name: Just "start", type: StartDrag }]) dragstarted
 
   let foo = node ... call (unsafeCoerce dragBehavior)
 
@@ -100,8 +94,7 @@ main = do
 
   simulation ... initNodes graph.nodes
               .. onTick callback
-
-  updateLinkForce <- getForce "link" simulation
-  updateLinkForce ... setLinks graph.links
+              .. getForce "link"
+              .. setLinks graph.links
 
   pure unit
