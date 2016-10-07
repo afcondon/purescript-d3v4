@@ -61,7 +61,7 @@ main = do
   color <- d3Scale (Category schemeCategory20)
 
   linkForce   <- makeLinkForce Nothing
-                  .. setIDFunction (\d i -> d.id) -- this isn't working because...currying. so no link munging
+                  .. setIDFunction (\d i -> d.id)
   chargeForce <- makeManyBody
   -- centerForce <- makeCenterForce (Just (Pair (width / 2.0) (height / 2.0)) )
   centerForce <- makeCenterForce (Just (Pair 200.0 200.0) ) -- d'oh, no globals, width/height not def'd here

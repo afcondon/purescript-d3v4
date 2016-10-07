@@ -31,7 +31,7 @@ foreign import addForceFn          :: ∀ eff. EffFn3 (d3::D3|eff) String D3Forc
 foreign import d3ForceSimulationFn :: ∀ eff. Eff    (d3::D3|eff)                                D3Simulation
 foreign import linkIDFn            :: ∀ v eff. EffFn2 (d3::D3|eff) (Fn2 Node Index v) D3Force      D3Force
 foreign import makeCenterForceFn   :: ∀ eff. Eff    (d3::D3|eff)                                     D3Force
-foreign import makeCenterForceFnP  :: ∀ eff. EffFn1 (d3::D3|eff) (Array Number)                      D3Force
+foreign import makeCenterForceFnP  :: ∀ eff. EffFn2 (d3::D3|eff) Number Number                       D3Force
 foreign import makeLinkForceFn     :: ∀ eff. EffFn1 (d3::D3|eff) (Array Link)                        D3Force
 foreign import makeManyBodyForceFn :: ∀ eff. Eff    (d3::D3|eff)                                     D3Force
 foreign import getLinksFn          :: ∀ eff. EffFn1 (d3::D3|eff) D3Simulation                   (Array Link)
@@ -88,7 +88,7 @@ makeManyBody = makeManyBodyForceFn
 
 -- || functions only for CENTERING force
 makeCenterForce :: ∀ eff. Maybe (Pair Number) -> Eff (d3::D3|eff) D3Force
-makeCenterForce (Just (Pair x y)) = runEffFn1 makeCenterForceFnP [x,y]
+makeCenterForce (Just (Pair x y)) = runEffFn2 makeCenterForceFnP x y
 makeCenterForce Nothing           = makeCenterForceFn
 
 {-
