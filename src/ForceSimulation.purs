@@ -3,9 +3,10 @@ module D3.ForceSimulation where
 import Data.Pair
 import D3.Base (Index, D3, Eff)
 import D3.Selection (Selection)
+import Data.Foreign.Undefined (Undefined(Undefined), unUndefined)
 import Data.Function.Eff (EffFn2, EffFn1, EffFn3, runEffFn1, runEffFn2, runEffFn3)
 import Data.Maybe (Maybe(Nothing, Just))
-import Prelude (Unit)
+import Prelude (Unit, pure, bind)
 
 
 foreign import data D3Simulation :: *
@@ -33,7 +34,9 @@ foreign import makeCenterForceFn   :: ∀ eff. Eff    (d3::D3|eff)              
 foreign import makeCenterForceFnP  :: ∀ eff. EffFn1 (d3::D3|eff) (Array Number)                      D3Force
 foreign import makeLinkForceFn     :: ∀ eff. EffFn1 (d3::D3|eff) (Array Link)                        D3Force
 foreign import makeManyBodyForceFn :: ∀ eff. Eff    (d3::D3|eff)                                     D3Force
+foreign import getLinksFn          :: ∀ eff. EffFn1 (d3::D3|eff) D3Simulation                   (Array Link)
 foreign import setLinksFn          :: ∀ eff. EffFn2 (d3::D3|eff) (Array Link) D3Force                D3Force
+foreign import getForceFn          :: ∀ eff. EffFn2 (d3::D3|eff) String       D3Simulation           D3Force
 foreign import simulationNodesFn   :: ∀ eff. EffFn2 (d3::D3|eff) (Array Node) D3Simulation      D3Simulation
 foreign import onTickFn            :: ∀ eff. EffFn2 (d3::D3|eff)
                                                     (Eff (d3::D3|eff) Unit)
@@ -53,13 +56,17 @@ initNodes = runEffFn2 simulationNodesFn
 onTick  :: forall eff. Eff (d3::D3|eff) Unit -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
 onTick = runEffFn2 onTickFn
 
-addForce :: ∀ eff. ForceType -> D3Force -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
-addForce Centering = runEffFn3 addForceFn "center"
-addForce Collision = runEffFn3 addForceFn "not implemented yet"
-addForce Links     = runEffFn3 addForceFn "link"
-addForce ManyBody  = runEffFn3 addForceFn "charge"
-addForce ForceX    = runEffFn3 addForceFn "not implemented yet"
-addForce ForceY    = runEffFn3 addForceFn "not implemented yet"
+addForce :: ∀ eff. ForceType -> String -> D3Force -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
+addForce Centering = runEffFn3 addForceFn
+addForce Collision = runEffFn3 addForceFn -- "not implemented yet"
+addForce Links     = runEffFn3 addForceFn
+addForce ManyBody  = runEffFn3 addForceFn
+addForce ForceX    = runEffFn3 addForceFn -- "not implemented yet"
+addForce ForceY    = runEffFn3 addForceFn -- "not implemented yet"
+
+-- This function will blow up if String doens't look up a valid force on this simulation TODO
+getForce :: ∀ eff. String -> D3Simulation                         -> Eff (d3::D3|eff) D3Force
+getForce name sim = runEffFn2 getForceFn name sim
 
 -- || functions only for LINK force
 makeLinkForce :: ∀ eff. Maybe (Array Link) -> Eff (d3::D3|eff) D3Force
@@ -71,6 +78,9 @@ setIDFunction = runEffFn2 linkIDFn
 
 setLinks      :: ∀ eff. (Array Link) -> D3Force -> Eff (d3::D3|eff) D3Force
 setLinks      = runEffFn2 setLinksFn
+
+getLinks      :: ∀ eff. D3Simulation            -> Eff (d3::D3|eff) (Array Link)
+getLinks      = runEffFn1 getLinksFn
 
 -- || functions only for MANY BODY force
 makeManyBody :: ∀ eff. Eff (d3::D3|eff) D3Force

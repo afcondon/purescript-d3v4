@@ -61,15 +61,15 @@ main = do
   color <- d3Scale (Category schemeCategory20)
 
   linkForce   <- makeLinkForce Nothing
-                  .. setIDFunction (\d i -> d.id)
+                  .. setIDFunction (\d i -> d.id) -- this isn't working because...currying. so no link munging
   chargeForce <- makeManyBody
   -- centerForce <- makeCenterForce (Just (Pair (width / 2.0) (height / 2.0)) )
   centerForce <- makeCenterForce (Just (Pair 200.0 200.0) ) -- d'oh, no globals, width/height not def'd here
 
   simulation <- d3ForceSimulation Force
-             .. addForce Links     linkForce   -- addForce :: ForceType -> D3Force -> d3Simulation -> d3Simulation
-             .. addForce ManyBody  chargeForce
-             .. addForce Centering centerForce
+             .. addForce Links     "link"   linkForce   -- addForce :: ForceType -> String -> D3Force -> d3Simulation -> d3Simulation
+             .. addForce ManyBody  "charge" chargeForce
+             .. addForce Centering "center" centerForce
 
   link <- svg ... append "g"
       .. attr "class" (SetAttr "links")
@@ -101,6 +101,7 @@ main = do
   simulation ... initNodes graph.nodes
               .. onTick callback
 
-  linkForce ... setLinks graph.links
+  updateLinkForce <- getForce "link" simulation
+  updateLinkForce ... setLinks graph.links
 
   pure unit

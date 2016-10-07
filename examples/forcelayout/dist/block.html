@@ -57,8 +57,9 @@ d3.json("miserables.json", function(error, graph) {
       .nodes(graph.nodes)
       .on("tick", ticked);
 
-  simulation.force("link")
-      .links(graph.links);
+  mylinkforce = simulation.force("link")
+
+  mylinkforce.links(graph.links);
 
   function ticked() {
     link
