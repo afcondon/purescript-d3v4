@@ -54,44 +54,38 @@ ticked node link = pure inner where
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
   -- get the data (to simplify this ex. to the bone, no AJAX here)
-  let jsondata =  miserables
+  let graph =  miserables
+
   svg <- setup
-  link <- svg ... append "g"
-      .. attr "class" (SetAttr "links")
-      .. selectAll "line"
-    .. dataBind (Data jsondata.links)
-      .. enter .. append "line"
-      .. attr "stroke-width" (AttrFn (\d i n e -> pure $ sqrt (d.value)))
 
   color <- d3Scale (Category schemeCategory20)
 
-  linkForce   <- makeLinkForce Nothing Nothing
+  linkForce   <- makeLinkForce Nothing
+                  .. setIDFunction (\d i -> d.id)
   chargeForce <- makeManyBody
   -- centerForce <- makeCenterForce (Just (Pair (width / 2.0) (height / 2.0)) )
   centerForce <- makeCenterForce (Just (Pair 200.0 200.0) ) -- d'oh, no globals, width/height not def'd here
 
   simulation <- d3ForceSimulation Force
-             .. addForce Links     linkForce
+             .. addForce Links     linkForce   -- addForce :: ForceType -> D3Force -> d3Simulation -> d3Simulation
              .. addForce ManyBody  chargeForce
              .. addForce Centering centerForce
+
+  link <- svg ... append "g"
+      .. attr "class" (SetAttr "links")
+      .. selectAll "line"
+    .. dataBind (Data graph.links)
+      .. enter .. append "line"
+      .. attr "stroke-width" (AttrFn (\d i n e -> pure $ sqrt (d.value)))
 
   node <- svg ... append "g"
       .. attr "class" (SetAttr "nodes")
       .. selectAll "circle"
-    .. dataBind (Data jsondata.nodes)
+    .. dataBind (Data graph.nodes)
       .. enter .. append "circle"
       .. attr "r" (SetAttr 5.0)
       .. attr "fill" (AttrFn (\d i n e -> do fill <- scaleBy color d.group
                                              pure fill))
-
-  -- controlledNodeSelection <- controlSelectionN node
-  -- controlledLinkSelection <- controlSelectionL link
-
-  callback <- ticked node link
-
-  sim <- simulation ... initNodes jsondata.nodes -- this is the magic spot where jsondata.nodes changes type to jsondata.forcenodes
-      .. onTick callback
-
   dragBehavior <- d3Drag { x: 0.0, y: 0.0 } -- seems to me that phantom type + unsafeCoerce is stupid TODO
       .. addDragListener (TypeNames [ { name: Just "foo", type: Drag }]) dragged
       .. addDragListener (TypeNames [ { name: Just "foo", type: EndDrag }]) dragended
@@ -101,5 +95,12 @@ main = do
 
   node ... append "title"
         .. text (SetByIndex (\d i -> pure (d.id)))
+
+  callback <- ticked node link
+
+  simulation ... initNodes graph.nodes
+              .. onTick callback
+
+  linkForce ... setLinks graph.links
 
   pure unit
