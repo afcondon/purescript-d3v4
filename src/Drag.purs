@@ -28,7 +28,6 @@ type DragEvent d = {
   , sourceEvent :: Event
 }
 
-
 type Draggable r = { x :: Number, y :: Number | r }  -- minimum requirement for draggable object
 
 type DragListener d = ∀ eff. (d -> Number -> Array D3Element -> D3Element -> Eff (d3::D3|eff) Unit)

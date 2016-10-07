@@ -3,9 +3,10 @@ module D3.ForceSimulation where
 import Data.Pair
 import D3.Base (Index, D3, Eff)
 import D3.Selection (Selection)
-import Data.Function.Eff (mkEffFn2, runEffFn3, EffFn3, runEffFn1, EffFn2, runEffFn2, EffFn1)
+import Data.Function.Eff (mkEffFn1, mkEffFn2, runEffFn3, EffFn3, runEffFn1, EffFn2, runEffFn2, EffFn1)
 import Data.Maybe (Maybe(Nothing, Just))
 import Prelude (Unit)
+import Unsafe.Coerce (unsafeCoerce)
 
 foreign import data D3Simulation :: *
 foreign import data D3Force      :: *
@@ -34,10 +35,7 @@ foreign import makeLinkForceFnFn :: ∀ v eff. EffFn2 (d3::D3|eff) (Array Link) 
 foreign import makeManyBodyForceFn :: ∀ eff. Eff    (d3::D3|eff)                                     D3Force
 foreign import simulationNodesFn   :: ∀ eff. EffFn2 (d3::D3|eff) (Array Node) D3Simulation      D3Simulation
 foreign import onTickFn            :: ∀ eff. EffFn2 (d3::D3|eff)
-                                                      (EffFn2 (d3::D3|eff)
-                                                      (Selection ForceNode)
-                                                      (Selection ForceLink)
-                                                      Unit)
+                                                    (EffFn1 (d3::D3|eff) Unit Unit)
                                                     D3Simulation
                                                     D3Simulation
 
@@ -47,8 +45,14 @@ d3ForceSimulation Force = d3ForceSimulationFn
 initNodes :: ∀ eff. Array Node -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
 initNodes = runEffFn2 simulationNodesFn
 
-onTick  :: forall eff. (Selection ForceNode -> Selection ForceLink -> Eff (d3::D3|eff) Unit) -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
-onTick f   = runEffFn2 onTickFn (mkEffFn2 f)
+onTick  :: forall eff. (Unit -> Eff (d3::D3|eff) Unit) -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
+onTick f = runEffFn2 onTickFn (mkEffFn1 f)
+
+controlSelectionN :: ∀ eff. Selection Node -> Eff (d3::D3|eff) (Selection ForceNode)
+controlSelectionN selection = unsafeCoerce selection
+
+controlSelectionL :: ∀ eff. Selection Link -> Eff (d3::D3|eff) (Selection ForceLink)
+controlSelectionL selection = unsafeCoerce selection
 
 addForce :: ∀ eff. ForceType -> D3Force -> D3Simulation -> Eff (d3::D3|eff) D3Simulation
 addForce Centering = runEffFn3 addForceFn "center"
