@@ -89,13 +89,13 @@ updateAff g cs = liftEff (updateFn g cs)
 main :: ∀ e. Aff (d3::D3,console::CONSOLE|e) Unit
 main = do
   g <- liftEff setup
-  later' 1500 $ updateAff g alphabet
-  later' 1500 $ updateAff g (toCharArray "abcdefghijklmnopqrstuvwxyz")
+  updateAff g alphabet
   later' 1500 $ updateAff g (toCharArray "abcijklmoprstvwyz")
   later' 1500 $ updateAff g (toCharArray "acfhjklmnoqrtuvxz")
   later' 1500 $ updateAff g (toCharArray "aceghilmoqsyz")
   later' 1500 $ updateAff g (toCharArray "abctyz")
   later' 1500 $ updateAff g (toCharArray "abcdefghijklmnopqrstuvwxyz")
+  later' 1500 $ updateAff g (toCharArray "purescript by example")
   -- | it would be nice if we could do something like the following:
   -- liftEff $ traverse (later' 1500 <<< updateAff g) wordlist
   pure unit
