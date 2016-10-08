@@ -24,6 +24,24 @@
 
 If you serve http from the examples directory you should be able to see all five of these simple demos run now.
 
+### Some resources about visualization generally...
+
+All of Edward Tufte's books are essential but [this](https://www.amazon.com/Envisioning-Information-Edward-R-Tufte/dp/0961392118) is maybe a good one to start with  in this context.
+
+Very nice [book](https://www.amazon.com/Book-Trees-Visualizing-Branches-Knowledge/dp/1616892188) by Manuel Lima about the ubiquitous tree diagram, all the way back to Ramon Llull in 13thC.
+
+Comprehensive overview / [introduction](https://www.amazon.com/Visualization-Analysis-Design-Peters-Series/dp/1466508914) to data visualization by the great Tamara Munzner.
+
+### ...and D3 specifically
+
+[General Update Pattern:](http://bl.ocks.org/mbostock/3808234)
+
+[How Selections Work (as it was in d3v3)](https://bost.ocks.org/mike/selection/)
+
+[Irene Ros D3v4 -What’s New?](https://iros.github.io/d3-v4-whats-new/)
+
+[Simpson's Paradox](http://vudlab.com/simpsons/) illustrated and explained using a variety of D3 ideas to very good effect.
+
 ### Further thoughts
 
 D3 encodes a _wealth_ of domain specific information about data visualization that is the fruit of both creator Mike Bostock's previous visualization libraries and, also, the extraordinarily rich eco-system of users that it has accumulated.
