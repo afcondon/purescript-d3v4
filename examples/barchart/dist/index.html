@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=800px, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="../../psblock.css">
+  <style>
+  .bar {
+    	fill: steelblue;
+    }
+
+    .bar:hover {
+    	fill: brown;
+    }
+
+    .axis--x path {
+    	display: none;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <span class="left">afc</span>
+    <span class="right"><a href="https://bl.ocks.org/mbostock/3885304">based on...</a></span>
+  </header>
+
+  <div class="inner">
+    <div class="inner-inner">
+      <h1>A simple SVG BarChart <span>#4</span></h1>
+
+      <svg  width="960" height="400" class="svg"></svg>
+      <div class="description">
+        <p class="lorem">
+          Uses Scales, Axes and, of course, Selection to put a bar chart into an SVG.
+        </p>
+
+        <a target="_blank" title="Open Block 4063269 a new window." href="">Open <svg height="16" width="12"><path d="M11 10h1v3c0 0.55-0.45 1-1 1H1c-0.55 0-1-0.45-1-1V3c0-0.55 0.45-1 1-1h3v1H1v10h10V10zM6 2l2.25 2.25-3.25 3.25 1.5 1.5 3.25-3.25 2.25 2.25V2H6z"></path></svg></a>
+      </div>
+
+      <h2>Code:</h2>
+      <div class="code">
+        <script src="https://gist.github.com/afcondon/0bdf2341c1768b0e087be3ab17471a3b.js"></script>
+      </div>
+
+      <h2>Data:</h2>
+      <div class="data">
+        <pre>
+type Pair = { letter :: Char, frequency :: Number }
+frequencies :: Array Pair
+frequencies = [
+    { letter: 'A',	frequency: 0.08167 }
+  , { letter: 'B',	frequency: 0.01492 }
+  , { letter: 'C',	frequency: 0.02782 }
+  , { letter: 'D',	frequency: 0.04253 }
+  , { letter: 'E',	frequency: 0.12702 }
+  , { letter: 'F',	frequency: 0.02288 }
+  , { letter: 'G',	frequency: 0.02015 }
+  , { letter: 'H',	frequency: 0.06094 }
+  , { letter: 'I',	frequency: 0.06966 }
+  , { letter: 'J',	frequency: 0.00153 }
+  , { letter: 'K',	frequency: 0.00772 }
+  , { letter: 'L',	frequency: 0.04025 }
+  , { letter: 'M',	frequency: 0.02406 }
+  , { letter: 'N',	frequency: 0.06749 }
+  , { letter: 'O',	frequency: 0.07507 }
+  , { letter: 'P',	frequency: 0.01929 }
+  , { letter: 'Q',	frequency: 0.00095 }
+  , { letter: 'R',	frequency: 0.05987 }
+  , { letter: 'S',	frequency: 0.06327 }
+  , { letter: 'T',	frequency: 0.09056 }
+  , { letter: 'U',	frequency: 0.02758 }
+  , { letter: 'V',	frequency: 0.00978 }
+  , { letter: 'W',	frequency: 0.02360 }
+  , { letter: 'X',	frequency: 0.00150 }
+  , { letter: 'Y',	frequency: 0.01974 }
+  , { letter: 'Z',	frequency: 0.00074 }
+]
+        </pre>
+      </div>
+    </div>
+
+    <footer><small>Copyleft 2016 etc etc</small></footer>
+  </div>
+
+</div>
+
+<script src="/node_modules/d3-array/build/d3-array.min.js"></script>
+<script src="/node_modules/d3-collection/build/d3-collection.js"></script>
+<script src="/node_modules/d3-color/build/d3-color.min.js"></script>
+<script src="/node_modules/d3-dispatch/build/d3-dispatch.min.js"></script>
+<script src="/node_modules/d3-format/build/d3-format.min.js"></script>
+<script src="/node_modules/d3-interpolate/build/d3-interpolate.min.js"></script>
+
+<script src="/node_modules/d3-axis/build/d3-axis.js"></script>
+<script src="/node_modules/d3-scale/build/d3-scale.js"></script>
+<script src="/node_modules/d3-selection/build/d3-selection.js"></script>
+<script src="example.js"></script>
+
+
+</body>
+</html>

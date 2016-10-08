@@ -1,5 +1,5 @@
 {
-  "name": "psd3-example",
+  "name": "purescript-d3v4",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -8,7 +8,9 @@
   ],
   "dependencies": {
     "purescript-console": "^1.0.0",
-    "purescript-dom": "^2.0.1"
+    "purescript-dom": "^2.0.1",
+    "purescript-colors": "^1.0.2",
+    "purescript-pairs": "^3.0.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^1.0.0"
