@@ -30,23 +30,7 @@
 
       <h2>Code:</h2>
       <div class="code">
-        <pre>
-main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
-main = do
-  svg <- d3Select ".svg"
-  g <-  svg ... append "g"
-
-  circles <- g ... selectAll "circle"
-      .. dataBind (Data circleData)
-    .. enter .. append "circle"
-      .. attr "cx" (AttrFn (\d i nodes el -> pure d.x))
-      .. attr "cy" (AttrFn (\d i nodes el -> pure d.y))
-      .. attr "r"  (SetAttr 20.0)
-      .. style "stroke" (Value "black")
-      .. style "fill"   (Value "red")
-
-  pure unit
-        </pre>
+        <script src="https://gist.github.com/afcondon/486dd4cf7166614d9aa6e2c1dc9ee14f.js"></script>
       </div>
 
       <h2>Data:</h2>
