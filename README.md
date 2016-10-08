@@ -9,6 +9,21 @@
 * ADTs for the polymorphic parameter types with resulting explicit representation in the DSL
 * purescript-eff-functions to wrap all the underlying calls (instead of easy-ffi)
 
+### Installing and running
+
+* Clone repo
+* npm install
+* bower install
+* npm run build
+* npm run
+* npm run example-five-circles
+* npm run example-gupIII
+* npm run example-barchart
+* npm run example-forcelayout
+* npm run example-default
+
+If you serve http from the examples directory you should be able to see all five of these simple demos run now.
+
 ### Further thoughts
 
 D3 encodes a _wealth_ of domain specific information about data visualization that is the fruit of both creator Mike Bostock's previous visualization libraries and, also, the extraordinarily rich eco-system of users that it has accumulated.
