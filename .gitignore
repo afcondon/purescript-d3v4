@@ -14,3 +14,4 @@ examples/default/dist/*.js
 node_modules
 examples/*/dist/example.js
 /examples/gupIII/dist/example.js
+example.js
