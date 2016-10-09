@@ -29,14 +29,13 @@ $ npm run example-forcelayout
 $ npm run example-default
 ```
 
-If you serve http from the examples directory - as for example...
+If you serve http from the install directory - as for example...
 
 ```
-$ cd examples
 $ python -m SimpleHTTPServer
 ```
 
-...you should be able to see all five of these simple demos run now.
+...you should be able to see all five of these simple demos run now from the simple demo page at `[install_dir]/index.html`
 
 ### Some resources about visualization generally...
 
