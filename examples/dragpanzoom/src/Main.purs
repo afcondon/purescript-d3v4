@@ -66,6 +66,6 @@ main = do
        .. scaleExtent [ 0.5, 8.0]
        .. addZoomListener tn2 zoomed
 
-  let bar = svg ... call (unsafeCoerce yag2)
+  let bar = g ... call (unsafeCoerce yag2)
 
   pure unit

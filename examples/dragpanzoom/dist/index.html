@@ -7,8 +7,21 @@
   <title>Document</title>
   <link rel="stylesheet" href="../../psblock.css">
   <style>
-  <!-- any local styles that you need for this example -->
-  </style>
+    .chart div {
+      font: 10px sans-serif;
+      background-color: steelblue;
+      text-align: right;
+      padding: 3px;
+      margin: 1px;
+      color: white;
+    }
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+    </style>
 
 </head>
 <body>
@@ -27,6 +40,11 @@
       <svg  width="960" height="500" class="svg"></svg>
       <div class="description">
         <p>
+
+          This demo is somewhat flakey at the moment - there's a bug in the zoomed function implementation. I'll fix it soon. Still the circles themselves
+          are both draggable and zoomable which is some sort of existence
+          proof...
+
         </p>
 
         <a target="_blank" title="Open Block 4063269 a new window." href="">Open <svg height="16" width="12"><path d="M11 10h1v3c0 0.55-0.45 1-1 1H1c-0.55 0-1-0.45-1-1V3c0-0.55 0.45-1 1-1h3v1H1v10h10V10zM6 2l2.25 2.25-3.25 3.25 1.5 1.5 3.25-3.25 2.25 2.25V2H6z"></path></svg></a>
