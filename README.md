@@ -28,8 +28,7 @@ If you serve http from the examples directory you should be able to see all five
 
 All of Edward Tufte's books are essential but [this](https://www.amazon.com/Envisioning-Information-Edward-R-Tufte/dp/0961392118) is maybe a good one to start with  in this context.
 
-Very nice [book](https://www.amazon.com/Book-Trees-Visualizing-Branches-Knowledge/dp/1616892188) by Manuel Lima about the ubiquitous tree diagram, all the way back to Ramon Llull in 13thC.
-![Visual Complexity](https://www.amazon.com/Visual-Complexity-Mapping-Patterns-Information/dp/1616892196) by the same author is also great and perhaps even more relevant to some of the kinds of uses i anticipate for purescript-d3v4
+Very nice [book](https://www.amazon.com/Book-Trees-Visualizing-Branches-Knowledge/dp/1616892188) by Manuel Lima about the ubiquitous tree diagram, all the way back to Ramon Llull in 13thC. [Visual Complexity](https://www.amazon.com/Visual-Complexity-Mapping-Patterns-Information/dp/1616892196) by the same author is also great and perhaps even more relevant to some of the kinds of uses i anticipate for purescript-d3v4
 
 Comprehensive overview / [introduction](https://www.amazon.com/Visualization-Analysis-Design-Peters-Series/dp/1466508914) to data visualization by the great Tamara Munzner.
 
