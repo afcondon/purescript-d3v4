@@ -9,20 +9,34 @@
 * ADTs for the polymorphic parameter types with resulting explicit representation in the DSL
 * purescript-eff-functions to wrap all the underlying calls (instead of easy-ffi)
 
-### Installing and running
+### Installing and running examples
 
-* Clone repo
-* npm install
-* bower install
-* npm run build
-* npm run
-* npm run example-five-circles
-* npm run example-gupIII
-* npm run example-barchart
-* npm run example-forcelayout
-* npm run example-default
+*(prerequisites assumed: `node`, `npm`, `purescript`)*
 
-If you serve http from the examples directory you should be able to see all five of these simple demos run now.
+Clone repo `https://github.com/afcondon/purescript-d3v4.git` and `cd` into the install directory
+```
+$ npm install
+$ bower install
+$ npm run build
+```
+
+From here you can build any demo you wish in the form `$ npm run example-{demo_name}`, such as
+```
+$ npm run example-fivecircles
+$ npm run example-gupIII
+$ npm run example-barchart
+$ npm run example-forcelayout
+$ npm run example-default
+```
+
+If you serve http from the examples directory - as for example...
+
+```
+$ cd examples
+$ python -m SimpleHTTPServer
+```
+
+...you should be able to see all five of these simple demos run now.
 
 ### Some resources about visualization generally...
 
