@@ -53,19 +53,17 @@ main = do
       .. style "stroke" (Value "red")
       .. style "fill"   (Value "black")
 
-  let phantom = { x: 0.0, y: 0.0 }
-  let tn = TypeNames [ { name: Just "foo", type: Drag } ]
-  yag <- d3Drag phantom -- phantom type to ensure correct type for yag (but type only gets in the way here, potentially)
-        .. addDragListener tn dragged
+  -- phantom type for d3Drag to ensure correct type for dragBehavior (but type only gets in the way here, potentially)
+  dragBehavior <- d3Drag { x: 0.0, y: 0.0 }
+               .. addDragListener (TypeNames [ { name: Just "foo", type: Drag } ]) dragged
 
-  let foo = circles ... call (unsafeCoerce yag) -- adds the drag callbacks for drag (yag) on selection (g)
+  let foo = circles ... call (unsafeCoerce dragBehavior) -- adds the drag callbacks for drag (dragBehavior) on selection (g)
   -- unsafeCoerce here is obviously undesirable, need to play with types and see if we can reformulate to lose it TODO
 
-  let tn2 = TypeNames [ { name: Just "foo", type: Zoom } ]
-  yag2 <- d3Zoom
-       .. scaleExtent [ 0.5, 8.0]
-       .. addZoomListener tn2 zoomed
+  zoomBehavior <- d3Zoom
+             .. scaleExtent [ 0.5, 8.0]
+             .. addZoomListener (TypeNames [ { name: Just "bar", type: Zoom } ]) zoomed
 
-  let bar = g ... call (unsafeCoerce yag2)
+  let bar = svg ... call (unsafeCoerce zoomBehavior)
 
   pure unit
