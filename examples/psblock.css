@@ -77,6 +77,12 @@ div.inner .description p a {
 	text-decoration: none;
 }
 
+div.inner .description ul {
+	clear: both;
+	background: #eee;
+	line-height: 1.2em;
+	font-size: 0.9em;
+}
 div.inner .description p + a {
 	padding: 10px;
 	font-size: 0.8em;

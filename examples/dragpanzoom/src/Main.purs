@@ -1,12 +1,13 @@
 module Main where
 
-import D3.Selection (call, style, attr, append, enter, dataBind, selectAll, d3Select, selectElem)
+import Control.Monad.Eff.Console (CONSOLE)
 import D3.Base (D3, Eff, D3Element, Index, Point, AttrSetter(..), DataBind(..), ListenerType(..), PolyValue(..), Typenames(..), (...), (..))
 import D3.Drag (addDragListener, d3Drag, dragUpdate)
+import D3.Scale (scaleBy, schemeCategory10, ScaleType(Category), d3Scale)
+import D3.Selection (call, style, attr, append, enter, dataBind, selectAll, d3Select, selectElem)
 import D3.Zoom (addZoomListener, scaleExtent, d3Zoom, getZoomEvent)
-import Prelude (Unit, unit, pure, bind)
-import Control.Monad.Eff.Console (CONSOLE)
 import Data.Maybe (Maybe(..))
+import Prelude (Unit, unit, pure, bind)
 import Unsafe.Coerce (unsafeCoerce)
 
 circleData :: Array Point
@@ -47,6 +48,7 @@ main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
   -- the containing SVG
   svg <- d3Select ".svg"
+  color <- d3Scale (Category schemeCategory10)
   -- appending a "g" to the svg
   g <-  svg ... append "g"
   -- creating a zoomBehavior
@@ -63,8 +65,9 @@ main = do
       .. attr "cx" (AttrFn (\d i nodes el -> pure d.x)) -- thing to bear in mind here:
       .. attr "cy" (AttrFn (\d i nodes el -> pure d.y)) -- if you mod here doesn't change underlying value when you drag
       .. attr "r"  (SetAttr 20.0)
-      .. style "stroke" (Value "red")
-      .. style "fill"   (Value "black")
+      .. style "stroke" (Value "black")
+      .. attr "fill" (AttrFn (\d i n e -> do fill <- scaleBy color i
+                                             pure fill))
 
   -- phantom type for d3Drag to ensure correct type for dragBehavior (but type only gets in the way here, potentially)
   dragBehavior <- d3Drag { x: 0.0, y: 0.0 }

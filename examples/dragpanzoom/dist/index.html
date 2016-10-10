@@ -39,11 +39,19 @@
 
       <svg  width="960" height="500" class="svg"></svg>
       <div class="description">
-        <p>
+        <p>This demo works for me in Chrome but not in Safari. The behavior you should see is:</p>
+          <ul>
+            <li>five colored circles sitting in the box above</li>
+            <li>each one is draggable</li>
+            <li>if you drag the background you should drag (pan) all five circles as you are moving their containing "g" element</li>
+            <li>if you use touch or mouse / mousewheel zoom gestures anywhere in the box you should get zoom behavior on entire group</li>
+          </ul>
 
-          This demo is somewhat flakey at the moment - there's a bug in the zoomed function implementation. I'll fix it soon. Still the circles themselves
-          are both draggable and zoomable which is some sort of existence
-          proof...
+        <p>
+          On Safari this behaves inexplicably oddly where the zoom only works when
+          applied in the circles themselves. Maybe it's even propagation that's funny or
+          maybe there just some tricky state hidden in D3 that only manifests itself in
+          Safari.
 
         </p>
 
@@ -52,7 +60,7 @@
 
       <h2>Code:</h2>
       <div class="code">
-        <!-- insert your Gist embed here -->
+        <script src="https://gist.github.com/afcondon/b30ceb1a3545c97c78a1c4e8d8d9c007.js"></script>
       </div>
 
       <h2>Data:</h2>
