@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <svg width="960" height="500"></svg>
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3.v4.js"></script>
 <script>
 
 var svg = d3.select("svg"),
@@ -22,9 +22,8 @@ g.selectAll("circle")
     .call(d3.drag()
         .on("drag", dragged));
 
-svg.call(d3.zoom()
-    .scaleExtent([1 / 2, 8])
-    .on("zoom", zoomed));
+
+svg.call(d3.zoom().scaleExtent([1 / 2, 8]).on("zoom", zoomed));
 
 function zoomed() {
   g.attr("transform", d3.event.transform);

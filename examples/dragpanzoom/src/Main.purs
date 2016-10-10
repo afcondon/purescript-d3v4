@@ -3,7 +3,7 @@ module Main where
 import D3.Selection (call, style, attr, append, enter, dataBind, selectAll, d3Select, selectElem)
 import D3.Base (D3, Eff, D3Element, Index, Point, AttrSetter(..), DataBind(..), ListenerType(..), PolyValue(..), Typenames(..), (...), (..))
 import D3.Drag (addDragListener, d3Drag, dragUpdate)
-import D3.Zoom (addZoomListener, scaleExtent, d3Zoom, getZoomTransform)
+import D3.Zoom (addZoomListener, scaleExtent, d3Zoom, getZoomEvent)
 import Prelude (Unit, unit, pure, bind)
 import Control.Monad.Eff.Console (CONSOLE)
 import Data.Maybe (Maybe(..))
@@ -36,14 +36,27 @@ dragged d i els element = do
 zoomed :: ∀ d eff. d -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
 zoomed d i els element = do
   g  <- d3Select "g"
-     .. attr "transform" (SetAttr getZoomTransform)
+
+  zt <- getZoomEvent
+
+  attr "transform" (SetAttr zt.transform) g
+
   pure unit
 
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
+  -- the containing SVG
   svg <- d3Select ".svg"
+  -- appending a "g" to the svg
   g <-  svg ... append "g"
+  -- creating a zoomBehavior
+  zoomBehavior <- d3Zoom
+             .. scaleExtent [ 0.5, 8.0]
+             .. addZoomListener (TypeNames [ { name: Just "zoom.bar", type: Zoom } ]) zoomed
+  -- attaching the zoomBehavior to the svg so that zoom events will fire the "zoomed" fn
+  let bar = svg ... call (unsafeCoerce zoomBehavior)
 
+  -- next, entering the the data-driven part, one "circle" for every datum
   circles <- g ... selectAll "circle"
       .. dataBind (Data circleData)
     .. enter .. append "circle"
@@ -55,15 +68,9 @@ main = do
 
   -- phantom type for d3Drag to ensure correct type for dragBehavior (but type only gets in the way here, potentially)
   dragBehavior <- d3Drag { x: 0.0, y: 0.0 }
-               .. addDragListener (TypeNames [ { name: Just "foo", type: Drag } ]) dragged
-
-  let foo = circles ... call (unsafeCoerce dragBehavior) -- adds the drag callbacks for drag (dragBehavior) on selection (g)
+               .. addDragListener (TypeNames [ { name: Just "drag.foo", type: Drag } ]) dragged
+  -- adds the drag callbacks for drag (dragBehavior) on selection (g)
+  let foo = circles ... call (unsafeCoerce dragBehavior)
   -- unsafeCoerce here is obviously undesirable, need to play with types and see if we can reformulate to lose it TODO
-
-  zoomBehavior <- d3Zoom
-             .. scaleExtent [ 0.5, 8.0]
-             .. addZoomListener (TypeNames [ { name: Just "bar", type: Zoom } ]) zoomed
-
-  let bar = svg ... call (unsafeCoerce zoomBehavior)
 
   pure unit

@@ -5,6 +5,7 @@ module D3.Zoom (
     , Extent
     , d3Zoom
     , getZoomTransform
+    , getZoomEvent
     , scaleExtent
     , addZoomListener
   ) where
@@ -31,12 +32,12 @@ type ZoomEvent = {
   , sourceEvent :: Event
 }
 
-foreign import d3ZoomFn      :: ∀ eff. Eff    (d3::D3|eff)             Zoom
-foreign import scaleExtentFn :: ∀ eff. EffFn2 (d3::D3|eff) Extent Zoom Zoom
-foreign import addListenerFn     :: ∀ d eff. EffFn3 (d3::D3|eff) D3Typenames
-                                                                (EffFn3PlusThis (d3::D3|eff) d Number (Array D3Element) Unit)
-                                                                Zoom
-                                                                Zoom
+foreign import d3ZoomFn       :: ∀ eff. Eff    (d3::D3|eff)             Zoom
+foreign import scaleExtentFn  :: ∀ eff. EffFn2 (d3::D3|eff) Extent Zoom Zoom
+foreign import addZoomListenerFn  :: ∀ d eff. EffFn3 (d3::D3|eff) D3Typenames
+                                                              (EffFn3PlusThis (d3::D3|eff) d Number (Array D3Element) Unit)
+                                                              Zoom
+                                                              Zoom
 
 d3Zoom :: ∀ eff. Eff (d3::D3|eff) Zoom
 d3Zoom = d3ZoomFn
@@ -45,7 +46,10 @@ scaleExtent :: ∀ eff. Extent -> Zoom -> Eff (d3::D3|eff) Zoom
 scaleExtent = runEffFn2 scaleExtentFn
 
 addZoomListener :: ∀ d eff. Typenames -> DragListener d -> Zoom -> Eff (d3::D3|eff) Zoom
-addZoomListener tn callback = runEffFn3 addListenerFn (show tn) (mkEffFn4Special callback)
+addZoomListener tn callback = runEffFn3 addZoomListenerFn (show tn) (mkEffFn4Special callback)
 
 getZoomTransform :: ∀ eff. Eff (d3::D3|eff) Transform
 getZoomTransform = getTransformFn
+
+getZoomEvent :: ∀ eff. Eff (d3::D3|eff) ZoomEvent
+getZoomEvent = d3ZoomEventFn

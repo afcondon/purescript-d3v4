@@ -9,5 +9,5 @@ exports.getTransformFn = function() {
 
 // this is the exact same implementation as that in Drag.js so it should be
 // coalesced and put in Base.purs TODO
-exports.addListenerFn     = function(typenames, listener, zoom) {
+exports.addZoomListenerFn     = function(typenames, listener, zoom) {
   return zoom.on(typenames, listener); }
