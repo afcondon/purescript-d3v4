@@ -22,16 +22,16 @@ type HierarchyNode d = {
   , y        :: Number
 }
 
-foreign import d3HierarchyFn :: ∀ eff.   Eff (d3::D3|eff)                                   D3Hierarchy
+foreign import d3HierarchyFn :: ∀ d eff. EffFn1 (d3::D3|eff) (Array d)                    (HierarchyNode d)
 foreign import d3TreeFn      :: ∀ eff.   Eff (d3::D3|eff)                                 D3Tree
 foreign import sizeFn        :: ∀ eff.   EffFn2 (d3::D3|eff) (Array Number) D3Tree        D3Tree
 foreign import nodeSizeFn    :: ∀ eff.   EffFn2 (d3::D3|eff) (Array Number) D3Tree        D3Tree
 foreign import hierarchizeFn :: ∀ d eff. EffFn2 (d3::D3|eff) (Array d) D3Hierarchy        (HierarchyNode d)
-foreign import treeFn        :: ∀ d eff. EffFn2 (d3::D3|eff) (HierarchyNode d) D3Tree     D3Tree
+foreign import treeFn        :: ∀ d eff. EffFn2 (d3::D3|eff) (HierarchyNode d) D3Tree     (HierarchyNode d)
 
 foreign import hasChildrenFn :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)                            Boolean
 foreign import ancestorsFn   :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)            (Array (HierarchyNode d))
-foreign import descendentsFn :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)            (Array (HierarchyNode d))
+foreign import descendantsFn :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)            (Array (HierarchyNode d))
 -- foreign import eachFn        :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)
 -- foreign import eachAfterFn   :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)
 -- foreign import eachBeforeFn  :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)
@@ -43,9 +43,9 @@ foreign import sumFn         :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)
 foreign import childrenFn    :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)            (Array (HierarchyNode d))
 foreign import parentFn      :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)         (Nullable (HierarchyNode d))
 
-
-d3Hierarchy :: ∀ eff. Eff (d3::D3|eff) D3Hierarchy
-d3Hierarchy = d3HierarchyFn
+-- no version yet to take the children accessor function
+d3Hierarchy :: ∀ d eff. Array d -> Eff (d3::D3|eff) (HierarchyNode d)
+d3Hierarchy = runEffFn1 d3HierarchyFn
 
 d3Tree :: ∀ eff. Eff (d3::D3|eff) D3Tree
 d3Tree = d3TreeFn
@@ -62,15 +62,15 @@ nodeSize width height = runEffFn2 nodeSizeFn [width, height]
 -- || functions on the Tree Layout
 
 -- d3.tree()()    tree as function, lays out HierarchyNodes as a Tree
-layoutTree :: ∀ d eff. HierarchyNode d -> D3Tree -> Eff (d3::D3|eff) D3Tree
+layoutTree :: ∀ d eff. HierarchyNode d -> D3Tree -> Eff (d3::D3|eff) (HierarchyNode d)
 layoutTree = runEffFn2 treeFn
 
 -- || functions on HierarchyNodes
 ancestors   :: ∀ d eff. HierarchyNode d   -> Eff (d3::D3|eff) (Array (HierarchyNode d))
 ancestors   = runEffFn1 ancestorsFn
 
-descendents :: ∀ d eff. HierarchyNode d -> Eff (d3::D3|eff) (Array (HierarchyNode d))
-descendents  = runEffFn1 descendentsFn
+descendants :: ∀ d eff. HierarchyNode d -> Eff (d3::D3|eff) (Array (HierarchyNode d))
+descendants  = runEffFn1 descendantsFn
 
 leaves      :: ∀ d eff. HierarchyNode d  -> Eff (d3::D3|eff) (Array (HierarchyNode d))
 leaves      = runEffFn1 leavesFn

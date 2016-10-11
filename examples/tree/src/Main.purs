@@ -1,11 +1,11 @@
 module Main where
 
-import D3.Selection
-import D3.Base
-import D3.Tree
-import Data.Maybe
-import Prelude (show, pure, bind, (<>), Unit, unit, (-), ($), (/), (+), negate)
-import Control.Monad.Eff.Console (CONSOLE, log)
+import D3.Selection (attr, append, enter, dataBind, selectAll, getAttr, d3Select)
+import D3.Base (D3, Eff, Index, D3Element, Nodes, AttrSetter(..), DataBind(..), (..), (...))
+import D3.Tree (HierarchyNode, descendants, layoutTree, hierarchize, d3Tree, d3Hierarchy, hasChildren, parent)
+import Data.Maybe (Maybe(..))
+import Prelude (show, pure, bind, (<>), Unit, unit, (-), ($), (/), (+), (<$>),negate)
+import Control.Monad.Eff.Console (CONSOLE)
 import Data.Array (drop)
 
 type TreeName = String
@@ -35,42 +35,52 @@ linkPath d i n e = do
     let midY = show ((d.y + pY) / 2.0)
     pure ("M" <> y <> "," <> x <> "C" <> midY <> "," <> x <> " " <> midY <> "," <> dx <> " " <> dy <> "," <> dx)
 
+labelXOffset :: ∀ d eff. HierarchyNode d -> Index -> Nodes -> D3Element -> Eff (d3::D3|eff) Number
+labelXOffset d i n e = do
+  cs <- hasChildren d
+  pure (if cs then -8.0 else 8.0)
+
+labelAnchor :: ∀ d eff. HierarchyNode d -> Index -> Eff (d3::D3|eff) String
+labelAnchor d i = do
+  cs <- hasChildren d
+  pure (if cs then "end" else "start")
+
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
+  let treedata = flaredata
+
   svg <- d3Select ".svg"
   w   <- svg ... getAttr "width"
   h   <- svg ... getAttr "height"
   let width =  w - margin.left - margin.right
   let height = h - margin.top - margin.bottom
 
-  g <-  svg ... append "g"
+  g      <- svg ... append "g"
+  tree   <- d3Tree
 
-  h    <- d3Hierarchy
-  tree <- d3Tree
-
-  root   <- hierarchize flaredata h
-  layout <- layoutTree root
-  nodeDescendents <- descendents layout
+  root   <- d3Hierarchy treedata
+  layout <- layoutTree root tree
+  nodeDescendants <- descendants layout
 
   link <- g ... selectAll ".link"
-           .. dataBind (Data (drop 1 nodeDescendents))
+           .. dataBind (Data (drop 1 nodeDescendants))
             .. enter .. append "path"
             .. attr "class"  (SetAttr "link")
             .. attr "d"      (AttrFn linkPath)
-
+  --
   node <- g ... selectAll ".node"
-          .. dataBind (Data nodeDescendents)
+          .. dataBind (Data nodeDescendants)
             .. enter .. append "g"
-            .. attr "class" (AttrFn (\d i n e -> "node"))
-            .. attr "transform" (AttrFn (\d i n e -> "translate(" <> (show d.y) <> "," <> (show d.y) <> ")" ))
+            .. attr "class" (AttrFn (\d i n e -> pure "node"))
+            .. attr "transform" (AttrFn (\d i n e -> pure ("translate(" <> (show d.y) <> "," <> (show d.y) <> ")") ))
 
   node ... append "circle"
         .. attr "r" (SetAttr 2.5)
 
-  node ... append "text"
-        .. attr "dy" (SetAttr 3)
-        .. attr "x"  (AttrFn (\d i n e -> if hasChildren d then -8.0 else 8.0 ))
-        .. style "text-anchor" (SetSome (\d i n e -> if hasChildren d then "end" else "start"))
-        .. text (SetByIndex (\d i -> d.data.name ))
+  -- node ... append "text"
+  --       .. attr "dy" (SetAttr 3)
+  --       .. attr "x"  (AttrFn labelXOffset)
+  --       .. style "text-anchor" (SetByIndex labelAnchor)
+  --       .. text (SetByIndex (\d i -> d.data.name ))
 
   pure unit

@@ -2,7 +2,7 @@
 "use strict"
 
 
-exports.d3HierarchyFn = function() { return d3.hierarchy(); }
+exports.d3HierarchyFn = function(data) { return d3.hierarchy(data); }
 exports.d3TreeFn      = function() { return d3.tree(); }
 exports.hierarchizeFn = function(data, hierarchy) { return hierarchy(data); }
 exports.treeFn        = function(data, tree) { return tree(data); }
@@ -12,7 +12,8 @@ exports.nodeSizeFn    = function(treedata)   { return treedata.nodeSize(); }
 // functions on nodes
 exports.hasChildrenFn = function(node) { return node.children ? true : false; }
 exports.ancestorsFn   = function(node) { return node.ancestors(); }
-exports.descendentsFn = function(node) { return node.descendents(); }
+exports.descendantsFn = function(node) {
+  return node.descendants(); }
 exports.leavesFn      = function(node) { return node.leaves(); }
 exports.linksFn       = function(node) { return node.links(); }
 exports.sumFn         = function(node) { return node.sum(); }
