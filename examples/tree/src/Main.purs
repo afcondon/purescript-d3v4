@@ -73,7 +73,7 @@ main = do
           .. dataBind (Data nodeDescendants)
             .. enter .. append "g"
             .. attr "class" (AttrFn (\d i n e -> pure "node"))
-            .. attr "transform" (AttrFn (\d i n e -> pure ("translate(" <> (show d.y) <> "," <> (show d.y) <> ")") ))
+            .. attr "transform" (AttrFn (\d i n e -> pure ("translate(" <> (show d.y) <> "," <> (show d.x) <> ")") ))
 
   node ... append "circle"
         .. attr "r" (SetAttr 2.5)
