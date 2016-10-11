@@ -1,17 +1,17 @@
 module Main where
 
-import D3.Selection (attr, append, enter, dataBind, selectAll, getAttr, d3Select)
-import D3.Base (D3, Eff, Index, D3Element, Nodes, AttrSetter(..), DataBind(..), (..), (...))
-import D3.Tree (HierarchyNode, descendants, layoutTree, hierarchize, d3Tree, d3Hierarchy, hasChildren, parent)
-import Data.Maybe (Maybe(..))
-import Prelude (show, pure, bind, (<>), Unit, unit, (-), ($), (/), (+), (<$>),negate)
 import Control.Monad.Eff.Console (CONSOLE)
+import D3.Base (PolyValue(SetByIndex), D3, Eff, Index, D3Element, Nodes, AttrSetter(..), DataBind(..), (..), (...))
+import D3.Selection (text, style, attr, append, enter, dataBind, selectAll, getAttr, d3Select)
+import D3.Tree (size, HierarchyNode, descendants, layoutTree, d3Hierarchy, d3Tree, hasChildren, parent)
 import Data.Array (drop)
+import Data.Maybe (Maybe(..))
+import Prelude (show, pure, bind, (<>), Unit, unit, (-), ($), (/), (+), (<$>), negate)
 
 type TreeName = String
 type TreeIndex = String
 
-type TreeNode = { id :: TreeName, index :: TreeIndex }
+type TreeNode = { name :: TreeName }
 
 -- define a margin, look to purescript-css for more sophisticated definition
 margin :: { top::Number, right::Number, bottom::Number, left::Number }
@@ -57,6 +57,7 @@ main = do
 
   g      <- svg ... append "g"
   tree   <- d3Tree
+          .. size height (width - 160.0)
 
   root   <- d3Hierarchy treedata
   layout <- layoutTree root tree
@@ -77,10 +78,10 @@ main = do
   node ... append "circle"
         .. attr "r" (SetAttr 2.5)
 
-  -- node ... append "text"
-  --       .. attr "dy" (SetAttr 3)
-  --       .. attr "x"  (AttrFn labelXOffset)
-  --       .. style "text-anchor" (SetByIndex labelAnchor)
-  --       .. text (SetByIndex (\d i -> d.data.name ))
+  node ... append "text"
+        .. attr "dy" (SetAttr 3)
+        .. attr "x"  (AttrFn labelXOffset)
+        .. style "text-anchor" (SetByIndex labelAnchor)
+        .. text (SetByIndex (\d i -> pure d.data.name ))
 
   pure unit
