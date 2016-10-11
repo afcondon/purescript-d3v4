@@ -47,7 +47,7 @@ d3.json("flare.json", function(error, data) {
 
   var root = d3.hierarchy(data);
 
-  tree(root);
+  var foo = tree(root);
 
   var link = g.selectAll(".link")
       .data(root.descendants().slice(1))
