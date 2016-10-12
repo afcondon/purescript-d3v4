@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=800px, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="../../psblock.css">
+  <style>
+
+  .node circle {
+    fill: #999;
+  }
+
+  .node text {
+    font: 10px sans-serif;
+  }
+
+  .node--internal circle {
+    fill: #555;
+  }
+
+  .node--internal text {
+    text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+  }
+
+  .link {
+    fill: none;
+    stroke: #555;
+    stroke-opacity: 0.4;
+    stroke-width: 1.5px;
+  }
+
+  div.inner-inner .svg {
+  	height: 2000px;
+  }
+
+  </style>
+
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <span class="left">afc</span>
+    <span class="right"><a href="">based on...</a></span>
+  </header>
+
+  <div class="inner">
+    <div class="inner-inner">
+      <h1>Hierarchy: Radial Cluster<span>#7</span></h1>
+
+      <svg  width="960" height="2000" class="svg"></svg>
+      <div class="description">
+        <p>
+        </p>
+
+        <a target="_blank" title="Open Block 4063269 a new window." href="">Open <svg height="16" width="12"><path d="M11 10h1v3c0 0.55-0.45 1-1 1H1c-0.55 0-1-0.45-1-1V3c0-0.55 0.45-1 1-1h3v1H1v10h10V10zM6 2l2.25 2.25-3.25 3.25 1.5 1.5 3.25-3.25 2.25 2.25V2H6z"></path></svg></a>
+      </div>
+
+      <h2>Code:</h2>
+      <div class="code">
+        <script src="https://gist.github.com/afcondon/7fc261c5394dba64d65f432f3db1bd72.js"></script>
+      </div>
+
+      <h2>Data:</h2>
+      <div class="data">
+        <pre>
+          <!-- insert data example here -->
+        </pre>
+      </div>
+    </div>
+
+    <footer><small>Copyleft 2016 etc etc</small></footer>
+  </div>
+
+</div>
+
+<script src="/node_modules/d3-array/build/d3-array.min.js"></script>
+<script src="/node_modules/d3-collection/build/d3-collection.min.js"></script>
+<script src="/node_modules/d3-color/build/d3-color.min.js"></script>
+<script src="/node_modules/d3-dispatch/build/d3-dispatch.min.js"></script>
+<script src="/node_modules/d3-ease/build/d3-ease.min.js"></script>
+<script src="/node_modules/d3-format/build/d3-format.min.js"></script>
+<script src="/node_modules/d3-interpolate/build/d3-interpolate.min.js"></script>
+<script src="/node_modules/d3-time-format/build/d3-time-format.min.js"></script>
+<script src="/node_modules/d3-time/build/d3-time.min.js"></script>
+<script src="/node_modules/d3-timer/build/d3-timer.min.js"></script>
+
+<script src="/node_modules/d3-hierarchy/build/d3-hierarchy.js"></script>
+<script src="/node_modules/d3-selection/build/d3-selection.js"></script>
+<script src="/node_modules/d3-transition/build/d3-transition.js"></script>
+<script src="example.js"></script>
+
+
+</body>
+</html>

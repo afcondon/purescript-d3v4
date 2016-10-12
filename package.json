@@ -16,6 +16,7 @@
     "example-fivecircles": "bower link && cd examples/fivecircles && bower link purescript-d3v4 && bower install && npm run build",
     "example-forcelayout": "bower link && cd examples/forcelayout && bower link purescript-d3v4 && bower install && npm run build",
     "example-gupIII":      "bower link && cd examples/gupIII      && bower link purescript-d3v4 && bower install && npm run build",
+    "example-radialcluster": "bower link && cd examples/radialcluster      && bower link purescript-d3v4 && bower install && npm run build",
     "example-tree":        "bower link && cd examples/tree        && bower link purescript-d3v4 && bower install && npm run build"
   },
   "repository": {

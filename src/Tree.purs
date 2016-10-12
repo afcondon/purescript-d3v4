@@ -2,7 +2,7 @@ module D3.Tree where
 
 import Prelude
 import D3.Base (D3, Eff)
-import Data.Function.Eff (EffFn1, runEffFn1, runEffFn2, EffFn2)
+import Data.Function.Eff (mkEffFn2, EffFn1, runEffFn1, runEffFn2, EffFn2)
 import Data.Maybe (Maybe)
 import Data.Nullable (toMaybe, Nullable)
 
@@ -26,6 +26,10 @@ foreign import d3HierarchyFn :: ∀ d eff. EffFn1 (d3::D3|eff) (Array d)        
 foreign import d3TreeFn      :: ∀ eff.   Eff (d3::D3|eff)                                 D3Tree
 foreign import sizeFn        :: ∀ eff.   EffFn2 (d3::D3|eff) (Array Number) D3Tree        D3Tree
 foreign import nodeSizeFn    :: ∀ eff.   EffFn2 (d3::D3|eff) (Array Number) D3Tree        D3Tree
+foreign import separationFn  :: ∀ d eff. EffFn2 (d3::D3|eff)
+                                                (EffFn2 (d3::D3|eff) (HierarchyNode d) (HierarchyNode d) Number)
+                                                D3Tree
+                                                D3Tree
 foreign import hierarchizeFn :: ∀ d eff. EffFn2 (d3::D3|eff) (Array d) D3Hierarchy        (HierarchyNode d)
 foreign import treeFn        :: ∀ d eff. EffFn2 (d3::D3|eff) (HierarchyNode d) D3Tree     (HierarchyNode d)
 
@@ -42,6 +46,7 @@ foreign import linksFn       :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)
 foreign import sumFn         :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)                              Number
 foreign import childrenFn    :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)            (Array (HierarchyNode d))
 foreign import parentFn      :: ∀ d eff. EffFn1 (d3::D3|eff) (HierarchyNode d)         (Nullable (HierarchyNode d))
+foreign import parentsEqFn   :: ∀ d. HierarchyNode d -> HierarchyNode d -> Boolean
 
 -- no version yet to take the children accessor function
 d3Hierarchy :: ∀ d eff. Array d -> Eff (d3::D3|eff) (HierarchyNode d)
@@ -81,6 +86,9 @@ links       = runEffFn1 linksFn
 sum         :: ∀ d eff. HierarchyNode d -> Eff (d3::D3|eff) Number
 sum         = runEffFn1 sumFn
 
+separation  :: ∀ d eff. (HierarchyNode d -> HierarchyNode d -> Eff (d3::D3|eff) Number) -> D3Tree -> Eff (d3::D3|eff) D3Tree
+separation f = runEffFn2 separationFn (mkEffFn2 f)
+
 -- || function in lieu of testing null on the array of children
 hasChildren :: ∀ d eff. HierarchyNode d -> Eff (d3::D3|eff) Boolean
 hasChildren = runEffFn1 hasChildrenFn
@@ -91,6 +99,9 @@ children = runEffFn1 childrenFn
 
 parent  :: ∀ d eff. HierarchyNode d -> Eff (d3::D3|eff) (Maybe (HierarchyNode d))
 parent node = toMaybe <$> runEffFn1 parentFn node
+
+parentsEq  :: ∀ d. HierarchyNode d -> HierarchyNode d -> Boolean
+parentsEq  = parentsEqFn
 
 -- each :: ∀ d eff. HierarchyNode d  ->
 -- eachAfter :: ∀ d eff. HierarchyNode d ->
