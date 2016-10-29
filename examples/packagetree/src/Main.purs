@@ -1,120 +1,22 @@
 module Main where
 
-import D3.Selection
-import Control.Monad.Eff.Console (CONSOLE, log)
-import D3.Base (Point, D3, Eff, ListenerType(..), Typenames(TypeNames), Index, D3Element, Nodes, AttrSetter(AttrFn, SetAttr), ClassSetter(SetAll, SetSome), DataBind(Keyed, Data), PolyValue(SetByIndex, Value), theHorror, (...), (..))
+import D3.ForceSimulation
+import Control.Monad.Eff.Console (CONSOLE)
+import D3.Base (PolyValue(SetByIndex), D3, Eff, D3Element, Index, Point, AttrSetter(AttrFn, SetAttr), DataBind(Data), ListenerType(StartDrag, EndDrag, Drag), Typenames(TypeNames), (...), (..))
 import D3.Drag (dragUpdate, addDragListener, d3Drag)
-import D3.Zoom (scaleExtent, d3Zoom, addZoomListener, getZoomTransform)
-import D3.Interpolator (Time)
-import D3.Transitions (Transition, AttrInterpolator(Target, TweenFn, TweenTarget), DelayValue(MilliSec), TransitionName(Name), tStyle, namedTransition, delay, addTransition, savedTransition, duration, d3Transition)
-import DOM.HTML.Event.EventTypes (mouseenter, mouseleave, click)
-import Data.Array (reverse)
-import Data.Foldable (foldr)
-import Data.Int (floor)
-import Data.Maybe (Maybe(Just))
-import Data.String (length, toCharArray, fromCharArray)
-import Prelude (class Show, Unit, show, unit, pure, bind, max, (*), (<>), (<<<), (==), ($), (+))
+import D3.Scale (ScaleType(Category), scaleBy, schemeCategory20, d3Scale)
+import D3.Selection (text, Selection, call, attr, append, enter, dataBind, selectAll, getAttr, d3Select, selectElem)
+import Data.Maybe (Maybe(Just, Nothing))
+import Data.Pair (Pair(Pair))
+import Math (sqrt)
+import Prelude (Unit, unit, pure, bind, ($), (-), (/))
 import Unsafe.Coerce (unsafeCoerce)
-{-
--- next target is to handle this case:
-var matrix = [
-  [11975,  5871, 8916, 2868],
-  [ 1951, 10048, 2060, 6171],
-  [ 8010, 16145, 8090, 8045],
-  [ 1013,   990,  940, 6907]
-];
 
-var tr = d3.select("body")
-  .append("table")
-  .selectAll("tr")
-  .data(matrix)
-  .enter().append("tr");
--}
+import PackageData (mydata)
 
--- | mainline: simplest possible D3 demo
-array :: Array Number
-array = [4.0, 8.0, 15.0, 16.0, 23.0, 42.0]
-
-array2 :: Array String
-array2 = ["awn", "bel", "cep", "dof", "erg", "fub"]
-
-circleData :: Array Point
-circleData = [ {x: 100.0, y: 100.0}
-             , {x: 200.0, y: 200.0}
-             , {x: 100.0, y: 200.0}
-             , {x: 200.0, y: 100.0}
-             , {x: 150.0, y: 150.0}
-             ]
-
-
-arrayMax :: Number
-arrayMax = foldr max 0.0 array
-
-revString :: String -> String
-revString = fromCharArray <<< reverse <<< toCharArray
-
-awn :: ∀ eff. CallbackParam Number -> Eff (d3::D3, console::CONSOLE|eff) Unit
-awn { datum: d, meta: m } = do
-  log (show d)
-  log (show m)
-  pure unit
-
-bel :: ∀ eff. CallbackParamP Number String -> Eff (d3::D3, console::CONSOLE|eff) Unit
-bel { datum: d, prop: p } = do
-  log (show d)
-  log (show p)
-  pure unit
-
-cep :: ∀ eff. Number -> Index -> Nodes -> D3Element -> Eff (d3::D3|eff) Boolean
-cep datum _ _ _ = pure $ if (datum == 16.0) then true else false
-
-dof :: ∀ eff. String -> Index -> Nodes -> D3Element -> Eff (d3::D3|eff) String
-dof datum _ _ _ = pure $ if (datum == "erg") then "ergo propter hoc" else theHorror
-
-hoy :: ∀ eff. Eff (d3::D3|eff) (Transition String)
-hoy = d3Transition (Name "hoy")
-
--- ist :: Number -> Index -> D3Element -> String
-ist :: ∀ eff. Number -> Index -> D3Element -> Eff (d3::D3|eff) String
-ist d _ _ = pure $ show val <> "px" where val = d * 10.0
-
--- || next two functions illustrate how you can do the following JS example in PS
--- selection.styleTween("fill", function() {          // equivalent of kef
---   return function(t) {                             // equivalent of jud
---     return "hsl(" + t * 360 + ",100%,50%)";
---   };
--- });
--- kef is given as param to transition.styleTween,
--- it is called by D3 to get a customized interpolator fn for this D3Element
--- since we need it to be callable from JS, the params need to be uncurried
-kef :: ∀ d eff. d -> Index -> D3Element -> Eff (d3::D3|eff) (Time -> String)
-kef d i e = pure jud
-
--- | jud is an interpolator function given to D3 by some other interpolator-making function,
--- which is given as param to transition.styleTween (in JS it's just anonymous)
-jud :: Time -> String  -- this func duplicates the D3 documentation example shown in comment below
-jud t = "hsl(" <> tval <> ",100%,50%)"
-  where tval = show (t * 360.0)
-
-roc :: ∀ eff. String -> Index -> Eff (d3::D3|eff) String
-roc d i = pure $ show d <> " " <> show i
-
-suq :: ∀ d eff. Show d => d -> Index -> Eff (d3::D3|eff) String
-suq d _ = pure $ show d
-
-tej :: ∀ eff. String -> Index -> Eff (d3::D3|eff) String
-tej d i = pure $ show l <> "px" where
-  l = (length d) * 30 * (floor (i + 1.0))
-
-ure :: ∀ eff. String -> Index -> Eff (d3::D3|eff) String
-ure d _ = pure $ show d
-
-vis :: ∀ d eff. Selection d -> String -> String -> Eff (d3::D3|eff) (Selection d)
-vis s first last =
-  do
-    s ... attr "first-name" (SetAttr first)
-      .. attr "last-name"  (SetAttr last)
-    pure s
+-- define a margin, look to purescript-css for more sophisticated definition
+margin :: { top::Number, right::Number, bottom::Number, left::Number }
+margin = { top: 20.0, right: 20.0, bottom: 30.0, left: 40.0}
 
 -- an example of a drag listener written in Purescript
 -- element will track pointer / finger, but other possibilities exist such as
@@ -127,106 +29,72 @@ dragged d i els element = do
   dragUpdate d element -- state mutating function from drag.purs that makes the change
   pure unit
 
--- an example of a zoom listener written in Purescript
--- this just gives the most naive implementation but here's where you'd begin to implement
--- semantic zooms and the like
--- in the example he's using a global var for the <g> which actually gets transformed
--- but we're (for now) just going to look it up each time
-zoomed :: ∀ d eff. d -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
-zoomed d i els element = do
-  g  <- d3Select "g"
-     .. attr "transform" (SetAttr getZoomTransform)
-  pure unit
+dragended :: ∀ eff. Point -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
+dragended d i els element = pure unit
+
+dragstarted :: ∀ eff. Point -> Index -> Array D3Element -> D3Element ->  Eff (d3::D3|eff) Unit
+dragstarted d i els element = pure unit
+
+ticked :: ∀ eff. Selection Node -> Selection Link -> Eff (d3::D3|eff) (Eff (d3::D3|eff) Unit)
+ticked node link = pure inner where
+  inner :: Eff (d3::D3|eff) Unit
+  inner = defaultTick node link
 
 main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
 main = do
-  -- | set up a named / reusable transition
-  erg <- d3Transition (Name "erg")
-    .. duration 2000.0
-
-  -- | a simple chart made of `div`s from a data array of Numbers
-  chartN <- d3Select ".chart"
-      .. selectAll "div"
-        .. dataBind (Data array)
-      .. enter .. append "div"
-        .. style    "width"         (Value "30px")
-        .. style    "font-size"     (Value "48pt")
-        .. classed  "twice as nice" (SetSome (\d i nodes el -> pure (i == 2.0) ))
-        .. classed  "16 candles"    (SetSome cep)
-        .. attr     "name"          (SetAttr "zek")
-        .. text                     (SetByIndex suq)
-        .. on       mouseenter      awn
-        .. on       mouseleave      awn
-        -- next an arbitrary property {prop: "propval"} is cached in the D3Element and returned in callback
-        .. on' click "prop" "propval" bel
-        .. call2 vis "mickey" "mouse"
-        -- .. makeTransition          -- this would be a non-reusable transition example
-        -- .. duration 500.0
-        -- .. tStyle "background-color" (SetAttr "#555")
-
-  -- | applying our saved transition to the chart and adding a further transition
-  chartN ... savedTransition erg
-          .. tStyle "color"            (Target "black")
-          .. tStyle "font-size"        (Target "24pt")
-          .. tStyle "width"            (TweenTarget  ist)
-          .. addTransition
-          .. delay  (MilliSec 500.0)
-          .. tStyle "background-color" (TweenFn      kef)
-
-  -- | a simple chart made of `div`s from a data array of Strings
-  chartS <- d3Select ".chart2"
-    .. selectAll "div"
-      .. dataBind (Keyed array2 (\d -> revString d))
-    .. enter .. append "div"
-      .. style "background-color"  (Value "red")
-      .. style "width"             (SetByIndex tej)       -- 'tej' uses EffFn so it can't be presented as a lambda???
-      .. classed "wis xis"         (SetAll true)
-      .. attr "name"               (AttrFn dof)
-      .. text                      (SetByIndex ure)
-      .. text                      (SetByIndex roc)
-      .. on' click "cep" "stringy" bel
-
-  chartS ... namedTransition "erg"
-          .. tStyle "background-color" (Target "blue")
-          .. tStyle "color"            (Target "white")
-
-  emptyChart <- d3Select "notfound"
-
-  lev <- chartS ... node
-  mim <- chartS ... nodes
-  nim <- chartS ... empty
-
-  obi <- emptyChart ... node
-  pyx <- emptyChart ... nodes
-  qat <- emptyChart ... empty
-
-  -- | let's try some SVG stuff now so that we can work towards zooming and dragging
+  -- get the data (to simplify this ex. to the bone, no AJAX here)
+  let graph =  mydata
 
   svg <- d3Select ".svg"
-  g <-  svg ... append "g"
+  w   <- svg ... getAttr "width"
+  h   <- svg ... getAttr "height"
+  let width =  w - margin.left - margin.right
+  let height = h - margin.top - margin.bottom
 
-  circles <- g ... selectAll "circle"
-      .. dataBind (Data circleData)
-    .. enter .. append "circle"
-      .. attr "cx" (AttrFn (\d i nodes el -> pure d.x)) -- thing to bear in mind here:
-      .. attr "cy" (AttrFn (\d i nodes el -> pure d.y)) -- if you mod here doesn't change underlying value when you drag
-      .. attr "r"  (SetAttr 20.0)
-      .. style "stroke" (Value "red")
-      .. style "fill"   (Value "black")
+  color <- d3Scale (Category schemeCategory20)
 
-  let phantom = { x: 0.0, y: 0.0 }
-  let tn = TypeNames [ { name: Just "foo", type: Drag } ]
-  yag <- d3Drag phantom -- phantom type to ensure correct type for yag (but type only gets in the way here, potentially)
-        .. addDragListener tn dragged
+  linkForce   <- makeLinkForce Nothing
+                  .. setIDFunction (\d i -> d.id)
+  chargeForce <- makeManyBody
+  centerForce <- makeCenterForce (Just (Pair (width / 2.0) (height / 2.0)) )
 
-  let foo = circles ... call (unsafeCoerce yag) -- adds the drag callbacks for drag (yag) on selection (g)
-  -- unsafeCoerce here is obviously undesirable, need to play with types and see if we can reformulate to lose it TODO
+  simulation <- d3ForceSimulation Force
+             .. addForce Links     "link"   linkForce
+             .. addForce ManyBody  "charge" chargeForce
+             .. addForce Centering "center" centerForce
 
-  let tn2 = TypeNames [ { name: Just "foo", type: Zoom } ]
-  yag2 <- d3Zoom
-       .. scaleExtent [ 0.5, 8.0]
-       .. addZoomListener tn2 zoomed
+  link <- svg ... append "g"
+      .. attr "class" (SetAttr "links")
+      .. selectAll "line"
+    .. dataBind (Data graph.links)
+      .. enter .. append "line"
+      .. attr "stroke-width" (AttrFn (\d i n e -> pure $ sqrt (d.value)))
 
-  let bar = svg ... call (unsafeCoerce yag2)
+  node <- svg ... append "g"
+      .. attr "class" (SetAttr "nodes")
+      .. selectAll "circle"
+    .. dataBind (Data graph.nodes)
+      .. enter .. append "circle"
+      .. attr "r" (SetAttr 5.0)
+      .. attr "fill" (AttrFn (\d i n e -> do fill <- scaleBy color d.group
+                                             pure fill))
+
+  -- seems to me that phantom type + unsafeCoerce is stupid TODO
+  dragBehavior <- d3Drag { x: 0.0, y: 0.0 }
+      .. addDragListener (TypeNames [ { name: Just "drag", type: Drag }]) dragged
+      .. addDragListener (TypeNames [ { name: Just "end", type: EndDrag }]) dragended
+      .. addDragListener (TypeNames [ { name: Just "start", type: StartDrag }]) dragstarted
+
+  let foo = node ... call (unsafeCoerce dragBehavior)
+
+  node ... append "title"
+        .. text (SetByIndex (\d i -> pure (d.id)))
+
+  callback <- ticked node link
+
+  simulation ... initNodes graph.nodes
+              .. onTick callback
+              .. getForce "link"
+              .. setLinks graph.links
 
   pure unit
