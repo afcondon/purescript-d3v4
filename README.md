@@ -49,10 +49,10 @@ Comprehensive overview / [introduction](https://www.amazon.com/Visualization-Ana
 ![The Book of Trees][2]
 ![Visual Complexity][3]
 ![Visualization Analysis][4]
-[1]: ./EI.jpg
-[2]: ./BoT.jpg
-[3]: ./VC.jpg
-[4]: ./VAaD.jpg
+[1]: ./images/EI.jpg
+[2]: ./images/BoT.jpg
+[3]: ./images/VC.jpg
+[4]: ./images/VAaD.jpg
 
 ### ...and D3 specifically
 
