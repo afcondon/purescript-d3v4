@@ -30,3 +30,9 @@ main = do
       .. style "fill"   (Value "red")
 
   pure unit
+
+-- botPort = [ dx \d i -> d.x
+--           , dy \d i -> d.y - i
+--           , fillFn \d i n e -> if d.foo = i then "red" else "yellow"
+--           , transition 'after' 1500 [dx \d i -> 2 * d.x, dy \d i -> d.x * i]
+--           ]
