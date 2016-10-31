@@ -1,6 +1,6 @@
 module PackageData where
 
-import Control.Monad.Aff (launchAff)
+import Control.Monad.Aff (launchAff, attempt)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Console (log)
@@ -9,7 +9,7 @@ import D3.ForceSimulation (GroupedForceLayout)
 import Data.Array (zip, concatMap, (!!), (:), (..), nub, length)
 import Data.Either (either, Either)
 import Data.Foldable (foldr)
-import Data.Foreign (Foreign, F)
+import Data.Foreign (Foreign, F, ForeignError)
 import Data.Foreign.Class (readJSON, readProp, class IsForeign)
 import Data.Foreign.Index (prop)
 import Data.Foreign.Keys (keys)
@@ -75,24 +75,15 @@ instance isForeignPackageSet :: IsForeign PackageSet where
 --   where
 --     decodePackages :: String -> Maybe PackageSet
 --     decodePackages s = hush (runExcept (readJSON s))
--- fetchPackagesFile :: ∀ e. Eff ( err :: EXCEPTION , ajax :: AJAX | e ) Unit
-fetchPackagesFile = void $ launchAff $ do
+fetchPackagesFile :: ∀ e. Eff ( err :: EXCEPTION , ajax :: AJAX | e ) (Maybe GroupedForceLayout)
+fetchPackagesFile = attempt $ do
   res <- get fileURL
-  liftEff $ log $ "GET /api response: " <> res.response
-  pure unit
-  where
-    decodePackages :: String -> Maybe PackageSet
-    decodePackages s = final -- hush (runExcept (readJSON s))
-      where
-        result = readJSON s
-        final = hush result
-
-hush :: ∀ a b. Either a b -> Maybe b
-hush = either (const Nothing) Just
+  -- liftEff $ log $ "GET /api response: " <> res.response
+  contents <- readJSON res.response :: Either ForeignError PackageSet
+  result   <- convert contents (getGroups contents)
+  pure result
 
 -- | convert to a format suitable for D3 Force Layout
-
--- | Conversion function
 convert :: PackageSet -> Map RepoName Number -> GroupedForceLayout
 convert (PackageSet ps) groups = { nodes: makeNodes
                                  , links: concatMap getLinks ps }

@@ -11,8 +11,10 @@ import Data.Pair (Pair(Pair))
 import Math (sqrt)
 import Prelude (Unit, unit, pure, bind, ($), (-), (/))
 import Unsafe.Coerce (unsafeCoerce)
+import Network.HTTP.Affjax (AJAX)
+import Control.Monad.Eff.Exception (EXCEPTION)
 
-import PackageData (mydata)
+import PackageData (mydata, fetchPackagesFile)
 
 -- define a margin, look to purescript-css for more sophisticated definition
 margin :: { top::Number, right::Number, bottom::Number, left::Number }
@@ -40,10 +42,11 @@ ticked node link = pure inner where
   inner :: Eff (d3::D3|eff) Unit
   inner = defaultTick node link
 
-main :: ∀ e. Eff (d3::D3,console::CONSOLE|e) Unit
+main :: ∀ e. Eff (ajax::AJAX, err::EXCEPTION, d3::D3,console::CONSOLE|e) Unit
 main = do
-  -- get the data (to simplify this ex. to the bone, no AJAX here)
-  let graph =  mydata
+  let graph = case fetchPackagesFile of
+                Nothing -> mydata
+                Just g  -> g
 
   svg <- d3Select ".svg"
   w   <- svg ... getAttr "width"
