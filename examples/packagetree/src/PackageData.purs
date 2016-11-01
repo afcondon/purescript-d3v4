@@ -1,34 +1,28 @@
 module PackageData where
 
-import Control.Monad.Aff (launchAff, attempt)
+import Prelude
+
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Exception (EXCEPTION)
-import Control.Monad.Eff.Console (log)
-import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Eff.Exception (Error)
+import D3.Base (D3)
 import D3.ForceSimulation (GroupedForceLayout)
 import Data.Array (zip, concatMap, (!!), (:), (..), nub, length)
-import Data.Either (either, Either)
+import Data.Either (Either(Right, Left))
 import Data.Foldable (foldr)
 import Data.Foreign (Foreign, F, ForeignError)
 import Data.Foreign.Class (readJSON, readProp, class IsForeign)
 import Data.Foreign.Index (prop)
 import Data.Foreign.Keys (keys)
 import Data.Int (toNumber)
-import Data.Map (fromFoldable, Map, lookup, insert, empty)
-import Data.Tuple (Tuple(..))
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Map (Map, fromFoldable, lookup)
+import Data.Maybe (fromMaybe)
 import Data.String (joinWith, split)
 import Data.Traversable (traverse)
-import Network.HTTP.Affjax (get, URL, AJAX)
-import Prelude
+import Data.Tuple (Tuple(..))
+import Network.HTTP.Affjax (URL, AffjaxResponse)
 
-fileURL :: URL
-fileURL = "https://raw.githubusercontent.com/purescript/package-sets/psc-0.10.1/packages.json"
-
---  read in the file
---  convert to desired format
---  make available to mainline for visualisation
---  stretch goal - load in various files and return array of data so that transforms can happen
+defaultPackages :: URL
+defaultPackages = "https://raw.githubusercontent.com/purescript/package-sets/psc-0.10.1/packages.json"
 
 -- | Ultra-simplistic types for now
 type PackageName   = String
@@ -68,20 +62,21 @@ instance isForeignPackageSet :: IsForeign PackageSet where
     packageData  <- traverse (\name -> prop name f >>= readPackageData name) packageNames
     pure (PackageSet packageData)
 
--- parsePackages :: ∀ e. String -> Aff (fs :: FS | e) (Maybe PackageSet)
--- parsePackages fp = do
---   contents <- readTextFile UTF8 fp
---   pure (decodePackages contents)
---   where
---     decodePackages :: String -> Maybe PackageSet
---     decodePackages s = hush (runExcept (readJSON s))
-fetchPackagesFile :: ∀ e. Eff ( err :: EXCEPTION , ajax :: AJAX | e ) (Maybe GroupedForceLayout)
-fetchPackagesFile = attempt $ do
-  res <- get fileURL
-  -- liftEff $ log $ "GET /api response: " <> res.response
-  contents <- readJSON res.response :: Either ForeignError PackageSet
-  result   <- convert contents (getGroups contents)
-  pure result
+
+myError :: forall e. Error -> Eff e Unit
+myError e = pure unit
+
+getGroupedLayoutData :: String -> Either ForeignError PackageSet
+getGroupedLayoutData s = readJSON s  -- read the String as a PackageSet and discard error into Nothing if it doesn't go
+
+mySuccess :: forall e. (GroupedForceLayout -> Eff (d3::D3|e) Unit) -> AffjaxResponse String -> Eff (d3::D3|e) Unit
+mySuccess d3Render res = do
+  let graph = case getGroupedLayoutData res.response of
+              Left err -> mydata  -- default if file fetch failed or convert failed or whatever
+              Right ps  -> convert ps (getGroups ps)
+  d3Render graph
+  pure unit
+
 
 -- | convert to a format suitable for D3 Force Layout
 convert :: PackageSet -> Map RepoName Number -> GroupedForceLayout

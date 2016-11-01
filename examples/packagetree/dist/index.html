@@ -42,8 +42,18 @@
         <a target="_blank" title="Open Block 4063269 a new window." href="">Open <svg height="16" width="12"><path d="M11 10h1v3c0 0.55-0.45 1-1 1H1c-0.55 0-1-0.45-1-1V3c0-0.55 0.45-1 1-1h3v1H1v10h10V10zM6 2l2.25 2.25-3.25 3.25 1.5 1.5 3.25-3.25 2.25 2.25V2H6z"></path></svg></a>
       </div>
 
-      <h2>Code:</h2>
-      <div class="code">
+      <h2>Code:</h2> <div class="code"> <p>The code for this is largely the same
+      as the other force layout example but the gist below shows how the JSON
+      file is grabbed from Github and automagically decoded to an intermediate
+      format and then to the kind of data that D3 expects. The most significant
+      thing happening there - and it's just a very small illustration of the
+      possibilities - is the creation of "group ID" for each repo in the package
+      set, derived from the account of the Github creator. These groups are then
+      used to add some colour to the package circles, puresly by way of
+      illustration.</p>
+
+      <script src="https://gist.github.com/afcondon/57c015dbc5bb4389241db9d4cf74a30b.js"></script>
+
       </div>
 
       <h2>Data:</h2>
